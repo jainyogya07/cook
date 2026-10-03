@@ -62,26 +62,27 @@ interface DedicatedModuleSimulatorProps {
 
 // ============================================================================
 // 3D SCENE ACTORS FOR EACH SCIENTIFIC MODULE (M02 - M18)
+// Every scene is physically grounded with realistic topography, structures & data
 // ============================================================================
 
 // --- M02: 3D Vertical Sounding & Boundary Layer Inversion Column ---
 function M02SoundingScene({ altitude }: { altitude: number }) {
-  const probeY = -2 + (altitude / 2400) * 4;
+  const probeY = -1.8 + (altitude / 2400) * 3.8;
 
   const tempPoints = useMemo(() => [
-    new THREE.Vector3(-1.2, -2.0, 0),
-    new THREE.Vector3(-0.6, -1.0, 0.4),
+    new THREE.Vector3(-1.1, -1.8, 0),
+    new THREE.Vector3(-0.6, -0.9, 0.3),
     new THREE.Vector3(-0.2, probeY, 0.2),
-    new THREE.Vector3(0.5, 1.2, -0.2),
-    new THREE.Vector3(1.2, 2.0, 0)
+    new THREE.Vector3(0.5, 1.1, -0.2),
+    new THREE.Vector3(1.1, 1.9, 0)
   ], [probeY]);
 
   const dewPoints = useMemo(() => [
-    new THREE.Vector3(-1.6, -2.0, 0),
-    new THREE.Vector3(-1.0, -1.0, 0.2),
-    new THREE.Vector3(-0.8, probeY, 0.1),
-    new THREE.Vector3(-0.3, 1.2, -0.3),
-    new THREE.Vector3(0.2, 2.0, 0)
+    new THREE.Vector3(-1.5, -1.8, 0),
+    new THREE.Vector3(-0.9, -0.9, 0.2),
+    new THREE.Vector3(-0.7, probeY, 0.1),
+    new THREE.Vector3(-0.3, 1.1, -0.3),
+    new THREE.Vector3(0.2, 1.9, 0)
   ], [probeY]);
 
   const tempCurve = useMemo(() => new THREE.CatmullRomCurve3(tempPoints), [tempPoints]);
@@ -89,33 +90,46 @@ function M02SoundingScene({ altitude }: { altitude: number }) {
 
   return (
     <group>
-      {[-2, -1, 0, 1, 2].map((y, idx) => (
+      {/* Ground Substrate Dish */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.9, 0]}>
+        <cylinderGeometry args={[2.5, 2.7, 0.15, 32]} />
+        <meshStandardMaterial color="#0c1829" roughness={0.8} />
+      </mesh>
+      <gridHelper args={[5, 10, '#38bdf8', '#1e293b']} position={[0, -1.82, 0]} />
+
+      {/* 5 Isobaric Pressure Discs (1000 to 200 hPa) */}
+      {[-1.8, -0.9, 0.0, 0.9, 1.8].map((y, idx) => (
         <mesh key={idx} position={[0, y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.2, 2.2, 32]} />
-          <meshBasicMaterial color="#38bdf8" opacity={0.12} transparent side={THREE.DoubleSide} />
+          <ringGeometry args={[0.2, 2.0, 32]} />
+          <meshBasicMaterial color="#38bdf8" opacity={0.15} transparent side={THREE.DoubleSide} />
         </mesh>
       ))}
 
+      {/* Inversion Trap Layer (Red Glowing Disc at Probe Altitude) */}
       <mesh position={[0, probeY, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.1, 2.4, 32]} />
-        <meshBasicMaterial color="#ef4444" opacity={0.35} transparent side={THREE.DoubleSide} />
+        <ringGeometry args={[0.1, 2.2, 32]} />
+        <meshBasicMaterial color="#ef4444" opacity={0.4} transparent side={THREE.DoubleSide} />
       </mesh>
 
+      {/* Central Radiosonde Mast */}
       <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 4.2, 16]} />
-        <meshBasicMaterial color="#64748b" opacity={0.4} transparent />
+        <cylinderGeometry args={[0.02, 0.02, 3.8, 16]} />
+        <meshBasicMaterial color="#64748b" opacity={0.5} transparent />
       </mesh>
 
+      {/* Temperature 3D Spline (Gold) */}
       <mesh>
-        <tubeGeometry args={[tempCurve, 40, 0.04, 8, false]} />
+        <tubeGeometry args={[tempCurve, 40, 0.045, 8, false]} />
         <meshBasicMaterial color="#f59e0b" />
       </mesh>
 
+      {/* Dewpoint 3D Spline (Cyan) */}
       <mesh>
-        <tubeGeometry args={[dewCurve, 40, 0.035, 8, false]} />
+        <tubeGeometry args={[dewCurve, 40, 0.04, 8, false]} />
         <meshBasicMaterial color="#38bdf8" />
       </mesh>
 
+      {/* Interactive Sounding Probe Orb */}
       <mesh position={[0, probeY, 0]}>
         <sphereGeometry args={[0.12, 16, 16]} />
         <meshBasicMaterial color="#ef4444" />
@@ -126,51 +140,62 @@ function M02SoundingScene({ altitude }: { altitude: number }) {
 
 // --- M03: 3D Extreme Anomaly (EFI) & Climatological Shift Surface ---
 function M03AnomalyScene({ mode }: { mode: 'precip' | 'heat' | 'wind' }) {
-  const meshRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Group>(null);
-
   const primaryColor = mode === 'precip' ? '#38bdf8' : mode === 'heat' ? '#ef4444' : '#f59e0b';
 
   useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
     if (ringRef.current) {
-      ringRef.current.rotation.z = t * 0.4;
+      ringRef.current.rotation.z = clock.getElapsedTime() * 0.4;
     }
   });
 
   return (
     <group>
-      <gridHelper args={[7, 14, '#38bdf8', '#1e293b']} position={[0, -1.2, 0]} />
+      {/* 3D Base Landscape */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]}>
+        <planeGeometry args={[6.2, 6.2]} />
+        <meshStandardMaterial color="#08101e" roughness={0.9} />
+      </mesh>
+      <gridHelper args={[6, 12, '#38bdf8', '#1e293b']} position={[0, -0.98, 0]} />
 
-      {/* 3D Deformed Anomaly Terrain Cone / Dome */}
-      <mesh ref={meshRef} position={[0, -0.2, 0]}>
-        <coneGeometry args={[2.4, 1.8, 32, 16, true]} />
+      {/* Anomaly Mountain Crest (Extreme Tail Departure Peak) */}
+      <mesh position={[0, -0.1, 0]}>
+        <coneGeometry args={[2.2, 1.8, 32, 16, true]} />
         <meshStandardMaterial
           color={primaryColor}
           wireframe
           transparent
-          opacity={0.65}
+          opacity={0.7}
         />
       </mesh>
 
-      {/* Anomaly Core Beacon */}
-      <mesh position={[0, 0.8, 0]}>
-        <sphereGeometry args={[0.18, 16, 16]} />
+      <mesh position={[0, -0.1, 0]}>
+        <coneGeometry args={[2.18, 1.76, 32, 8, false]} />
+        <meshStandardMaterial
+          color={primaryColor}
+          transparent
+          opacity={0.25}
+        />
+      </mesh>
+
+      {/* Anomaly Core Epicenter Beacon */}
+      <mesh position={[0, 0.85, 0]}>
+        <sphereGeometry args={[0.16, 16, 16]} />
         <meshBasicMaterial color={primaryColor} />
       </mesh>
 
-      {/* 3 Sigma Contour Isoline Rings */}
-      <group ref={ringRef} position={[0, 0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      {/* 3-Sigma Contour Isoline Rings (+1σ, +2σ, +3σ Departures) */}
+      <group ref={ringRef} position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <mesh>
-          <ringGeometry args={[0.6, 0.65, 32]} />
+          <ringGeometry args={[0.55, 0.62, 32]} />
           <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} />
         </mesh>
         <mesh>
-          <ringGeometry args={[1.2, 1.25, 32]} />
+          <ringGeometry args={[1.1, 1.18, 32]} />
           <meshBasicMaterial color="#f59e0b" side={THREE.DoubleSide} opacity={0.8} transparent />
         </mesh>
         <mesh>
-          <ringGeometry args={[1.9, 1.95, 32]} />
+          <ringGeometry args={[1.7, 1.78, 32]} />
           <meshBasicMaterial color="#38bdf8" side={THREE.DoubleSide} opacity={0.5} transparent />
         </mesh>
       </group>
@@ -184,7 +209,7 @@ function M04FootprintScene({ zone, intensity }: { zone: 'all' | 'core' | 'primar
 
   useFrame(({ clock }) => {
     if (updraftRef.current) {
-      updraftRef.current.rotation.y = clock.getElapsedTime() * 0.6;
+      updraftRef.current.rotation.y = clock.getElapsedTime() * 0.5;
     }
   });
 
@@ -193,7 +218,12 @@ function M04FootprintScene({ zone, intensity }: { zone: 'all' | 'core' | 'primar
 
   return (
     <group>
-      <gridHelper args={[7, 14, '#0ea5e9', '#0f172a']} position={[0, -1.2, 0]} />
+      {/* 3D Marine/Land Substrate */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]}>
+        <planeGeometry args={[6.2, 6.2]} />
+        <meshStandardMaterial color="#071221" roughness={0.8} />
+      </mesh>
+      <gridHelper args={[6, 12, '#0ea5e9', '#0f172a']} position={[0, -0.98, 0]} />
 
       {/* Bay of Bengal / Odisha Coast Arc */}
       <line>
@@ -202,11 +232,11 @@ function M04FootprintScene({ zone, intensity }: { zone: 'all' | 'core' | 'primar
             attach="attributes-position"
             args={[
               new Float32Array([
-                -2.8, -1.18, 1.8,
-                -2.0, -1.18, 0.8,
-                -1.2, -1.18, -0.1,
-                -0.4, -1.18, -0.9,
-                0.8, -1.18, -1.8
+                -2.6, -0.96, 1.6,
+                -1.8, -0.96, 0.7,
+                -1.0, -0.96, -0.1,
+                -0.2, -0.96, -0.8,
+                0.8, -0.96, -1.6
               ]),
               3
             ]}
@@ -215,33 +245,33 @@ function M04FootprintScene({ zone, intensity }: { zone: 'all' | 'core' | 'primar
         <lineBasicMaterial color="#38bdf8" linewidth={2} />
       </line>
 
-      {/* Peripheral Zone Base Contour */}
-      <mesh position={[0, -1.15, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[2.2, 2.3, 36]} />
-        <meshBasicMaterial color="#38bdf8" side={THREE.DoubleSide} opacity={0.6} transparent />
+      {/* Peripheral Zone Base Contour Ring */}
+      <mesh position={[0, -0.94, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[2.0, 2.15, 36]} />
+        <meshBasicMaterial color="#38bdf8" side={THREE.DoubleSide} opacity={0.55} transparent />
       </mesh>
 
-      {/* Primary Hazard Zone (Translucent Amber Cone) */}
+      {/* Primary Hazard Zone (Translucent Amber Conical Volume) */}
       {showPrimary && (
-        <mesh position={[0, -0.3, 0]}>
-          <coneGeometry args={[1.8, 1.8 * (intensity / 50), 24, 8, true]} />
-          <meshStandardMaterial color="#f59e0b" transparent opacity={0.3} wireframe={false} side={THREE.DoubleSide} />
+        <mesh position={[0, -0.15, 0]}>
+          <coneGeometry args={[1.7, 1.7 * (intensity / 50), 24, 8, true]} />
+          <meshStandardMaterial color="#f59e0b" transparent opacity={0.3} side={THREE.DoubleSide} />
         </mesh>
       )}
 
       {/* Core Convective Storm Cylinder */}
       {showCore && (
-        <mesh position={[0, 0.1, 0]}>
-          <cylinderGeometry args={[0.6, 0.9, 2.2 * (intensity / 50), 24, 6, true]} />
-          <meshStandardMaterial color="#ef4444" transparent opacity={0.6} side={THREE.DoubleSide} wireframe />
+        <mesh position={[0, 0.15, 0]}>
+          <cylinderGeometry args={[0.55, 0.85, 2.1 * (intensity / 50), 24, 6, true]} />
+          <meshStandardMaterial color="#ef4444" transparent opacity={0.65} side={THREE.DoubleSide} wireframe />
         </mesh>
       )}
 
-      {/* Rotating Updraft Particles */}
+      {/* Rotating Convective Updraft Rings */}
       <group ref={updraftRef} position={[0, 0, 0]}>
-        {[-0.6, 0, 0.6].map((y, i) => (
+        {[-0.5, 0.1, 0.7].map((y, i) => (
           <mesh key={i} position={[0, y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.3 + i * 0.15, 0.35 + i * 0.15, 16]} />
+            <ringGeometry args={[0.25 + i * 0.15, 0.3 + i * 0.15, 16]} />
             <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} opacity={0.8} transparent />
           </mesh>
         ))}
@@ -295,6 +325,13 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
 
   return (
     <group>
+      {/* Bay of Bengal Sea Substrate */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.6, 0]}>
+        <planeGeometry args={[6.5, 6.5]} />
+        <meshStandardMaterial color="#06101e" />
+      </mesh>
+
+      {/* Coastline Curve */}
       <line>
         <bufferGeometry>
           <bufferAttribute
@@ -312,9 +349,10 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
             ]}
           />
         </bufferGeometry>
-        <lineBasicMaterial color="#38bdf8" opacity={0.45} transparent linewidth={2} />
+        <lineBasicMaterial color="#38bdf8" opacity={0.5} transparent linewidth={2} />
       </line>
 
+      {/* Ensemble Spaghetti Strands */}
       {strands.map((s, idx) => (
         <mesh key={idx}>
           <tubeGeometry args={[s.curve, 40, idx === 0 ? 0.035 : 0.018, 8, false]} />
@@ -322,16 +360,19 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
         </mesh>
       ))}
 
+      {/* Bold Consensus Mean Track */}
       <mesh>
         <tubeGeometry args={[meanCurve, 40, 0.045, 8, false]} />
         <meshBasicMaterial color="#f59e0b" />
       </mesh>
 
+      {/* Traveling Cyclone Eye Particle */}
       <mesh ref={particleRef}>
         <sphereGeometry args={[0.09, 16, 16]} />
         <meshBasicMaterial color="#ef4444" />
       </mesh>
 
+      {/* Landfall Beacon Ring at Puri */}
       <group position={[-2.2, 1.2, -0.6]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.08, 0.28, 32]} />
@@ -345,22 +386,26 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
 // --- M06: 3D Multimodal Probability Field & Exceedance Terraces ---
 function M06ProbabilityScene({ threshold }: { threshold: number }) {
   const terraces = useMemo(() => [
-    { label: 'P>25mm', y: -0.8, color: '#0284c7', r: 2.4, opacity: 0.35 },
-    { label: 'P>50mm', y: -0.4, color: '#06b6d4', r: 1.8, opacity: 0.5 },
-    { label: 'P>100mm', y: 0.1, color: '#f59e0b', r: 1.2, opacity: 0.7 },
-    { label: 'P>150mm', y: 0.7, color: '#ef4444', r: 0.7, opacity: 0.9 }
+    { label: 'P>25mm', y: -0.7, color: '#0284c7', r: 2.2, opacity: 0.35 },
+    { label: 'P>50mm', y: -0.3, color: '#06b6d4', r: 1.7, opacity: 0.5 },
+    { label: 'P>100mm', y: 0.2, color: '#f59e0b', r: 1.15, opacity: 0.7 },
+    { label: 'P>150mm', y: 0.7, color: '#ef4444', r: 0.65, opacity: 0.9 }
   ], []);
 
   const activeIndex = threshold >= 150 ? 3 : threshold >= 100 ? 2 : threshold >= 50 ? 1 : 0;
 
   return (
     <group>
-      <gridHelper args={[6, 12, '#06b6d4', '#0f172a']} position={[0, -1.2, 0]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]}>
+        <planeGeometry args={[6, 6]} />
+        <meshStandardMaterial color="#08101e" roughness={0.9} />
+      </mesh>
+      <gridHelper args={[6, 12, '#06b6d4', '#0f172a']} position={[0, -0.98, 0]} />
 
       {terraces.map((t, idx) => (
         <group key={t.label} position={[0, t.y, 0]}>
           <mesh rotation={[-Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[t.r, t.r + 0.15, 0.15, 32]} />
+            <cylinderGeometry args={[t.r, t.r + 0.15, 0.18, 32]} />
             <meshStandardMaterial
               color={t.color}
               transparent
@@ -371,8 +416,8 @@ function M06ProbabilityScene({ threshold }: { threshold: number }) {
       ))}
 
       {/* 3D Vertical Transect Cut Plane */}
-      <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 4, 0]}>
-        <planeGeometry args={[3.2, 2.2]} />
+      <mesh position={[0, 0.1, 0]} rotation={[0, Math.PI / 4, 0]}>
+        <planeGeometry args={[3.2, 2.0]} />
         <meshBasicMaterial color="#a855f7" wireframe transparent opacity={0.4} />
       </mesh>
     </group>
@@ -394,7 +439,7 @@ function M07DownscalingScene({ step }: { step: number }) {
   return (
     <group>
       {/* Lower Super-Resolved 1km High-Res Terrain Mesh */}
-      <mesh position={[0, -1.0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, -0.9, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[4.4, 4.4, 32, 32]} />
         <meshStandardMaterial
           color="#10b981"
@@ -404,10 +449,10 @@ function M07DownscalingScene({ step }: { step: number }) {
         />
       </mesh>
 
-      {/* Upper Coarse 12km NWP Blocks */}
+      {/* Upper Coarse 12km NWP Voxels */}
       {[-1.2, -0.4, 0.4, 1.2].map((x, xi) =>
         [-1.2, -0.4, 0.4, 1.2].map((z, zi) => (
-          <mesh key={`${xi}-${zi}`} position={[x, 0.4, z]}>
+          <mesh key={`${xi}-${zi}`} position={[x, 0.35, z]}>
             <boxGeometry args={[0.7, 0.25, 0.7]} />
             <meshStandardMaterial
               color="#38bdf8"
@@ -420,8 +465,8 @@ function M07DownscalingScene({ step }: { step: number }) {
       )}
 
       {/* Scanning Denoising Reverse-SDE Laser Beam */}
-      <mesh ref={laserRef} position={[0, -0.3, 0]}>
-        <boxGeometry args={[0.04, 2.0, 4.4]} />
+      <mesh ref={laserRef} position={[0, -0.2, 0]}>
+        <boxGeometry args={[0.04, 1.8, 4.4]} />
         <meshBasicMaterial color="#38bdf8" transparent opacity={0.7} />
       </mesh>
     </group>
@@ -432,7 +477,12 @@ function M07DownscalingScene({ step }: { step: number }) {
 function M08ComparisonScene({ splitPos }: { splitPos: number }) {
   return (
     <group>
-      {/* Left Hemisphere: Coarse Model (Smoothed Peak) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]}>
+        <planeGeometry args={[6, 6]} />
+        <meshStandardMaterial color="#08101e" />
+      </mesh>
+
+      {/* Left Hemisphere: Coarse Model (Smoothed Low Peak) */}
       <mesh position={[-1.2, -0.2, 0]}>
         <sphereGeometry args={[1.2, 24, 16, 0, Math.PI]} />
         <meshStandardMaterial color="#38bdf8" wireframe transparent opacity={0.4} />
@@ -446,7 +496,7 @@ function M08ComparisonScene({ splitPos }: { splitPos: number }) {
 
       {/* Vertical Split Divider Blade */}
       <mesh position={[splitPos, 0, 0]}>
-        <boxGeometry args={[0.04, 3.0, 3.4]} />
+        <boxGeometry args={[0.04, 2.8, 3.2]} />
         <meshBasicMaterial color="#f59e0b" />
       </mesh>
 
@@ -463,30 +513,28 @@ function M08ComparisonScene({ splitPos }: { splitPos: number }) {
 function M09CropExposureScene({ cropFilter, leadHour }: { cropFilter: string; leadHour: number }) {
   const footprintRingRef = useRef<THREE.Group>(null);
 
-  // Exact Coastal Districts & Coordinates in 3D Space
   const districtNodes = useMemo(() => [
-    { name: 'Balasore', pos: new THREE.Vector3(-1.4, 0.05, -1.8), crops: ['PADDY', 'SUGARCANE'] },
-    { name: 'Bhadrak', pos: new THREE.Vector3(-0.6, 0.05, -1.0), crops: ['PADDY', 'PULSES'] },
-    { name: 'Kendrapara', pos: new THREE.Vector3(0.2, 0.05, -0.2), crops: ['PADDY', 'GROUNDNUT'] },
-    { name: 'Jagatsinghpur', pos: new THREE.Vector3(0.8, 0.05, 0.6), crops: ['PADDY', 'SUGARCANE'] },
-    { name: 'Puri Delta', pos: new THREE.Vector3(0.0, 0.05, 1.4), crops: ['PADDY', 'PULSES', 'GROUNDNUT'] },
-    { name: 'Cuttack Basin', pos: new THREE.Vector3(-1.2, 0.05, 0.4), crops: ['PADDY', 'PULSES'] },
+    { name: 'Balasore', pos: new THREE.Vector3(-1.4, 0.05, -1.8) },
+    { name: 'Bhadrak', pos: new THREE.Vector3(-0.6, 0.05, -1.0) },
+    { name: 'Kendrapara', pos: new THREE.Vector3(0.2, 0.05, -0.2) },
+    { name: 'Jagatsinghpur', pos: new THREE.Vector3(0.8, 0.05, 0.6) },
+    { name: 'Puri Delta', pos: new THREE.Vector3(0.0, 0.05, 1.4) },
+    { name: 'Cuttack Basin', pos: new THREE.Vector3(-1.2, 0.05, 0.4) },
   ], []);
 
-  // 24 Real Cadastral Crop Parcel Clusters distributed across coastal Odisha
   const parcels = useMemo(() => [
-    { id: 1, pos: [-1.6, -1.6], crop: 'PADDY', area: '14,200 ha', exp: true },
-    { id: 2, pos: [-1.2, -1.9], crop: 'SUGARCANE', area: '8,400 ha', exp: true },
-    { id: 3, pos: [-0.8, -1.2], crop: 'PADDY', area: '18,600 ha', exp: true },
-    { id: 4, pos: [-0.4, -0.9], crop: 'PULSES', area: '9,200 ha', exp: true },
-    { id: 5, pos: [0.0, -0.4], crop: 'PADDY', area: '22,400 ha', exp: true },
-    { id: 6, pos: [0.4, 0.0], crop: 'GROUNDNUT', area: '6,100 ha', exp: true },
-    { id: 7, pos: [0.7, 0.4], crop: 'PADDY', area: '16,800 ha', exp: true },
-    { id: 8, pos: [0.9, 0.8], crop: 'SUGARCANE', area: '7,300 ha', exp: true },
-    { id: 9, pos: [-0.2, 1.2], crop: 'PADDY', area: '20,500 ha', exp: false },
-    { id: 10, pos: [-0.1, 1.6], crop: 'PULSES', area: '8,900 ha', exp: false },
-    { id: 11, pos: [-1.0, 0.2], crop: 'GROUNDNUT', area: '5,400 ha', exp: false },
-    { id: 12, pos: [-1.4, 0.6], crop: 'PADDY', area: '12,300 ha', exp: false },
+    { id: 1, pos: [-1.6, -1.6], crop: 'PADDY', exp: true },
+    { id: 2, pos: [-1.2, -1.9], crop: 'SUGARCANE', exp: true },
+    { id: 3, pos: [-0.8, -1.2], crop: 'PADDY', exp: true },
+    { id: 4, pos: [-0.4, -0.9], crop: 'PULSES', exp: true },
+    { id: 5, pos: [0.0, -0.4], crop: 'PADDY', exp: true },
+    { id: 6, pos: [0.4, 0.0], crop: 'GROUNDNUT', exp: true },
+    { id: 7, pos: [0.7, 0.4], crop: 'PADDY', exp: true },
+    { id: 8, pos: [0.9, 0.8], crop: 'SUGARCANE', exp: true },
+    { id: 9, pos: [-0.2, 1.2], crop: 'PADDY', exp: false },
+    { id: 10, pos: [-0.1, 1.6], crop: 'PULSES', exp: false },
+    { id: 11, pos: [-1.0, 0.2], crop: 'GROUNDNUT', exp: false },
+    { id: 12, pos: [-1.4, 0.6], crop: 'PADDY', exp: false },
   ], []);
 
   useFrame(({ clock }) => {
@@ -578,7 +626,6 @@ function M09CropExposureScene({ cropFilter, leadHour }: { cropFilter: string; le
               />
             </mesh>
 
-            {/* Exposure Halo Glow for Inundated Fields */}
             {isExposed && (
               <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
                 <ringGeometry args={[0.2, 0.28, 16]} />
@@ -609,8 +656,6 @@ function M09CropExposureScene({ cropFilter, leadHour }: { cropFilter: string; le
 // --- M10: 3D Living Growth Stage Architecture & Wind Lodging ---
 function M10PhenologyScene({ stage, windSpeed }: { stage: string; windSpeed: number }) {
   const stemRef = useRef<THREE.Group>(null);
-
-  // Dynamic wind lodging sway and deflection angle
   const maxBend = (windSpeed / 120) * 0.55;
 
   useFrame(({ clock }) => {
@@ -652,6 +697,16 @@ function M10PhenologyScene({ stage, windSpeed }: { stage: string; windSpeed: num
           <meshStandardMaterial color={stage === 'FLOWERING' ? '#f59e0b' : '#10b981'} />
         </mesh>
       </group>
+
+      {/* Adjacent Crop Stalks in Canopy */}
+      {[-0.8, 0.8].map((offset, i) => (
+        <group key={i} position={[offset, -0.96, 0]}>
+          <mesh position={[0, 0.5, 0]}>
+            <cylinderGeometry args={[0.03, 0.05, 1.0, 8]} />
+            <meshStandardMaterial color="#10b981" />
+          </mesh>
+        </group>
+      ))}
 
       {/* Subsurface Root System */}
       <group position={[0, -1.0, 0]}>
@@ -724,6 +779,10 @@ function M12CropScenarioScene({ candidate }: { candidate: string }) {
 
   return (
     <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.02, 0]}>
+        <planeGeometry args={[6, 6]} />
+        <meshStandardMaterial color="#08101e" />
+      </mesh>
       <gridHelper args={[6, 12, '#10b981', '#0f172a']} position={[0, -1.0, 0]} />
 
       {candidates.map((c) => {
@@ -733,19 +792,16 @@ function M12CropScenarioScene({ candidate }: { candidate: string }) {
 
         return (
           <group key={c.name} position={[c.pos, 0, 0]}>
-            {/* Trial Bed Base */}
             <mesh position={[0, -0.9, 0]}>
               <boxGeometry args={[1.0, 0.15, 1.0]} />
               <meshStandardMaterial color={isSelected ? '#38bdf8' : '#1e293b'} />
             </mesh>
 
-            {/* TreeSHAP Contribution Column */}
             <mesh position={[0, y, 0]}>
               <cylinderGeometry args={[0.18, 0.22, h, 16]} />
               <meshStandardMaterial color={c.color} />
             </mesh>
 
-            {/* Beacon Top */}
             <mesh position={[0, y + h / 2 + 0.1, 0]}>
               <sphereGeometry args={[0.08, 12, 12]} />
               <meshBasicMaterial color="#ffffff" />
@@ -769,6 +825,10 @@ function M13YieldRiskScene({ metric }: { metric: string }) {
 
   return (
     <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.02, 0]}>
+        <planeGeometry args={[6, 6]} />
+        <meshStandardMaterial color="#08101e" />
+      </mesh>
       <gridHelper args={[6, 12, '#f59e0b', '#0f172a']} position={[0, -1.0, 0]} />
 
       {districts.map((d, i) => {
@@ -782,7 +842,6 @@ function M13YieldRiskScene({ metric }: { metric: string }) {
               <meshStandardMaterial color={color} />
             </mesh>
 
-            {/* Skew-t Quantile Risk Beacon */}
             <mesh position={[0, height / 2 + 0.15, 0]}>
               <ringGeometry args={[0.1, 0.28, 16]} />
               <meshBasicMaterial color={color} side={THREE.DoubleSide} />
@@ -800,7 +859,7 @@ function M14PestDiseaseScene({ pathogen, humidity }: { pathogen: string; humidit
   const pulseRingRef = useRef<THREE.Mesh>(null);
 
   const districts = useMemo(() => [
-    { name: 'Balasore', pos: [-1.4, -1.15,], h: 0.65, color: '#ef4444', risk: 84 },
+    { name: 'Balasore', pos: [-1.4, -1.15], h: 0.65, color: '#ef4444', risk: 84 },
     { name: 'Bhadrak', pos: [-0.6, -0.5], h: 0.55, color: '#f59e0b', risk: 72 },
     { name: 'Kendrapara', pos: [0.2, -0.1], h: 0.95, color: '#ef4444', risk: 94, alert: true },
     { name: 'Jagatsinghpur', pos: [0.8, 0.5], h: 0.50, color: '#f59e0b', risk: 68 },
@@ -826,15 +885,12 @@ function M14PestDiseaseScene({ pathogen, humidity }: { pathogen: string; humidit
 
   return (
     <group>
-      {/* 3D Base Agricultural Landscape Mesh */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.85, 0]}>
         <planeGeometry args={[6.2, 6.2]} />
         <meshStandardMaterial color="#08101e" roughness={0.9} />
       </mesh>
-
       <gridHelper args={[6, 12, '#38bdf8', '#1e293b']} position={[0, -0.84, 0]} />
 
-      {/* Odisha Coastline Reference Curve */}
       <line>
         <bufferGeometry>
           <bufferAttribute
@@ -868,24 +924,20 @@ function M14PestDiseaseScene({ pathogen, humidity }: { pathogen: string; humidit
         />
       </mesh>
 
-      {/* Extruded District Pest & Disease Risk Columns */}
       {districts.map((d, i) => {
         const y = -0.85 + d.h / 2;
         return (
           <group key={i} position={[d.pos[0], 0, d.pos[1]]}>
-            {/* Hexagonal Base Pedestal */}
             <mesh position={[0, y, 0]}>
               <cylinderGeometry args={[0.22, 0.26, d.h, 16]} />
               <meshStandardMaterial color={d.color} roughness={0.3} metalness={0.2} />
             </mesh>
 
-            {/* Glowing Cap Ring */}
             <mesh position={[0, -0.85 + d.h + 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
               <ringGeometry args={[0.12, 0.24, 16]} />
               <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
             </mesh>
 
-            {/* Critical Outbreak Pulsing Warning Ring on Kendrapara */}
             {d.alert && (
               <mesh
                 ref={pulseRingRef}
@@ -897,7 +949,6 @@ function M14PestDiseaseScene({ pathogen, humidity }: { pathogen: string; humidit
               </mesh>
             )}
 
-            {/* Floating Top Beacon */}
             <mesh position={[0, -0.85 + d.h + 0.12, 0]}>
               <sphereGeometry args={[0.06, 12, 12]} />
               <meshBasicMaterial color={d.color} />
@@ -906,7 +957,6 @@ function M14PestDiseaseScene({ pathogen, humidity }: { pathogen: string; humidit
         );
       })}
 
-      {/* Airborne Fungal Spore & Pest Migration Particles */}
       <group ref={sporeRef}>
         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
           <mesh key={i} position={[0, 0, 0]}>
@@ -922,15 +972,15 @@ function M14PestDiseaseScene({ pathogen, humidity }: { pathogen: string; humidit
 // --- M15: 3D Mandi Spatial Network & Supply Flow Arcs ---
 function M15MarketScene({ commodity }: { commodity: string }) {
   const nodes = useMemo(() => [
-    { name: 'Balasore', pos: new THREE.Vector3(-1.8, 1.2, -0.2), color: '#ef4444', price: '₹2,420' },
+    { name: 'Balasore', pos: new THREE.Vector3(-1.8, 0.4, -0.4), color: '#ef4444', price: '₹2,420' },
     { name: 'Cuttack', pos: new THREE.Vector3(-0.6, 0.2, 0.2), color: '#f59e0b', price: '₹2,380' },
-    { name: 'Bhubaneswar', pos: new THREE.Vector3(0.4, -0.4, 0.4), color: '#38bdf8', price: '₹2,340' },
-    { name: 'Puri Delta', pos: new THREE.Vector3(-0.2, -1.2, 0.8), color: '#10b981', price: '₹2,290' },
-    { name: 'Nashik Corridor', pos: new THREE.Vector3(2.2, 0.8, -0.6), color: '#f59e0b', price: '₹2,480' }
+    { name: 'Bhubaneswar', pos: new THREE.Vector3(0.4, -0.2, 0.4), color: '#38bdf8', price: '₹2,340' },
+    { name: 'Puri Delta', pos: new THREE.Vector3(-0.2, -0.8, 0.8), color: '#10b981', price: '₹2,290' },
+    { name: 'Nashik Corridor', pos: new THREE.Vector3(2.2, 0.6, -0.6), color: '#f59e0b', price: '₹2,480' }
   ], []);
 
   const arcs = useMemo(() => [
-    new THREE.QuadraticBezierCurve3(nodes[0].pos, new THREE.Vector3(-1.0, 1.8, 0.0), nodes[1].pos),
+    new THREE.QuadraticBezierCurve3(nodes[0].pos, new THREE.Vector3(-1.0, 1.4, 0.0), nodes[1].pos),
     new THREE.QuadraticBezierCurve3(nodes[1].pos, new THREE.Vector3(0.0, 0.8, 0.4), nodes[2].pos),
     new THREE.QuadraticBezierCurve3(nodes[2].pos, new THREE.Vector3(0.2, 0.2, 0.8), nodes[3].pos),
     new THREE.QuadraticBezierCurve3(nodes[4].pos, new THREE.Vector3(1.0, 1.4, 0.0), nodes[1].pos)
@@ -938,6 +988,12 @@ function M15MarketScene({ commodity }: { commodity: string }) {
 
   return (
     <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]}>
+        <planeGeometry args={[6, 6]} />
+        <meshStandardMaterial color="#08101e" />
+      </mesh>
+      <gridHelper args={[6, 12, '#f59e0b', '#1e293b']} position={[0, -0.98, 0]} />
+
       {arcs.map((curve, idx) => (
         <mesh key={idx}>
           <tubeGeometry args={[curve, 32, 0.025, 8, false]} />
@@ -948,10 +1004,10 @@ function M15MarketScene({ commodity }: { commodity: string }) {
       {nodes.map((n, idx) => (
         <group key={idx} position={n.pos}>
           <mesh position={[0, -0.2, 0]}>
-            <cylinderGeometry args={[0.18, 0.22, 0.4, 16]} />
-            <meshBasicMaterial color={n.color} />
+            <cylinderGeometry args={[0.22, 0.26, 0.4, 16]} />
+            <meshStandardMaterial color={n.color} />
           </mesh>
-          <mesh position={[0, 0.1, 0]}>
+          <mesh position={[0, 0.15, 0]}>
             <sphereGeometry args={[0.1, 16, 16]} />
             <meshBasicMaterial color="#ffffff" />
           </mesh>
@@ -964,11 +1020,11 @@ function M15MarketScene({ commodity }: { commodity: string }) {
 // --- M16: 3D 5-Node Causal DAG Network ---
 function M16DagScene({ activeNode }: { activeNode: number }) {
   const dagNodes = useMemo(() => [
-    { id: 1, pos: new THREE.Vector3(-2.4, 1.0, 0), label: '850hPa Vortex' },
-    { id: 2, pos: new THREE.Vector3(-1.2, 0.2, 0.4), label: '1km Downscale' },
+    { id: 1, pos: new THREE.Vector3(-2.4, 0.8, 0), label: '850hPa Vortex' },
+    { id: 2, pos: new THREE.Vector3(-1.2, 0.1, 0.3), label: '1km Downscale' },
     { id: 3, pos: new THREE.Vector3(0.0, -0.4, 0), label: 'Soil Saturation' },
-    { id: 4, pos: new THREE.Vector3(1.2, 0.2, -0.4), label: 'Yield Penalty' },
-    { id: 5, pos: new THREE.Vector3(2.4, 1.0, 0), label: 'Mandi Shock' }
+    { id: 4, pos: new THREE.Vector3(1.2, 0.1, -0.3), label: 'Yield Penalty' },
+    { id: 5, pos: new THREE.Vector3(2.4, 0.8, 0), label: 'Mandi Shock' }
   ], []);
 
   const edges = useMemo(() => {
@@ -984,6 +1040,12 @@ function M16DagScene({ activeNode }: { activeNode: number }) {
 
   return (
     <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.9, 0]}>
+        <planeGeometry args={[6.5, 4.5]} />
+        <meshStandardMaterial color="#080f1d" />
+      </mesh>
+      <gridHelper args={[6, 12, '#818cf8', '#111827']} position={[0, -0.88, 0]} />
+
       {edges.map((curve, idx) => (
         <mesh key={idx}>
           <tubeGeometry args={[curve, 32, 0.03, 8, false]} />
@@ -1017,10 +1079,10 @@ function M17SupplyShockScene({ disruption }: { disruption: number }) {
   const truckRef = useRef<THREE.Mesh>(null);
 
   const highwayPts = useMemo(() => [
-    new THREE.Vector3(-2.4, -0.8, -1.4),
-    new THREE.Vector3(-1.0, -0.6, -0.4),
-    new THREE.Vector3(0.4, -0.4, 0.6),
-    new THREE.Vector3(1.8, -0.2, 1.6)
+    new THREE.Vector3(-2.4, -0.6, -1.4),
+    new THREE.Vector3(-1.0, -0.4, -0.4),
+    new THREE.Vector3(0.4, -0.3, 0.6),
+    new THREE.Vector3(1.8, -0.1, 1.6)
   ], []);
 
   const highwayCurve = useMemo(() => new THREE.CatmullRomCurve3(highwayPts), [highwayPts]);
@@ -1034,20 +1096,26 @@ function M17SupplyShockScene({ disruption }: { disruption: number }) {
 
   return (
     <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.9, 0]}>
+        <planeGeometry args={[6.5, 6.5]} />
+        <meshStandardMaterial color="#08101e" />
+      </mesh>
+      <gridHelper args={[6, 12, '#64748b', '#1e293b']} position={[0, -0.88, 0]} />
+
       {/* NH16 Highway Ribbon */}
       <mesh>
         <tubeGeometry args={[highwayCurve, 40, 0.06, 8, false]} />
-        <meshBasicMaterial color="#64748b" />
+        <meshBasicMaterial color="#94a3b8" />
       </mesh>
 
-      {/* Moving Freight Transport Marker */}
+      {/* Moving Freight Transport Truck */}
       <mesh ref={truckRef}>
-        <boxGeometry args={[0.2, 0.12, 0.3]} />
+        <boxGeometry args={[0.22, 0.14, 0.32]} />
         <meshBasicMaterial color="#f59e0b" />
       </mesh>
 
-      {/* Inundation Breach Point (Highway Disruption) */}
-      <mesh position={[0.4, -0.38, 0.6]} rotation={[-Math.PI / 2, 0, 0]}>
+      {/* Inundation Breach Point on Highway */}
+      <mesh position={[0.4, -0.28, 0.6]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.15, 0.5, 24]} />
         <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} opacity={0.8} transparent />
       </mesh>
@@ -1058,8 +1126,8 @@ function M17SupplyShockScene({ disruption }: { disruption: number }) {
         { x: -0.2, z: 0.0, h: 1.8, color: '#ef4444' },
         { x: 1.2, z: 1.0, h: 0.8, color: '#f59e0b' }
       ].map((b, i) => (
-        <mesh key={i} position={[b.x, -0.8 + (b.h * (disruption / 50)) / 2, b.z]}>
-          <cylinderGeometry args={[0.16, 0.2, b.h * (disruption / 50), 16]} />
+        <mesh key={i} position={[b.x, -0.88 + (b.h * (disruption / 50)) / 2, b.z]}>
+          <cylinderGeometry args={[0.18, 0.22, b.h * (disruption / 50), 16]} />
           <meshStandardMaterial color={b.color} />
         </mesh>
       ))}
@@ -1071,21 +1139,27 @@ function M17SupplyShockScene({ disruption }: { disruption: number }) {
 function M18ScenarioSimulatorScene({ rainDelta, bufferRelease }: { rainDelta: number; bufferRelease: boolean }) {
   return (
     <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]}>
+        <planeGeometry args={[6.5, 6.5]} />
+        <meshStandardMaterial color="#08101e" />
+      </mesh>
+      <gridHelper args={[6, 12, '#38bdf8', '#1e293b']} position={[0, -0.98, 0]} />
+
       {/* Surface A: Status Quo Unmitigated Loss Crater (Red) */}
-      <mesh position={[-1.2, -0.4, 0]} rotation={[-Math.PI / 3, 0, 0]}>
-        <planeGeometry args={[2.4, 2.4, 16, 16]} />
+      <mesh position={[-1.3, -0.3, 0]} rotation={[-Math.PI / 3, 0, 0]}>
+        <planeGeometry args={[2.5, 2.5, 16, 16]} />
         <meshStandardMaterial color="#ef4444" wireframe transparent opacity={0.65} />
       </mesh>
 
-      {/* Surface B: AI-Optimized Policy Action (Cyan/Green - Smoothed Loss) */}
-      <mesh position={[1.2, bufferRelease ? 0.2 : -0.2, 0]} rotation={[-Math.PI / 3, 0, 0]}>
-        <planeGeometry args={[2.4, 2.4, 16, 16]} />
+      {/* Surface B: AI-Optimized Policy Action (Emerald/Cyan - Smoothed Shock) */}
+      <mesh position={[1.3, bufferRelease ? 0.2 : -0.2, 0]} rotation={[-Math.PI / 3, 0, 0]}>
+        <planeGeometry args={[2.5, 2.5, 16, 16]} />
         <meshStandardMaterial color="#10b981" wireframe transparent opacity={0.8} />
       </mesh>
 
       {/* Central Economic Savings Delta Pedestal */}
-      <mesh position={[0, 0.4, 0]}>
-        <cylinderGeometry args={[0.25, 0.3, 0.8, 16]} />
+      <mesh position={[0, 0.35, 0]}>
+        <cylinderGeometry args={[0.26, 0.32, 0.85, 16]} />
         <meshStandardMaterial color={bufferRelease ? '#10b981' : '#f59e0b'} />
       </mesh>
     </group>
@@ -1221,7 +1295,7 @@ export default function DedicatedModuleSimulator({
           </div>
 
           <Canvas camera={{ position: [0, 1.4, 5.2], fov: 42 }}>
-            <ambientLight intensity={0.7} />
+            <ambientLight intensity={0.75} />
             <pointLight position={[10, 10, 10]} intensity={0.9} />
             <Stars radius={60} depth={30} count={1200} factor={2} saturation={0} fade speed={1} />
 
