@@ -26,24 +26,28 @@ def _user_payload(row: Any) -> dict[str, Any]:
     return {"id": row[0], "email": row[1], "name": row[2], "plan": plan}
 
 
+SUPABASE_PROJECT_REF = "aiwdzqcfrhavsqejbyfv"
+SUPABASE_POOL_HOST = "aws-0-ap-northeast-1.pooler.supabase.com"
+
+
 def _auth_dsn() -> str:
-    """Supabase direct db hosts are IPv6-only; Render cannot reach them."""
-    from urllib.parse import quote, urlparse
+    """Render cannot reach IPv6-only db.*.supabase.co; pooler needs postgres.<ref>."""
+    from urllib.parse import quote, unquote
 
     url = settings.AUTH_DATABASE_URL.strip()
-    parsed = urlparse(url)
-    host = parsed.hostname or ""
-    if host.startswith("db.") and host.endswith(".supabase.co"):
-        ref = host.removeprefix("db.").removesuffix(".supabase.co")
-        user = parsed.username or "postgres"
-        if "." not in user:
-            user = f"{user}.{ref}"
-        password = quote(parsed.password or "", safe="")
-        return (
-            f"postgresql://{user}:{password}"
-            f"@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
-        )
-    return url
+    if "://" not in url or "@" not in url:
+        user, password = f"postgres.{SUPABASE_PROJECT_REF}", url
+    else:
+        _scheme, rest = url.split("://", 1)
+        creds, _hostpart = rest.rsplit("@", 1)
+        _user, password = creds.split(":", 1) if ":" in creds else ("postgres", creds)
+        password = unquote(password)
+    if not password:
+        raise HTTPException(503, "AUTH_DATABASE_URL is missing a database password.")
+    user = f"postgres.{SUPABASE_PROJECT_REF}"
+    return (
+        f"postgresql://{user}:{quote(password, safe='')}@{SUPABASE_POOL_HOST}:5432/postgres?sslmode=require"
+    )
 
 
 def _db():
