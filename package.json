@@ -1,0 +1,28 @@
+{
+  "name": "earth-4d-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix product-shell run dev",
+    "dev:shell": "npm --prefix product-shell run dev",
+    "dev:module1": "npm --prefix frontend run dev",
+    "dev:module2": "npm --prefix module2-frontend run dev -- -p 3002",
+    "dev:module3": "npm --prefix module3-anomaly run dev -- -p 3003",
+    "dev:module4": "npm --prefix module4-footprint run dev -- -p 3004",
+    "dev:module5": "npm --prefix module5-trajectory run dev -- -p 3005",
+    "dev:module6": "npm --prefix module6-probability run dev -- -p 3006",
+    "dev:module7": "npm --prefix module7-downscaling run dev -- -p 3007",
+    "dev:module8": "npm --prefix module8-extreme-comparison run dev -- -p 3008",
+    "dev:module9": "npm --prefix module9-crop-exposure run dev -- -p 3009",
+    "dev:module10": "npm --prefix module10-growth-stage run dev",
+    "dev:module11": "npm --prefix module11-water-soil run dev",
+    "dev:module12": "npm --prefix module12-crop-scenario run dev",
+    "dev:module13": "npm --prefix module13-yield-risk run dev",
+    "dev:module14": "npm --prefix module14-pest-disease run dev",
+    "dev:module15": "npm --prefix module15-market-intelligence run dev",
+    "dev:module16": "npm --prefix module16-weather-crop-supply-market run dev",
+    "dev:module17": "npm --prefix module17-supply-shock run dev",
+    "dev:module18": "npm --prefix module18-scenario-simulator run dev",
+    "dev:module19": "npm --prefix module19-landing run dev",
+    "build": "node scripts/build-all-modules.js && npm --prefix product-shell run build"
+  }
+}

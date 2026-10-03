@@ -656,8 +656,11 @@ export default function ModuleWorkspaceView() {
   const [realtimeData, setRealtimeData] = useState<RealtimeTelemetryState | null>(null);
 
   const port = activeModuleWorkspace?.port ?? 3000;
-  const targetUrl = `http://localhost:${port}`;
+  const moduleNumberStr = activeModuleWorkspace?.moduleNumber.toString().padStart(2, '0') ?? '01';
   const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  
+  // Use localhost in dev, but fallback to statically hosted /moduleXX/index.html in production
+  const targetUrl = isLocalhost ? `http://localhost:${port}` : `/module${moduleNumberStr}/index.html`;
 
   const activeBasinObj = BASIN_OPTIONS.find((b) => b.id === selectedBasin) || BASIN_OPTIONS[0];
 
@@ -915,6 +918,7 @@ export default function ModuleWorkspaceView() {
               ENGINE {moduleNumber < 10 ? `0${moduleNumber}` : moduleNumber}
             </span>
             <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>{title}</span>
+            <span style={{ fontSize: '12px', color: '#687486', fontFamily: 'var(--font-mono)' }}>({targetUrl})</span>
           </div>
           <button onClick={() => setIsFullscreen(false)} style={{ padding: '6px 14px', borderRadius: '9999px', fontSize: '12px', fontWeight: 600, color: '#FFFFFF', border: '1px solid var(--border)', backgroundColor: '#151B26', cursor: 'pointer' }}>
             <Minimize2 style={{ width: '14px', height: '14px' }} />
@@ -922,34 +926,13 @@ export default function ModuleWorkspaceView() {
         </div>
 
         <div style={{ flex: 1, backgroundColor: '#07090E', position: 'relative' }}>
-          {moduleNumber === 1 ? (
-            <iframe
-              key={iframeKey}
-              src="/module01/index.html"
-              style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
-              title="Module 01 Planetary Volumetric Atmospheric Earth Globe"
-              allow="accelerometer; autoplay; camera; gyroscope; payment"
-            />
-          ) : isLocalhost && isPortOnline ? (
-            <iframe
-              key={iframeKey}
-              src={targetUrl}
-              style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
-              title={`Module ${moduleNumber} Fullscreen`}
-              allow="accelerometer; autoplay; camera; gyroscope; payment"
-            />
-          ) : (
-            <DedicatedModuleSimulator
-              moduleNumber={moduleNumber}
-              title={title}
-              category={category}
-              basin={activeBasinObj}
-              horizon={selectedHorizon}
-              locale={locale}
-              realtimeData={realtimeData}
-              port={port}
-            />
-          )}
+          <iframe
+            key={iframeKey}
+            src={(!isLocalhost || !isPortOnline) ? `/module${moduleNumber.toString().padStart(2, '0')}/index.html` : targetUrl}
+            style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
+            title={`Module ${moduleNumber} Fullscreen`}
+            allow="accelerometer; autoplay; camera; gyroscope; payment"
+          />
         </div>
       </div>
     );
@@ -1020,7 +1003,7 @@ export default function ModuleWorkspaceView() {
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '9999px', backgroundColor: '#10B981' }} />
-            <span>{locale === 'hi' ? '3D इंजन सक्रिय // रियल-टाइम' : '3D ENGINE ACTIVE // REAL-TIME'}</span>
+            <span>{isLocalhost && isPortOnline ? `ONLINE :${port}` : 'ENGINE ACTIVE // 30 FPS'}</span>
           </div>
         </div>
 
@@ -1081,7 +1064,7 @@ export default function ModuleWorkspaceView() {
               ) : (
                 <>
                   <Activity style={{ width: '13px', height: '13px' }} />
-                  <span>{locale === 'hi' ? `⚡ M0${moduleNumber} 3D सिमुलेशन` : `⚡ M0${moduleNumber} 3D Simulation`}</span>
+                  <span>{locale === 'hi' ? `⚡ M0${moduleNumber} सिमुलेटर (: ${port})` : `⚡ M0${moduleNumber} Simulator (: ${port})`}</span>
                 </>
               )}
             </button>
@@ -1091,21 +1074,46 @@ export default function ModuleWorkspaceView() {
             onClick={() => {
               setIframeKey((k) => k + 1);
               setIsIframeLoading(true);
-              showToast('Reloaded 3D Engine Twin', 'info');
+              showToast('Reloaded Engine Sandbox', 'info');
             }}
             style={{ padding: '6px', borderRadius: '9999px', backgroundColor: '#151B26', color: '#FFFFFF', border: '1px solid var(--border)', cursor: 'pointer' }}
-            title="Reload 3D Engine"
+            title="Reload Engine"
           >
             <RotateCcw style={{ width: '13px', height: '13px' }} />
           </button>
 
           <button
             onClick={() => setIsFullscreen(true)}
-            style={{ padding: '6px 14px', borderRadius: '9999px', backgroundColor: '#151B26', color: '#FFFFFF', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600 }}
+            style={{ padding: '6px', borderRadius: '9999px', backgroundColor: '#151B26', color: '#FFFFFF', border: '1px solid var(--border)', cursor: 'pointer' }}
             title="Fullscreen Studio"
           >
             <Maximize2 style={{ width: '13px', height: '13px' }} />
-            <span>{locale === 'hi' ? 'पूर्ण स्क्रीन' : 'Fullscreen'}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (!isLocalhost) {
+                showToast(`Standalone port :${port} is for local workstation development`, 'info');
+              }
+              window.open(targetUrl, '_blank');
+            }}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '9999px',
+              backgroundColor: '#EFF3F4',
+              color: '#0B0E14',
+              border: 'none',
+              fontWeight: 700,
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer'
+            }}
+            title={isLocalhost ? `Open :${port} in New Tab` : `Local dev port :${port}`}
+          >
+            <span>{isLocalhost ? `Open :${port}` : `Dev Port :${port}`}</span>
+            <ExternalLink style={{ width: '13px', height: '13px' }} />
           </button>
         </div>
       </div>
@@ -1170,7 +1178,7 @@ export default function ModuleWorkspaceView() {
                   ENGINE {moduleNumber < 10 ? `0${moduleNumber}` : moduleNumber}
                 </span>
                 <span style={{ fontSize: '11px', color: '#10B981', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-                  3D SCIENTIFIC ENGINE (ONLINE)
+                  {isLocalhost ? `PORT :${port} (RUNNING)` : 'NEURAL TWIN (ONLINE)'}
                 </span>
               </div>
               <div style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.3 }}>
@@ -1240,7 +1248,7 @@ export default function ModuleWorkspaceView() {
                           M{cm.moduleNumber < 10 ? `0${cm.moduleNumber}` : cm.moduleNumber} · {cm.title?.substring(0, 18)}
                         </div>
                         <div style={{ fontSize: '10px', color: '#10B981', fontFamily: 'var(--font-mono)' }}>
-                          3D ENGINE ACTIVE
+                          Port :{cm.port} (ONLINE)
                         </div>
                       </div>
                       <ArrowUpRight style={{ width: '13px', height: '13px', color: '#FFFFFF' }} />
@@ -1282,34 +1290,13 @@ export default function ModuleWorkspaceView() {
           {activeTab === 'iframe' ? (
             /* Dedicated Simulation or Live Port View */
             <div style={{ width: '100%', height: '100%', minHeight: 'calc(100vh - 53px)', position: 'relative' }}>
-              {moduleNumber === 1 ? (
-                <iframe
-                  key={iframeKey}
-                  src="/module01/index.html"
-                  style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
-                  title="Module 01 Planetary Volumetric Atmospheric Earth Globe"
-                  allow="accelerometer; autoplay; camera; gyroscope; payment"
-                />
-              ) : isLocalhost && isPortOnline ? (
-                <iframe
-                  key={iframeKey}
-                  src={targetUrl}
-                  style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
-                  title={`Module ${moduleNumber} Live View`}
-                  allow="accelerometer; autoplay; camera; gyroscope; payment"
-                />
-              ) : (
-                <DedicatedModuleSimulator
-                  moduleNumber={moduleNumber}
-                  title={title}
-                  category={category}
-                  basin={activeBasinObj}
-                  horizon={selectedHorizon}
-                  locale={locale}
-                  realtimeData={realtimeData}
-                  port={port}
-                />
-              )}
+              <iframe
+                key={iframeKey}
+                src={(!isLocalhost || !isPortOnline) ? `/module${moduleNumber.toString().padStart(2, '0')}/index.html` : targetUrl}
+                style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
+                title={`Module ${moduleNumber} Live View`}
+                allow="accelerometer; autoplay; camera; gyroscope; payment"
+              />
             </div>
           ) : (
             /* 4D Professional Scientific Studio & Connected Input/Output System */
@@ -1460,7 +1447,7 @@ export default function ModuleWorkspaceView() {
                             border: '1px solid rgba(56, 189, 248, 0.3)'
                           }}
                         >
-                          3D OPERATIONAL
+                          Port :{port}
                         </span>
                       </div>
                       <div style={{ fontSize: '13px', color: '#94A3B8', lineHeight: 1.4 }}>
