@@ -463,7 +463,7 @@ export default function InputComposer() {
                 <span>Routing...</span>
               </>
             ) : (
-              <span>पूछें</span>
+              <span>{locale === 'hi' ? 'पूछें' : 'Ask'}</span>
             )}
           </button>
         </div>

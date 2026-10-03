@@ -170,7 +170,7 @@ export default function RightRail() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
-            placeholder="खोजें: जगह, फसल, मंडी..."
+            placeholder={locale === 'hi' ? 'खोजें: जगह, फसल, मंडी...' : 'Search: Basin, crop, mandi shock...'}
             style={{
               width: '100%',
               padding: '11px 0',
@@ -202,7 +202,7 @@ export default function RightRail() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="live-dot" />
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-0)', margin: 0, letterSpacing: '-0.01em' }}>
-              लाइव चेतावनी
+              {locale === 'hi' ? 'लाइव चेतावनी' : 'Live Alerts & Forecast'}
             </h3>
           </div>
           <span className="chip chip-green" style={{ fontSize: '10px', gap: '4px' }}>
@@ -253,7 +253,7 @@ export default function RightRail() {
                   {evt.leadHorizon}
                 </span>
                 <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: '#34D399', fontWeight: 600 }}>
-                  {evt.probabilityPct}% मिलान
+                  {evt.probabilityPct}% {locale === 'hi' ? 'मिलान' : 'Consensus'}
                 </span>
               </div>
             </div>
@@ -269,14 +269,14 @@ export default function RightRail() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <span className="chip chip-amber">गेहूं गर्मी</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>पंजाब / हरियाणा</span>
+              <span className="chip chip-amber">{locale === 'hi' ? 'गेहूं गर्मी' : 'Wheat Heat'}</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>{locale === 'hi' ? 'पंजाब / हरियाणा' : 'Punjab / Haryana'}</span>
             </div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-0)', lineHeight: 1.4 }}>
-              गेहूं की जड़ अवस्था पर गर्मी का दबाव
+              {locale === 'hi' ? 'गेहूं की जड़ अवस्था पर गर्मी का दबाव' : 'Terminal Heat Stress on Wheat Root Development'}
             </div>
             <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--text-2)', fontFamily: 'var(--font-mono)' }}>
-              उपज खतरे में · Northwest India
+              {locale === 'hi' ? 'उपज खतरे में · Northwest India' : 'Yield Vulnerability Window · Northwest India'}
             </div>
           </div>
 
@@ -289,14 +289,14 @@ export default function RightRail() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <span className="chip chip-purple">मंडी भाव</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>विदर्भ</span>
+              <span className="chip chip-purple">{locale === 'hi' ? 'मंडी भाव' : 'Mandi Rates'}</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>{locale === 'hi' ? 'विदर्भ' : 'Vidarbha'}</span>
             </div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-0)', lineHeight: 1.4 }}>
-              सोयाबीन आवक घटी, मंडी स्प्रेड बढ़ा
+              {locale === 'hi' ? 'सोयाबीन आवक घटी, मंडी स्प्रेड बढ़ा' : 'Soybean Inflow Deficit & Mandi Spread Widening'}
             </div>
             <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--text-2)', fontFamily: 'var(--font-mono)' }}>
-              भाव अस्थिर · Maharashtra
+              {locale === 'hi' ? 'भाव अस्थिर · Maharashtra' : 'Market Volatility Signal · Maharashtra'}
             </div>
           </div>
         </div>
@@ -320,7 +320,7 @@ export default function RightRail() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '15px' }}>📰</span>
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-0)', margin: 0, letterSpacing: '-0.01em' }}>
-              समाचार · मंडी
+              {locale === 'hi' ? 'समाचार · मंडी' : 'News & Mandi Wire'}
             </h3>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

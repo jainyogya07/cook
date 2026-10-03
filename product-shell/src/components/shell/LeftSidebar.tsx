@@ -147,11 +147,11 @@ export default function LeftSidebar() {
                 letterSpacing: '0.04em'
               }}
             >
-              भारत
+              {locale === 'hi' ? 'भारत' : 'INDIA'}
             </span>
           </div>
           <div
-            title="From skies to soil"
+            title={locale === 'hi' ? 'आसमान से खेत तक' : 'From skies to soil'}
             style={{
               fontSize: '9px',
               color: '#E6C65C',
@@ -160,7 +160,7 @@ export default function LeftSidebar() {
               lineHeight: 1.2
             }}
           >
-            मौसम से मंडी तक
+            {locale === 'hi' ? 'मौसम से मंडी तक' : 'Skies to Mandi'}
           </div>
         </div>
       </div>
@@ -168,11 +168,11 @@ export default function LeftSidebar() {
         <button
           onClick={() => setFieldGuideOpen(true)}
           className="guide-header-btn"
-          title="क्या लिखें, क्या मिलेगा"
+          title={locale === 'hi' ? 'क्या लिखें, क्या मिलेगा' : 'Directive & Engine Guide'}
           style={{ marginTop: '10px', width: '100%', justifyContent: 'center', fontSize: '11px', padding: '7px 8px' }}
         >
           <BookOpen size={13} />
-          गाइड
+          {locale === 'hi' ? 'गाइड' : 'Guide'}
         </button>
       <ul style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '2px', listStyle: 'none', padding: 0 }}>
         {navItems.map((item) => {
@@ -434,10 +434,10 @@ export default function LeftSidebar() {
             <span style={{ fontSize: '11px', color: '#A855F7', fontWeight: 600 }}>Tiers</span>
           </div>
           <div style={{ fontSize: '12px', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.3 }}>
-            बेहतर नक्शा, मंडी भाव
+            {locale === 'hi' ? 'बेहतर नक्शा, मंडी भाव' : 'Hyperlocal Maps & Mandi'}
           </div>
           <div style={{ fontSize: '10px', color: 'var(--text-2)', marginTop: '4px', lineHeight: 1.4 }}>
-            गाँव-स्तर का मौसम और मंडी सलाह।
+            {locale === 'hi' ? 'गाँव-स्तर का मौसम और मंडी सलाह।' : 'Village weather & mandi advisory.'}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '8px', fontSize: '11px', fontWeight: 600, color: '#38BDF8' }}>
             <span>Plans →</span>
@@ -449,9 +449,10 @@ export default function LeftSidebar() {
       <div style={{ paddingTop: '4px' }}>
           <button
             onClick={() => setLocale(locale === 'en' ? 'hi' : 'en')}
-            style={{ width: '100%', marginBottom: 8, padding: '8px 10px', borderRadius: 12, border: '1px solid var(--stroke)', background: 'transparent', color: '#E2E8F0', fontSize: 12 }}
+            style={{ width: '100%', marginBottom: 8, padding: '8px 10px', borderRadius: 12, border: '1px solid var(--stroke)', background: 'transparent', color: '#E2E8F0', fontSize: 12, cursor: 'pointer' }}
+            title={locale === 'en' ? 'Switch to Hindi' : 'अंग्रेज़ी में बदलें'}
           >
-            {locale === 'en' ? 'हिन्दी' : 'English'}
+            {locale === 'en' ? '🌐 EN · Switch to हिन्दी' : '🌐 HI · Switch to English'}
           </button>
           <button
             onClick={() => setActiveNav('ai')}

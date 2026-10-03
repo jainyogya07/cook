@@ -55,33 +55,38 @@ export function VolumetricStratificationCanvas({
     };
     window.addEventListener('resize', handleResize);
 
-    // Particle streamlines in 3D cylindrical coordinates
-    const particleCount = 180;
+    // Particle streamlines in 3D cylindrical coordinates (capped to 50 for cool laptop operation)
+    const particleCount = 50;
     const particles = Array.from({ length: particleCount }, () => ({
       radius: 40 + Math.random() * 220,
       angle: Math.random() * Math.PI * 2,
       zNorm: Math.random(), // 0 to 1 (surface to 300 hPa)
       speed: 0.008 + Math.random() * 0.016,
       verticalDrift: (Math.random() - 0.48) * 0.002,
-      size: 1 + Math.random() * 2,
-      alpha: 0.2 + Math.random() * 0.6
+      size: 1 + Math.random() * 1.5,
+      alpha: 0.25 + Math.random() * 0.5
     }));
 
     let autoRot = rotationAngle;
+    let lastTime = performance.now();
+    const frameInterval = 1000 / 30; // 30 FPS cap for silent laptop fans
 
-    const render = () => {
+    const render = (now: number) => {
+      animationFrameId = requestAnimationFrame(render);
+
+      // Auto-pause when tab is inactive to protect battery and thermals
+      if (document.hidden) return;
+
+      const delta = now - lastTime;
+      if (delta < frameInterval) return;
+      lastTime = now - (delta % frameInterval);
+
       if (!isDragging) {
-        autoRot += 0.003;
+        autoRot += 0.0025;
       }
 
-      ctx.clearRect(0, 0, width, height);
-
-      // Deep space atmospheric background
-      const bgGrad = ctx.createRadialGradient(width / 2, height / 2, 20, width / 2, height / 2, Math.max(width, height) * 0.7);
-      bgGrad.addColorStop(0, '#0E1422');
-      bgGrad.addColorStop(0.6, '#080C14');
-      bgGrad.addColorStop(1, '#04060A');
-      ctx.fillStyle = bgGrad;
+      // Flat fill without allocating radial gradients on heap every frame
+      ctx.fillStyle = '#07090E';
       ctx.fillRect(0, 0, width, height);
 
       const cx = width / 2;
@@ -90,13 +95,11 @@ export function VolumetricStratificationCanvas({
 
       // Project 3D point (x, y, z) into 2D isometric viewport
       const project = (x: number, y: number, z: number) => {
-        // Rotate around Y axis
         const cosR = Math.cos(autoRot);
         const sinR = Math.sin(autoRot);
         const rx = x * cosR - y * sinR;
         const ry = x * sinR + y * cosR;
 
-        // Tilt around X axis
         const cosT = Math.cos(tiltAngle);
         const sinT = Math.sin(tiltAngle);
         const px = cx + rx;
@@ -172,13 +175,11 @@ export function VolumetricStratificationCanvas({
 
       // 3. Draw 3D Cyclonic Wind Stream Particles
       particles.forEach((p) => {
-        // Streamline equation: spiral inward/outward based on altitude
         p.angle += p.speed;
         p.zNorm += p.verticalDrift;
         if (p.zNorm > 1) p.zNorm = 0;
         if (p.zNorm < 0) p.zNorm = 1;
 
-        // Spiral radius contracts at 850hPa (convergence) and expands at 300hPa (divergence)
         const radiusFactor = 0.75 + Math.sin(p.zNorm * Math.PI) * 0.4;
         const x = Math.cos(p.angle) * (p.radius * radiusFactor);
         const y = Math.sin(p.angle) * (p.radius * radiusFactor);
@@ -186,7 +187,6 @@ export function VolumetricStratificationCanvas({
 
         const pt = project(x, y, z);
 
-        // Calculate tail
         const tailX = Math.cos(p.angle - p.speed * 2) * (p.radius * radiusFactor);
         const tailY = Math.sin(p.angle - p.speed * 2) * (p.radius * radiusFactor);
         const tailPt = project(tailX, tailY, z);
@@ -195,7 +195,6 @@ export function VolumetricStratificationCanvas({
         ctx.moveTo(tailPt.px, tailPt.py);
         ctx.lineTo(pt.px, pt.py);
 
-        // Color blends from surface (cyan) to mid (green) to jet (violet)
         const particleColor = p.zNorm > 0.7 ? '#C084FC' : p.zNorm > 0.35 ? '#38BDF8' : '#34D399';
         ctx.strokeStyle = particleColor;
         ctx.lineWidth = p.size;
@@ -203,11 +202,9 @@ export function VolumetricStratificationCanvas({
         ctx.stroke();
         ctx.globalAlpha = 1.0;
       });
-
-      animationFrameId = requestAnimationFrame(render);
     };
 
-    render();
+    animationFrameId = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
