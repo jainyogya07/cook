@@ -923,19 +923,21 @@ export default function ModuleWorkspaceView() {
         </div>
 
         <div style={{ flex: 1, backgroundColor: '#07090E', position: 'relative' }}>
-          {isLocalhost && isPortOnline ? (
+          {moduleNumber === 1 ? (
+            <iframe
+              key={iframeKey}
+              src={isLocalhost && isPortOnline ? targetUrl : '/module01/index.html'}
+              style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
+              title="Module 01 Planetary Volumetric Atmospheric Earth Globe"
+              allow="accelerometer; autoplay; camera; gyroscope; payment"
+            />
+          ) : isLocalhost && isPortOnline ? (
             <iframe
               key={iframeKey}
               src={targetUrl}
               style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
               title={`Module ${moduleNumber} Fullscreen`}
               allow="accelerometer; autoplay; camera; gyroscope; payment"
-            />
-          ) : moduleNumber === 1 ? (
-            <VolumetricStratificationCanvas
-              moduleNumber={moduleNumber}
-              moduleTitle={title}
-              leadHour={parseInt(selectedHorizon.replace(/[^\d]/g, ''), 10) || 72}
             />
           ) : (
             <DedicatedModuleSimulator
@@ -1306,19 +1308,21 @@ export default function ModuleWorkspaceView() {
           {activeTab === 'iframe' ? (
             /* Dedicated Simulation or Live Port View */
             <div style={{ width: '100%', height: '100%', minHeight: 'calc(100vh - 53px)', position: 'relative' }}>
-              {isLocalhost && isPortOnline ? (
+              {moduleNumber === 1 ? (
+                <iframe
+                  key={iframeKey}
+                  src={isLocalhost && isPortOnline ? targetUrl : '/module01/index.html'}
+                  style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
+                  title="Module 01 Planetary Volumetric Atmospheric Earth Globe"
+                  allow="accelerometer; autoplay; camera; gyroscope; payment"
+                />
+              ) : isLocalhost && isPortOnline ? (
                 <iframe
                   key={iframeKey}
                   src={targetUrl}
                   style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
                   title={`Module ${moduleNumber} Live View`}
                   allow="accelerometer; autoplay; camera; gyroscope; payment"
-                />
-              ) : moduleNumber === 1 ? (
-                <VolumetricStratificationCanvas
-                  moduleNumber={moduleNumber}
-                  moduleTitle={title}
-                  leadHour={parseInt(selectedHorizon.replace(/[^\d]/g, ''), 10) || 72}
                 />
               ) : (
                 <DedicatedModuleSimulator
