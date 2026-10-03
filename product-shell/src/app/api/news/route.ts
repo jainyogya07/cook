@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(rss, { next: { revalidate: 120 } });
     const xml = await response.text();
-    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, limit).map((match, index) => {
+    const matches = Array.from(xml.matchAll(/<item>([\s\S]*?)<\/item>/g));
+    const items = matches.slice(0, limit).map((match, index) => {
       const block = match[1];
       const pick = (tag: string) => block.match(new RegExp(`<${tag}><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tag}>`))?.[1]
         || block.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`))?.[1]
