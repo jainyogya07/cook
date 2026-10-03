@@ -62,6 +62,13 @@ const EN = {
   seedHint: 'Seed Pro account is ready for operators.',
   reportTitle: 'ATMOS 4D intelligence report',
   reportPremium: 'PDF export is included with Atmos Pro.',
+  proOn: 'Atmos Pro is active',
+  proOnBody: 'You have PDF reports, all 18 engines, and mandi shock.',
+  proPlan: 'Atmos Pro',
+  newChat: 'New chat',
+  noChats: 'No saved chats yet',
+  clickView: 'Click to view',
+  liveWire: 'Live mandi & news',
 };
 
 const HI: typeof EN = {
@@ -125,6 +132,13 @@ const HI: typeof EN = {
   seedHint: 'सीड Pro खाता ऑपरेटरों के लिए तैयार है।',
   reportTitle: 'ATMOS 4D इंटेलिजेंस रिपोर्ट',
   reportPremium: 'PDF निकालना Atmos Pro में शामिल है।',
+  proOn: 'Atmos Pro खाता सक्रिय है',
+  proOnBody: 'PDF रिपोर्ट, सभी 18 इंजन और मंडी झटका आपके पास हैं।',
+  proPlan: 'Atmos Pro',
+  newChat: 'नई बात',
+  noChats: 'अभी कोई सहेजी बात नहीं',
+  clickView: 'देखने के लिए क्लिक करें',
+  liveWire: 'लाइव मंडी और समाचार',
 };
 
 export const COPY: Record<AppLocale, typeof EN> = { en: EN, hi: HI };
@@ -141,9 +155,11 @@ export function canPost(plan: AccessPlan) {
   return plan === 'free' || plan === 'pro';
 }
 
-export function canUseEngines(plan: AccessPlan, _moduleNumber?: number) {
-  if (plan === 'pro' || plan === 'free') return true;
-  return false;
+export function canUseEngines(plan: AccessPlan, moduleNumber?: number) {
+  if (plan === 'pro') return true;
+  if (plan === 'guest') return false;
+  if (moduleNumber == null) return true;
+  return moduleNumber <= 6;
 }
 
 export function canExportPdf(plan: AccessPlan) {

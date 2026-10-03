@@ -1,42 +1,52 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useShellStore } from '@/services/useShellStore';
-import NewsTranslator from '@/components/feed/NewsTranslator';
-import { cleanNewsText } from '@/lib/cleanNews';
+import FeedPostCard from '@/components/feed/FeedPostCard';
 import { t } from '@/i18n/copy';
 
+const PAGE = 4;
+
 export default function NewsDeskView() {
-  const { liveNews, fetchLiveNews, locale, isNewsLiveSyncing } = useShellStore();
+  const { posts, fetchLiveNews, locale, isNewsLiveSyncing } = useShellStore();
+  const [page, setPage] = useState(0);
+  const hi = locale === 'hi';
 
   useEffect(() => {
     void fetchLiveNews('weather', 'India', locale);
+    void fetchLiveNews('mandi', 'India', locale);
   }, [fetchLiveNews, locale]);
 
+  const total = Math.max(1, Math.ceil(posts.length / PAGE));
+  const slice = useMemo(() => posts.slice(page * PAGE, page * PAGE + PAGE), [posts, page]);
+
+  useEffect(() => {
+    if (page > total - 1) setPage(0);
+  }, [page, total]);
+
   return (
-    <div className="nv-page">
+    <div className="nv-page nv-tweets">
       <div className="nv-page-head">
         <p>{t(locale, 'news')}</p>
-        <h1>{locale === 'hi' ? 'आज मौसम और मंडी में क्या हुआ' : 'What happened in weather and mandi today'}</h1>
-        <span>{isNewsLiveSyncing ? (locale === 'hi' ? 'अपडेट हो रहा है…' : 'Updating…') : (locale === 'hi' ? 'लाइव स्रोत' : 'Live sources')}</span>
+        <h1>{hi ? 'टाइमलाइन' : 'Timeline'}</h1>
+        <span>{isNewsLiveSyncing ? (hi ? 'लाइव आ रहा है…' : 'Live updating…') : (hi ? 'लाइव समाचार + डेस्क' : 'Live news + desk')}</span>
       </div>
-      <div className="nv-news-grid">
-        {liveNews.length === 0 ? (
-          <div className="nv-empty">{locale === 'hi' ? 'अभी समाचार नहीं मिले।' : 'No bulletins yet.'}</div>
-        ) : liveNews.map((item) => {
-          const title = cleanNewsText(item.headline);
-          const body = cleanNewsText(item.aiRelevanceContext);
-          return (
-            <article key={item.id} className="nv-card">
-              <div className="nv-card-kicker">{item.source} · {item.timestamp}</div>
-              <h2>{title}</h2>
-              {body && body !== title ? <p>{body}</p> : null}
-              <div className="nv-card-foot">
-                <NewsTranslator headline={`${title}\n\n${body}`} locale={locale} />
-              </div>
-            </article>
-          );
-        })}
+
+      <div className="nv-tweet-col">
+        {slice.length === 0 ? (
+          <div className="nv-empty">{hi ? 'अभी ट्वीट नहीं।' : 'No tweets yet.'}</div>
+        ) : slice.map((post) => <FeedPostCard key={post.id} post={post} compact />)}
+      </div>
+
+      <div className="nv-pager">
+        <button type="button" disabled={page === 0} onClick={() => setPage((n) => Math.max(0, n - 1))}>
+          <ChevronLeft size={14} /> {hi ? 'पिछला' : 'Prev'}
+        </button>
+        <span>{hi ? `पृष्ठ ${page + 1} / ${total}` : `Page ${page + 1} / ${total}`}</span>
+        <button type="button" disabled={page >= total - 1} onClick={() => setPage((n) => Math.min(total - 1, n + 1))}>
+          {hi ? 'अगला' : 'Next'} <ChevronRight size={14} />
+        </button>
       </div>
     </div>
   );

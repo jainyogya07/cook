@@ -8,7 +8,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Sparkles, ArrowUpRight, Loader2, CloudRain, Wheat, TrendingUp, Shield, Mic, Square, Info } from 'lucide-react';
+import { Send, Sparkles, ArrowUpRight, Loader2, CloudRain, Wheat, TrendingUp, Shield, Mic, Square, Info, Paperclip } from 'lucide-react';
 import { useShellStore } from '@/services/useShellStore';
 import { parseAndRouteQuery } from '@/services/intentRouter';
 import { useVoiceCapture } from '@/hooks/useVoiceCapture';
@@ -16,12 +16,17 @@ import { QUERY_INPUT_RULE, QUERY_INPUT_RULE_EN } from '@/data/engineFieldGuide';
 import { buildHumanReply } from '@/services/plainReply';
 import FeatureLock from '@/components/shell/FeatureLock';
 import { canPost, t } from '@/i18n/copy';
+import { readChatIndex, writeChatIndex } from '@/components/shell/ChatHistoryRail';
+import { getAtmosNimCard } from '@/data/modelNimCards';
+import { cardsFromModules, ResultCard } from '@/services/resultCards';
+import ResultCardsGrid from '@/components/shell/ResultCardsGrid';
 
 interface ChatMessage {
   id: string;
   sender: 'user' | 'ai';
   text: string;
   timestamp: string;
+  resultCards?: ResultCard[];
   actionButtons?: {
     label: string;
     targetModule: number;
@@ -34,22 +39,28 @@ const SUGGESTION_CARDS_HI = [
   { icon: CloudRain, label: 'ओडिशा में चक्रवात?', query: 'ओडिशा तट पर अगले 3 दिन चक्रवात का कितना खतरा है?' },
   { icon: Wheat, label: 'पंजाब गेहूं सलाह', query: 'पंजाब में इस हफ्ते गेहूं के लिए क्या सलाह है?' },
   { icon: TrendingUp, label: 'नाशिक प्याज भाव', query: 'नाशिक प्याज मंडी में भारी बारिश से भाव कैसे बदलेंगे?' },
-  { icon: Shield, label: 'बाढ़ से बचाव', query: 'बंगाल की खाड़ी के डिप्रेशन से गाँवों को क्या तैयारी करनी चाहिए?' }
+  { icon: Shield, label: 'बाढ़ से बचाव', query: 'बंगाल की खाड़ी के डिप्रेशन से गाँवों को क्या तैयारी करनी चाहिए?' },
+  { icon: CloudRain, label: 'दिल्ली बारिश?', query: 'दिल्ली एनसीआर में अगले 48 घंटे बारिश कितनी संभव है?' },
+  { icon: Wheat, label: 'धान उपज?', query: 'तटीय ओडिशा खरीफ धान की उपज का कम-बीच-ज़्यादा अनुमान क्या है?' }
 ];
 const SUGGESTION_CARDS_EN = [
   { icon: CloudRain, label: 'Odisha cyclone?', query: 'How much cyclone risk on the Odisha coast in the next 3 days?' },
   { icon: Wheat, label: 'Punjab wheat advice', query: 'What should Punjab wheat do this week?' },
   { icon: TrendingUp, label: 'Nashik onion price', query: 'How will heavy rain move Nashik onion mandi prices?' },
-  { icon: Shield, label: 'Flood prep', query: 'What should villages prepare for a Bay of Bengal depression?' }
+  { icon: Shield, label: 'Flood prep', query: 'What should villages prepare for a Bay of Bengal depression?' },
+  { icon: CloudRain, label: 'Delhi rain?', query: 'How likely is rain in Delhi NCR in the next 48 hours?' },
+  { icon: Wheat, label: 'Paddy yield range?', query: 'What is the low / likely / high paddy yield range for coastal Odisha kharif?' }
 ];
 
 export default function AtmosAIChatView() {
-  const { openModuleWorkspace, showToast, userProfile, locale, accessPlan } = useShellStore();
+  const { openModuleWorkspace, showToast, userProfile, locale, accessPlan, selectedModelId } = useShellStore();
 
+  const [threadId, setThreadId] = useState(() => `t_${Date.now()}`);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const { isListening, toggle: toggleVoice } = useVoiceCapture(
     (transcript) => setInputText((prev) => `${prev.trim()}${prev.trim() ? ' ' : ''}${transcript}`),
     (message) => showToast(message, 'warning')
@@ -58,6 +69,39 @@ export default function AtmosAIChatView() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    const onNew = () => {
+      setThreadId(`t_${Date.now()}`);
+      setMessages([]);
+      setInputText('');
+    };
+    const onLoad = (event: Event) => {
+      const id = (event as CustomEvent<string>).detail;
+      if (!id) return;
+      try {
+        const saved = JSON.parse(localStorage.getItem(`atmos_thread_${id}`) || '[]') as ChatMessage[];
+        setThreadId(id);
+        setMessages(saved);
+      } catch {
+        setThreadId(id);
+        setMessages([]);
+      }
+    };
+    window.addEventListener('atmos-new-chat', onNew);
+    window.addEventListener('atmos-load-chat', onLoad as EventListener);
+    return () => {
+      window.removeEventListener('atmos-new-chat', onNew);
+      window.removeEventListener('atmos-load-chat', onLoad as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!messages.length) return;
+    localStorage.setItem(`atmos_thread_${threadId}`, JSON.stringify(messages));
+    const title = messages.find((m) => m.sender === 'user')?.text.slice(0, 48) || (locale === 'hi' ? 'बात' : 'Chat');
+    writeChatIndex([{ id: threadId, title, updatedAt: Date.now() }, ...readChatIndex().filter((row) => row.id !== threadId)]);
+  }, [messages, threadId, locale]);
 
   const handleSend = async (queryText?: string) => {
     const text = queryText || inputText;
@@ -75,23 +119,48 @@ export default function AtmosAIChatView() {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const nextMessages = [...messages, userMsg];
+    setMessages(nextMessages);
     setInputText('');
     setIsGenerating(true);
 
-    await new Promise((res) => setTimeout(res, 600));
     const routingResult = parseAndRouteQuery(text, 'ASK');
+    const model = selectedModelId ? getAtmosNimCard(selectedModelId) : getAtmosNimCard(routingResult.targetModuleLaunch?.moduleNumber || 1);
+    const resultCards = cardsFromModules(routingResult.activatedModules, locale);
+    let reply = buildHumanReply(routingResult, useShellStore.getState().locale);
 
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          locale,
+          engines: resultCards.map((card) => ({
+            module: card.moduleNumber,
+            title: card.title,
+            metric: card.metric
+          })),
+          messages: nextMessages.map((m) => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }))
+        })
+      });
+      const data = await response.json();
+      if (data?.ok && data.text) reply = data.text;
+    } catch {
+      /* keep local reply */
+    }
+
+    const target = routingResult.targetModuleLaunch?.moduleNumber || model?.moduleNumber || 6;
     const aiMsg: ChatMessage = {
       id: `ai_${Date.now()}`,
       sender: 'ai',
-      text: buildHumanReply(routingResult, useShellStore.getState().locale),
+      text: reply,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      resultCards,
       actionButtons: [
         {
-          label: locale === 'hi' ? 'नक्शा खोलें' : 'Open the map',
-          targetModule: routingResult.targetModuleLaunch?.moduleNumber || 6,
-          targetPort: routingResult.targetModuleLaunch?.port || 3006
+          label: locale === 'hi' ? 'मॉडल कार्ड' : 'Open model card',
+          targetModule: target,
+          targetPort: routingResult.targetModuleLaunch?.port || 3000 + target
         },
         {
           label: locale === 'hi' ? 'गाँव वाला नक्शा' : 'Village map',
@@ -101,13 +170,20 @@ export default function AtmosAIChatView() {
       ],
       evidenceMetrics: [
         { label: locale === 'hi' ? 'भरोसा' : 'Confidence', value: `${Math.round((routingResult.entities.confidenceScore || 0.9) * 100)}%` },
-        { label: locale === 'hi' ? 'समय' : 'Horizon', value: routingResult.entities.horizon || '+72h' },
+        { label: locale === 'hi' ? 'समय' : 'Horizon', value: routingResult.entities.horizon || '+72 Hours' },
         { label: locale === 'hi' ? 'इंजन' : 'Engines', value: `${routingResult.activatedModules.length}` }
       ]
     };
 
     setMessages((prev) => [...prev, aiMsg]);
     setIsGenerating(false);
+  };
+
+  const onPickFile = async (file: File) => {
+    const note = locale === 'hi'
+      ? `फ़ोटो/फ़ाइल: ${file.name}. फसल, जिला और तारीख लिखो तो पढ़ूँगा।`
+      : `Uploaded ${file.name}. Add crop, district and date so I can read it.`;
+    await handleSend(note);
   };
 
   const hasMessages = messages.length > 0;
@@ -187,9 +263,9 @@ export default function AtmosAIChatView() {
             {/* Suggestion Cards — 2x2 grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
               gap: '10px',
-              maxWidth: '480px',
+              maxWidth: '640px',
               width: '100%'
             }}>
               {(locale === 'hi' ? SUGGESTION_CARDS_HI : SUGGESTION_CARDS_EN).map((card, idx) => {
@@ -269,7 +345,7 @@ export default function AtmosAIChatView() {
                   )}
 
                   <div style={{
-                    maxWidth: '520px',
+                    maxWidth: msg.resultCards?.length ? '100%' : '520px',
                     borderRadius: '16px',
                     padding: '14px 16px',
                     fontSize: '13.5px',
@@ -284,6 +360,9 @@ export default function AtmosAIChatView() {
                     border: `1px solid ${msg.sender === 'user' ? 'rgba(255, 255, 255, 0.15)' : 'var(--stroke)'}`,
                   }}>
                     <div style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</div>
+                    {msg.resultCards && msg.resultCards.length > 0 && (
+                      <ResultCardsGrid cards={msg.resultCards} />
+                    )}
 
                     {/* Evidence Metrics */}
                     {msg.evidenceMetrics && (
@@ -322,7 +401,7 @@ export default function AtmosAIChatView() {
                             key={i}
                             onClick={() => {
                               openModuleWorkspace(btn.targetModule, btn.targetPort, btn.label);
-                              showToast(`Opened Engine ${btn.targetModule}`, 'info');
+                              showToast(locale === 'hi' ? 'मॉडल कार्ड खुला' : 'Opened model card', 'info');
                             }}
                             style={{
                               padding: '5px 10px',
@@ -357,15 +436,18 @@ export default function AtmosAIChatView() {
                   </div>
 
                   {msg.sender === 'user' && (
-                    <div style={{
+                    <div
+                      title={userProfile.name}
+                      style={{
                       width: '30px', height: '30px', borderRadius: '9999px',
                       backgroundColor: 'rgba(255, 255, 255, 0.06)',
                       border: '1px solid var(--stroke)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 700,
                       color: 'var(--text-0)', flexShrink: 0
-                    }}>
-                      {userProfile.avatarInitials}
+                    }}
+                    >
+                      {userProfile.avatarInitials || userProfile.name.slice(0, 1).toUpperCase()}
                     </div>
                   )}
                 </motion.div>
@@ -418,6 +500,31 @@ export default function AtmosAIChatView() {
           {isListening ? <Square size={15} /> : <Mic size={16} />}
         </button>
         <input
+          ref={fileRef}
+          type="file"
+          accept="image/*,.pdf,.csv,.json"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) void onPickFile(file);
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          title={locale === 'hi' ? 'फ़ोटो या फ़ाइल' : 'Upload photo or file'}
+          style={{
+            padding: 10,
+            borderRadius: 999,
+            color: 'var(--text-2)',
+            background: 'rgba(255,255,255,.04)',
+            border: '1px solid var(--stroke)'
+          }}
+        >
+          <Paperclip size={16} />
+        </button>
+        <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
@@ -442,8 +549,10 @@ export default function AtmosAIChatView() {
           style={{
             padding: '10px',
             borderRadius: '9999px',
-            backgroundColor: '#76b900',
-            color: '#04120a',
+            background: 'linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06))',
+            color: '#f8fafc',
+            border: '1px solid rgba(255,255,255,.22)',
+            backdropFilter: 'blur(16px)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',

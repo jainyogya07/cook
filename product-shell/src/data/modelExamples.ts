@@ -1,0 +1,20 @@
+export const MODEL_EXAMPLES: Record<number, { farmer: string; farmerHi: string; publicUser: string; publicHi: string }> = {
+  1: { farmer: 'Puri farmer: will the sky stay wet for 3 days?', farmerHi: 'पुरी किसान: 3 दिन आसमान गीला रहेगा?', publicUser: 'Will it rain on my Puri trip?', publicHi: 'पुरी यात्रा पर बारिश होगी?' },
+  2: { farmer: 'Is this rain a shallow shower or a tall storm over the ghats?', farmerHi: 'घाट पर यह हल्की बौछार है या ऊँचा तूफान?', publicUser: 'Why does the coast feel windy at 2 km height?', publicHi: '2 किमी ऊपर हवा क्यों तेज़ है?' },
+  3: { farmer: 'Is this Punjab heat worse than a normal April?', farmerHi: 'पंजाब की यह गर्मी सामान्य अप्रैल से ज़्यादा है?', publicUser: 'Is this heatwave unusual for Delhi?', publicHi: 'दिल्ली की यह गर्मी असामान्य है?' },
+  4: { farmer: 'Which Kendrapara villages sit inside the rain footprint?', farmerHi: 'केन्द्रापारा के कौन से गाँव घेरे में हैं?', publicUser: 'Is my block inside the warning zone?', publicHi: 'मेरा ब्लॉक चेतावनी क्षेत्र में है?' },
+  5: { farmer: 'Where might the cyclone walk in 5 days?', farmerHi: 'चक्रवात 5 दिन में कहाँ जा सकता है?', publicUser: 'Will the storm miss my town?', publicHi: 'तूफान मेरे शहर से कटेगा?' },
+  6: { farmer: 'Chance of heavy rain on coastal Andhra in 48h?', farmerHi: 'तटीय आंध्र पर 48 घंटे में भारी बारिश की संभावना?', publicUser: 'Should I cancel the outdoor market?', publicHi: 'बाजार बाहर रखूँ या नहीं?' },
+  7: { farmer: 'Show rain on a 5 km village grid, not a state blob.', farmerHi: 'राज्य नहीं, 5 किमी गाँव ग्रिड पर बारिश दिखाओ।', publicUser: 'Zoom the map to my panchayat.', publicHi: 'पंचायत तक नक्शा ज़ूम करो।' },
+  8: { farmer: 'Did this landfall get wetter than the last one?', farmerHi: 'यह लैंडफॉल पिछले से ज़्यादा गीला है?', publicUser: 'Is this worse than last year’s storm?', publicHi: 'पिछले साल के तूफान से बुरा है?' },
+  9: { farmer: 'How many paddy hectares are in harm’s way — not lost yet.', farmerHi: 'कितने धान हेक्टेयर रास्ते में हैं — नुकसान नहीं।', publicUser: 'How wide is the crop exposure?', publicHi: 'फसल का घेरा कितना चौड़ा है?' },
+  10: { farmer: 'Wheat is flowering — can it take this wind?', farmerHi: 'गेहूं फूल में है — यह हवा सहेगा?', publicUser: 'Is the crop in a fragile stage?', publicHi: 'फसल नाज़ुक अवस्था में है?' },
+  11: { farmer: 'Vidarbha black soil: wet, dry, or standing water?', farmerHi: 'विदर्भ काली मिट्टी: गीली, सूखी, या पानी खड़ा?', publicUser: 'Will fields stay flooded after the rain?', publicHi: 'बारिश के बाद खेत डूबे रहेंगे?' },
+  12: { farmer: 'If rain is 15% less, should I keep soybean?', farmerHi: 'बारिश 15% कम हो तो सोयाबीन रखूँ?', publicUser: 'What crop fits a drier year?', publicHi: 'सूखे साल में कौन सी फसल?' },
+  13: { farmer: 'Paddy yield range for coastal Odisha kharif.', farmerHi: 'तटीय ओडिशा खरीफ धान उपज की तीन संख्याएँ।', publicUser: 'Best / likely / worst harvest, not one fake %.', publicHi: 'कम / बीच / ज़्यादा उपज, एक नकली % नहीं।' },
+  14: { farmer: 'Long leaf wetness — wheat rust risk this week?', farmerHi: 'पत्ते गीले — इस हफ्ते गेहूं रस्ट?', publicUser: 'Is disease weather lining up?', publicHi: 'रोग वाला मौसम बन रहा है?' },
+  15: { farmer: 'Will Nashik onion arrivals fall and lift prices?', farmerHi: 'नाशिक प्याज आवक घटेगी और भाव चढ़ेगा?', publicUser: 'Why might mandi rates move after rain?', publicHi: 'बारिश के बाद मंडी भाव क्यों हिलें?' },
+  16: { farmer: 'Will the Puri–Cuttack road stop tomato trucks?', farmerHi: 'पुरी–कटक सड़क टमाटर ट्रक रोकेगी?', publicUser: 'Will the highway close after flood?', publicHi: 'बाढ़ के बाद हाईवे बंद होगा?' },
+  17: { farmer: 'District tonnes if soybean arrivals drop 18%.', farmerHi: 'सोयाबीन आवक 18% गिरे तो ज़िले के टन।', publicUser: 'How big is the supply shock?', publicHi: 'आवक का झटका कितना बड़ा?' },
+  18: { farmer: 'What if Vidarbha rain is 15% higher than this run?', farmerHi: 'अगर विदर्भ बारिश इस रन से 15% ज़्यादा हो?', publicUser: 'Show a wetter what-if, not a promise.', publicHi: 'गीला what-if दिखाओ, वादा नहीं।' }
+};

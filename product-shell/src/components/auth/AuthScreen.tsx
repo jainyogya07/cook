@@ -33,12 +33,24 @@ export default function AuthScreen({ onAuthenticated, onBack }: AuthScreenProps)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, ...(mode === 'signup' ? { name } : {}) })
       });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.detail || (locale === 'hi' ? 'साइन इन नहीं हो पाया।' : 'Authentication failed.'));
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const detail = payload?.detail;
+        const message = typeof detail === 'string'
+          ? detail
+          : Array.isArray(detail)
+            ? detail.map((item: { msg?: string }) => item?.msg || '').join(' ')
+            : (locale === 'hi' ? 'साइन इन नहीं हो पाया।' : 'Authentication failed.');
+        throw new Error(message);
+      }
       localStorage.setItem('atmos_auth_token', payload.token);
       onAuthenticated(payload.user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : (locale === 'hi' ? 'सेवा तक नहीं पहुँच सके।' : 'Unable to reach the auth service.'));
+      const raw = err instanceof Error ? err.message : '';
+      const network = !raw || raw === 'Failed to fetch' || raw.includes('NetworkError') || raw.includes('Load failed') || raw.includes('Timeout');
+      setError(network
+        ? (locale === 'hi' ? 'सर्वर अभी जवाब नहीं दे रहा। 20 सेकंड बाद फिर कोशिश करें — पहली बार में सर्वर जागता है।' : 'The server is not answering yet. Wait 20 seconds and try again — the first request can wake it.')
+        : raw);
     } finally {
       setBusy(false);
     }

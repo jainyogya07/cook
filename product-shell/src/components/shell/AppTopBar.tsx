@@ -1,13 +1,18 @@
 'use client';
 
-import React from 'react';
-import { Bot, Newspaper, Boxes, Compass, Bell, Zap, User } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Bot, Newspaper, Boxes, Compass, Bell, Zap, BookOpen, Sun, Moon } from 'lucide-react';
 import { useShellStore } from '@/services/useShellStore';
 import { LeftNavTab } from '@/types/shell';
 import { t } from '@/i18n/copy';
+import AtmosAnimatedLogo from '@/components/common/AtmosAnimatedLogo';
 
 export default function AppTopBar() {
-  const { activeNav, setActiveNav, unreadNotificationCount, locale, setLocale, userProfile, accessPlan } = useShellStore();
+  const { activeNav, setActiveNav, unreadNotificationCount, locale, setLocale, userProfile, accessPlan, setFieldGuideOpen, uiTheme, setUiTheme } = useShellStore();
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = uiTheme;
+  }, [uiTheme]);
 
   const items: { id: LeftNavTab; label: string; icon: typeof Bot }[] = [
     { id: 'ai', label: t(locale, 'ask'), icon: Bot },
@@ -20,7 +25,7 @@ export default function AppTopBar() {
   return (
     <header className="nv-topbar">
       <button className="nv-brand" type="button" onClick={() => setActiveNav('ai')}>
-        <img src="/emblem.jpg" alt="" />
+        <AtmosAnimatedLogo size={32} variant="rich" showBadge={false} interactive={false} />
         <div>
           <strong>ATMOS 4D</strong>
           <span>{t(locale, 'landingKicker')}</span>
@@ -49,16 +54,23 @@ export default function AppTopBar() {
       </nav>
 
       <div className="nv-actions">
+        <button type="button" className="nv-chip" onClick={() => setFieldGuideOpen(true)}>
+          <BookOpen size={13} /> {t(locale, 'guidebook')}
+        </button>
         <button type="button" className="nv-chip" onClick={() => setLocale(locale === 'hi' ? 'en' : 'hi')}>
           {locale === 'hi' ? 'EN' : 'हि'}
+        </button>
+        <button type="button" className="nv-chip" onClick={() => setUiTheme(uiTheme === 'field' ? 'night' : 'field')}>
+          {uiTheme === 'field' ? <Moon size={13} /> : <Sun size={13} />}
+          {uiTheme === 'field' ? 'Night' : 'Field'}
         </button>
         <button type="button" className="nv-chip" onClick={() => setActiveNav('subscription')}>
           <Zap size={13} /> {t(locale, 'plans')}
         </button>
         <button type="button" className="nv-chip nv-user" onClick={() => setActiveNav('profile')}>
-          <User size={13} />
+          <span className="nv-user-av">{userProfile.avatarInitials}</span>
           {userProfile.name.split(' ')[0]}
-          {accessPlan === 'guest' ? '' : ''}
+          {accessPlan === 'pro' ? ` · ${t(locale, 'proPlan')}` : ''}
         </button>
       </div>
     </header>

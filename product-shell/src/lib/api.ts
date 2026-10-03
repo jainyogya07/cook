@@ -9,15 +9,13 @@ export function apiBase() {
 }
 
 export function newsEndpoint(query: string) {
-  const base = apiBase();
-  return base ? `${base}/weather/news?${query}` : `/api/news?${query}`;
+  return `/api/news?${query}`;
 }
 
 export function translateEndpoint() {
-  const base = apiBase();
-  return base ? `${base}/weather/news/translate` : '/api/translate';
+  return '/api/translate';
 }
 
 export function authEndpoint(path: string) {
-  return `${apiBase() || ''}/auth/${path.replace(/^\//, '')}`;
+  return `/api/auth/${path.replace(/^\//, '')}`;
 }

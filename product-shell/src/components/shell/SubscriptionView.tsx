@@ -23,7 +23,7 @@ import {
 import { useShellStore } from '@/services/useShellStore';
 
 export default function SubscriptionView() {
-  const { showToast, setActiveView, accessPlan, locale } = useShellStore();
+  const { showToast, setActiveNav, accessPlan, locale, setAccessPlan } = useShellStore();
   const [annualBilling, setAnnualBilling] = useState(true);
 
   const plans = [
@@ -155,7 +155,7 @@ export default function SubscriptionView() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
         {plans.map((p) => {
           const price = annualBilling ? p.priceAnnual : p.priceMonthly;
-          const isCurrent = (p.id === 'academic' && accessPlan === 'free') || (p.id === 'pro' && accessPlan === 'pro');
+          const isCurrent = (p.id === 'academic' && (accessPlan === 'free' || accessPlan === 'guest')) || (p.id === 'pro' && accessPlan === 'pro');
 
           return (
             <motion.div
@@ -250,11 +250,12 @@ export default function SubscriptionView() {
                 <button
                   onClick={() => {
                     if (isCurrent) {
-                      showToast('You are currently on the Open Science tier', 'info');
+                      showToast(locale === 'hi' ? 'आप इसी प्लान पर हैं' : 'You are on this plan', 'info');
                     } else if (p.id === 'pro') {
-                      showToast('Pro tier sandbox activated for this session!', 'success');
+                      setAccessPlan('pro');
+                      showToast(locale === 'hi' ? 'Atmos Pro इस सेशन में सक्रिय: PDF, M07–M18, मंडी झटका' : 'Atmos Pro is active in this session: PDF, M07–M18, mandi shock', 'success');
                     } else {
-                      showToast('Enterprise liaison team notified for sovereign demo', 'info');
+                      showToast(locale === 'hi' ? 'एंटरप्राइज़ डेमो टीम को भेजा' : 'Enterprise liaison notified', 'info');
                     }
                   }}
                   style={{
@@ -279,6 +280,23 @@ export default function SubscriptionView() {
         })}
       </div>
 
+      <div className="nv-page" style={{ paddingTop: 8, maxWidth: 1100, margin: '0 auto' }}>
+        <h2 style={{ fontSize: 18, margin: '8px 0 12px' }}>{locale === 'hi' ? 'Pro पर क्या खुलता है' : 'What Pro unlocks'}</h2>
+        <div className="nv-catalog">
+          {[
+            { t: locale === 'hi' ? 'पूरे 18 इंजन' : 'All 18 engines', d: locale === 'hi' ? 'M07 गाँव नक्शा से M18 मंडी झटका तक। फ्री पर पहले 6।' : 'Village map through mandi shock. Free keeps the first 6.' },
+            { t: locale === 'hi' ? 'PDF रिपोर्ट' : 'PDF reports', d: locale === 'hi' ? 'किसान/FPO के लिए काला-सफेद प्रिंट, नीले लिंक नहीं।' : 'Farmer/FPO print pack, black on white — not blue links.' },
+            { t: locale === 'hi' ? 'मंडी झटका' : 'Mandi shock', d: locale === 'hi' ? 'बारिश/आवक के साथ भाव परिदृश्य — पक्का भाव नहीं।' : 'Rain/arrival vs price scenario — not a guaranteed quote.' },
+            { t: locale === 'hi' ? 'पहले जवाब' : 'Priority answers', d: locale === 'hi' ? 'चैट इतिहास, अपलोड, और मॉडल कार्ड से जुड़ा जवाब।' : 'Saved chats, uploads, and answers that know the model cards.' }
+          ].map((card) => (
+            <div key={card.t} className="nv-card">
+              <strong>{card.t}</strong>
+              <p style={{ marginTop: 8 }}>{card.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* 3. Provenance & Security Trust Banner */}
       <div style={{ marginTop: '40px', padding: '20px 24px', borderRadius: '20px', backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--stroke)', maxWidth: '1100px', margin: '40px auto 16px auto', width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -293,7 +311,7 @@ export default function SubscriptionView() {
           </div>
         </div>
         <button
-          onClick={() => setActiveView('feed')}
+          onClick={() => setActiveNav('ai')}
           style={{
             padding: '8px 16px',
             borderRadius: '9999px',

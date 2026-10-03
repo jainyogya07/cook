@@ -30,9 +30,10 @@ import { cleanNewsText } from '@/lib/cleanNews';
 
 interface FeedPostCardProps {
   post: FeedPost;
+  compact?: boolean;
 }
 
-export default function FeedPostCard({ post }: FeedPostCardProps) {
+export default function FeedPostCard({ post, compact = false }: FeedPostCardProps) {
   const {
     toggleLikePost,
     toggleBookmarkPost,
@@ -46,8 +47,8 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
 
   const { author, timestamp, content, contentHi, intelCard, stats, routingPipeline, tags, imageUrl, expandable } = post;
   const body = cleanNewsText(locale === 'hi' && contentHi ? contentHi : content);
-  const long = Boolean(expandable) && body.length > 280;
-  const shown = expanded || !long ? body : `${body.slice(0, 280)}…`;
+  const long = Boolean(expandable) && body.length > (compact ? 160 : 280);
+  const shown = expanded || !long ? body : `${body.slice(0, compact ? 160 : 280)}…`;
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -69,15 +70,18 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] as const }}
+      className={compact ? 'nv-tweet-card' : undefined}
       onClick={() => openPostDetail(post.id)}
       style={{
-        borderBottom: '1px solid var(--stroke)',
-        padding: '24px 28px',
+        borderBottom: '1px solid rgba(255,255,255,.08)',
+        padding: compact ? '12px 14px' : '24px 28px',
         display: 'flex',
-        gap: '16px',
-        backgroundColor: 'transparent',
+        gap: compact ? '10px' : '16px',
+        backgroundColor: 'rgba(255,255,255,.03)',
         cursor: 'pointer',
-        transition: 'background-color 0.15s ease'
+        transition: 'background-color 0.15s ease',
+        borderRadius: compact ? 16 : 0,
+        marginBottom: compact ? 8 : 0
       }}
       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)')}
       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -109,7 +113,7 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
         {/* Header Row: Author Name, Badge, Handle, Dot, Timestamp, Menu */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', lineHeight: 1 }}>
-            <span style={{ fontWeight: 700, fontSize: '15px', color: '#FFFFFF' }}>
+            <span style={{ fontWeight: 700, fontSize: compact ? '13px' : '15px', color: '#FFFFFF' }}>
               {author.name}
             </span>
             {author.verified && (
@@ -150,9 +154,15 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
         </div>
 
         {/* Post Text Body — Hindi first so a common reader can follow */}
-        <div style={{ marginTop: '6px', fontSize: '15px', lineHeight: 1.55, color: '#E7E9EA', whiteSpace: 'pre-line' }}>
+        <div style={{ marginTop: '6px', fontSize: compact ? '13px' : '15px', lineHeight: 1.5, color: '#E7E9EA', whiteSpace: 'pre-line' }}>
           {shown}
         </div>
+        {compact && intelCard && (
+          <p className="nv-tweet-impact">
+            {locale === 'hi' ? 'असर' : 'Impact'}: {intelCard.hazardType} · {intelCard.region}
+            {intelCard.probabilityPct ? ` · ${intelCard.probabilityPct}%` : ''}
+          </p>
+        )}
         {long && (
           <button
             onClick={(event) => {
@@ -174,7 +184,7 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
           <img
             src={imageUrl}
             alt=""
-            style={{ width: '100%', maxHeight: 320, objectFit: 'cover', borderRadius: 16, marginTop: 12, border: '1px solid var(--stroke)' }}
+            style={{ width: '100%', maxHeight: compact ? 180 : 320, objectFit: 'cover', borderRadius: 16, marginTop: 12, border: '1px solid var(--stroke)' }}
           />
         )}
         <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -185,7 +195,7 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
         {/* Tags if present */}
         {tags && tags.length > 0 && (
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-            {tags.map((t, idx) => (
+            {tags.slice(0, compact ? 3 : tags.length).map((t, idx) => (
               <span
                 key={idx}
                 style={{
@@ -202,7 +212,7 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
         )}
 
         {/* Coupled Multi-Module Pipeline Trace Strip */}
-        {routingPipeline && routingPipeline.length > 0 && (
+        {routingPipeline && routingPipeline.length > 0 && !compact && (
           <div style={{
             marginTop: '10px',
             padding: '8px 12px',
@@ -256,7 +266,7 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
         )}
 
         {/* Embedded Scientific Intelligence Visualization Card */}
-        {intelCard && (
+        {intelCard && (!compact || expanded) && (
           <div
             onClick={(e) => {
               e.stopPropagation();

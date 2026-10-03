@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { ArrowLeft, Play } from 'lucide-react';
 import { GROUPED_MODEL_CATEGORIES } from '@/data/mockFeedData';
 import { ENGINE_FIELD_GUIDE } from '@/data/engineFieldGuide';
@@ -18,27 +19,31 @@ import { buildHumanReply } from '@/services/plainReply';
 import { useShellStore } from '@/services/useShellStore';
 import { t, canUseEngines } from '@/i18n/copy';
 import FeatureLock from '@/components/shell/FeatureLock';
+import GlassMenu from '@/components/shell/GlassMenu';
+import EngineScene from '@/components/shell/EngineScene';
+import ResultCardsGrid from '@/components/shell/ResultCardsGrid';
+import { cardsFromModules, ResultCard } from '@/services/resultCards';
+import { MODEL_EXAMPLES } from '@/data/modelExamples';
 
-type Tab = 'experience' | 'card' | 'result';
+type Tab = 'experience' | 'scene' | 'card' | 'result';
 type Family = 'All' | 'Atmosphere' | 'Village' | 'Field' | 'Mandi';
 
 export default function ModelsCatalogView() {
-  const { locale, openModuleWorkspace, accessPlan } = useShellStore();
+  const { locale, accessPlan, selectedModelId, setSelectedModelId } = useShellStore();
   const catalog = useMemo(() => allAtmosNimCards(), []);
   const ports = useMemo(
     () => Object.fromEntries(GROUPED_MODEL_CATEGORIES.flatMap((g) => g.models.map((m) => [m.moduleNumber, m]))),
     []
   );
-  const [openId, setOpenId] = useState<number | null>(null);
   const [family, setFamily] = useState<Family>('All');
   const [tab, setTab] = useState<Tab>('experience');
   const [eventIdx, setEventIdx] = useState(0);
   const [variable, setVariable] = useState('Rain');
   const [running, setRunning] = useState(false);
-  const [output, setOutput] = useState<{ text: string; metrics: { label: string; value: string }[] } | null>(null);
+  const [output, setOutput] = useState<{ text: string; metrics: { label: string; value: string }[]; cards: ResultCard[] } | null>(null);
 
   const visible = catalog.filter((card) => family === 'All' || card.family === family);
-  const card = openId ? getAtmosNimCard(openId) : null;
+  const card = selectedModelId ? getAtmosNimCard(selectedModelId) : null;
   const guide = card ? ENGINE_FIELD_GUIDE.find((g) => g.moduleNumber === card.moduleNumber) : null;
   const meta = card ? ports[card.moduleNumber] : null;
   const hi = locale === 'hi';
@@ -51,7 +56,8 @@ export default function ModelsCatalogView() {
       const result = parseAndRouteQuery(`${query} ${variable}`, 'ANALYZE');
       setOutput({
         text: buildHumanReply(result, locale),
-        metrics: result.activatedModules.slice(0, 4).map((step) => ({ label: step.moduleName, value: step.metricOutput }))
+        metrics: result.activatedModules.map((step) => ({ label: step.moduleName, value: step.metricOutput })),
+        cards: cardsFromModules(result.activatedModules, locale)
       });
       setTab('result');
       setRunning(false);
@@ -63,8 +69,8 @@ export default function ModelsCatalogView() {
       <div className="nv-page">
         <div className="nv-page-head">
           <p>{t(locale, 'models')}</p>
-          <h1>{hi ? '18 इंजन. हर एक का पूरा कार्ड.' : '18 engines. A full card for each.'}</h1>
-          <span>{hi ? 'NVIDIA जैसा: पहले कार्ड चुनें, फिर आज़माएँ।' : 'NVIDIA-style: pick a card, then try it.'}</span>
+          <h1>{hi ? '18 इंजन' : '18 engines'}</h1>
+          <span>{hi ? 'कार्ड चुनो, 3D चलाओ।' : 'Pick a card. Run 3D.'}</span>
         </div>
         <div className="nv-filters">
           {(['All', 'Atmosphere', 'Village', 'Field', 'Mandi'] as Family[]).map((item) => (
@@ -74,18 +80,30 @@ export default function ModelsCatalogView() {
           ))}
         </div>
         <div className="nv-catalog">
-          {visible.map((item) => (
-            <button key={item.moduleNumber} type="button" className="nv-feature-card" onClick={() => { setOpenId(item.moduleNumber); setTab('experience'); setOutput(null); }}>
+          {visible.map((item, index) => (
+            <motion.button
+              key={item.moduleNumber}
+              type="button"
+              className="nv-feature-card"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.035, duration: 0.4 }}
+              whileHover={{ y: -4 }}
+              onClick={() => { setSelectedModelId(item.moduleNumber); setTab('experience'); setOutput(null); window.history.pushState(null, '', `#models/${item.moduleNumber}`); }}
+            >
               <div className="nv-feature-top">
                 <span>M{String(item.moduleNumber).padStart(2, '0')}</span>
                 <em>{hi ? item.familyHi : item.family}</em>
               </div>
               <h2>{farmerTitle(item.moduleNumber, locale)}</h2>
               <p>{hi ? item.descriptionHi : item.description}</p>
+              <p className="nv-ex">{hi ? MODEL_EXAMPLES[item.moduleNumber]?.farmerHi : MODEL_EXAMPLES[item.moduleNumber]?.farmer}</p>
+              <p className="nv-ex is-public">{hi ? MODEL_EXAMPLES[item.moduleNumber]?.publicHi : MODEL_EXAMPLES[item.moduleNumber]?.publicUser}</p>
               <div className="nv-tags">
                 {item.variables.slice(0, 3).map((v) => <i key={v}>{v}</i>)}
+                <i className={item.moduleNumber > 6 ? 'is-pro' : ''}>{item.moduleNumber > 6 ? 'Atmos Pro' : (hi ? 'फ्री' : 'Free')}</i>
               </div>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -94,28 +112,26 @@ export default function ModelsCatalogView() {
 
   const title = farmerTitle(card.moduleNumber, locale);
   const event = card.sampleEvents[eventIdx];
+  const scene = <EngineScene moduleNumber={card.moduleNumber} title={title} />;
 
   return (
     <div className="nv-page nv-nim">
-      <button type="button" className="nv-back" onClick={() => setOpenId(null)}>
+      <button type="button" className="nv-back" onClick={() => { setSelectedModelId(null); window.history.pushState(null, '', '#models'); }}>
         <ArrowLeft size={14} /> {hi ? 'सभी मॉडल' : 'All models'}
       </button>
 
       <header className="nv-nim-hero">
         <div>
-          <div className="nv-card-kicker">ATMOS · M{String(card.moduleNumber).padStart(2, '0')} · {hi ? card.familyHi : card.family}</div>
+          <div className="nv-card-kicker">ATMOS · M{String(card.moduleNumber).padStart(2, '0')} · {hi ? card.familyHi : card.family} · {card.moduleNumber > 6 ? 'Pro' : (hi ? 'फ्री' : 'Free')}</div>
           <h1>{title}</h1>
           <p className="nv-sci">{card.scientificName}</p>
         </div>
-        <button type="button" className="nv-chip" onClick={() => openModuleWorkspace(card.moduleNumber, meta?.port || 3000 + card.moduleNumber, meta?.title || title)}>
-          {hi ? 'पूरा स्टूडियो' : 'Open studio'}
-        </button>
       </header>
 
       <div className="nv-subtabs">
-        {(['experience', 'card', 'result'] as Tab[]).map((id) => (
+        {(['experience', 'scene', 'card', 'result'] as Tab[]).map((id) => (
           <button key={id} type="button" className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>
-            {id === 'experience' ? (hi ? 'आज़माएँ' : 'Experience') : id === 'card' ? (hi ? 'मॉडल कार्ड' : 'Model card') : t(locale, 'result')}
+            {id === 'experience' ? (hi ? 'आज़माएँ' : 'Try') : id === 'scene' ? (hi ? '3D इंजन' : '3D engine') : id === 'card' ? (hi ? 'कार्ड' : 'Card') : t(locale, 'result')}
           </button>
         ))}
       </div>
@@ -125,49 +141,60 @@ export default function ModelsCatalogView() {
           <div className="nv-io nv-io-pro">
             <div>
               <div className="nv-io-title">{hi ? 'इनपुट' : 'Input'}</div>
-              <label>{hi ? 'नमूना घटना' : 'Sample weather event'}</label>
-              <select value={eventIdx} onChange={(e) => setEventIdx(Number(e.target.value))}>
-                {card.sampleEvents.map((item, idx) => (
-                  <option key={item.query} value={idx}>{hi ? item.labelHi : item.label}</option>
-                ))}
-              </select>
-              <label>{hi ? 'मौसम चर' : 'Weather variable'}</label>
-              <select value={variable} onChange={(e) => setVariable(e.target.value)}>
-                {card.variables.map((item) => <option key={item} value={item}>{item}</option>)}
-              </select>
+              <GlassMenu
+                label={hi ? 'घटना' : 'Event'}
+                value={String(eventIdx)}
+                onChange={(v) => setEventIdx(Number(v))}
+                options={card.sampleEvents.map((item, idx) => ({
+                  value: String(idx),
+                  label: hi ? item.labelHi : item.label
+                }))}
+              />
+              <GlassMenu
+                label={hi ? 'चर' : 'Variable'}
+                value={variable}
+                onChange={setVariable}
+                options={card.variables.map((item) => ({ value: item, label: item }))}
+              />
               <details>
-                <summary>{hi ? 'इस घटना के बारे में' : 'About this sample'}</summary>
+                <summary>{hi ? 'उदाहरण' : 'Example'}</summary>
                 <p>{hi ? guide?.exampleHi : guide?.example}</p>
-                <p>{hi ? card.descriptionHi : card.description}</p>
+                <p>{hi ? MODEL_EXAMPLES[card.moduleNumber]?.farmerHi : MODEL_EXAMPLES[card.moduleNumber]?.farmer}</p>
+                <p>{hi ? MODEL_EXAMPLES[card.moduleNumber]?.publicHi : MODEL_EXAMPLES[card.moduleNumber]?.publicUser}</p>
               </details>
               <div className="nv-run-row">
                 <button type="button" className="nv-chip" onClick={() => { setOutput(null); setEventIdx(0); }}>{hi ? 'रीसेट' : 'Reset'}</button>
-                <button type="button" className="nv-run" onClick={run} disabled={running || !canUseEngines(accessPlan)}>
+                <button type="button" className="nv-run" onClick={run} disabled={running || !canUseEngines(accessPlan, card.moduleNumber)}>
                   <Play size={14} /> {running ? '…' : (hi ? 'पूर्वानुमान' : 'Forecast')}
                 </button>
               </div>
+              {!canUseEngines(accessPlan, card.moduleNumber) && (
+                <p className="nv-hint">{hi ? 'यह इंजन Pro है। फ्री पर कार्ड पढ़ो, Forecast के लिए Pro।' : 'This engine is Pro. Free can read the card; Forecast needs Pro.'}</p>
+              )}
             </div>
             <div>
-              <div className="nv-io-title">{hi ? 'आउटपुट' : 'Output'}</div>
-              <div className="nv-globe" aria-hidden="true">
-                <span />
-                <b>{variable}</b>
-              </div>
+              <div className="nv-io-title">{hi ? '3D इंजन' : 'Live 3D'}</div>
+              {scene}
               <div className="nv-output">
                 {output ? (
                   <>
                     <p>{output.text}</p>
-                    <div className="nv-metrics">
-                      {output.metrics.map((metric) => (
-                        <div key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong></div>
-                      ))}
-                    </div>
+                    <ResultCardsGrid cards={output.cards} />
                   </>
                 ) : (
-                  <p>{hi ? 'Forecast दबाइए। सादा जवाब और तीन स्तर यहीं खुलेंगे।' : 'Press Forecast. Plain language and P-bands appear here — not a dump of raw links.'}</p>
+                  <p>{hi ? 'Forecast दबाएँ।' : 'Press Forecast.'}</p>
                 )}
               </div>
             </div>
+          </div>
+        </FeatureLock>
+      )}
+
+      {tab === 'scene' && (
+        <FeatureLock need="signin">
+          <div className="nv-scene-full">
+            {scene}
+            <p className="nv-hint">{hi ? 'यह वही 3D इंजन है जो forecast चलाता है।' : 'This is the same 3D engine the forecast uses.'}</p>
           </div>
         </FeatureLock>
       )}
@@ -235,7 +262,7 @@ export default function ModelsCatalogView() {
               <ol>
                 <li>{hi ? 'Experience पर नमूना घटना चुनें।' : 'On Experience, pick a sample weather event.'}</li>
                 <li>{hi ? 'Forecast दबाएँ — जवाब दाईं ओर।' : 'Press Forecast — answer on the right.'}</li>
-                <li>{hi ? 'ज़्यादा गहराई के लिए स्टूडियो खोलें।' : 'Open studio only if you need the deep scientific view.'}</li>
+                <li>{hi ? 'नतीजा टैब पर सादा जवाब पढ़ें।' : 'Read the plain answer on Result.'}</li>
               </ol>
               <p>{hi ? 'क्या टाइप करें' : 'What to type'}: {hi ? guide?.needHi : guide?.need}</p>
             </section>
@@ -251,18 +278,13 @@ export default function ModelsCatalogView() {
 
       {tab === 'result' && (
         <div className="nv-result-page">
-          <div className="nv-globe nv-globe-lg" aria-hidden="true"><span /><b>{variable}</b></div>
+          {scene}
           <div className="nv-output nv-output-full">
             {output ? (
               <>
                 <p className="nv-event">{hi ? event.labelHi : event.label}</p>
                 <h2>{hi ? 'सादा नतीजा' : 'Plain result'}</h2>
-                <p>{output.text}</p>
-                <div className="nv-metrics">
-                  {output.metrics.map((metric) => (
-                    <div key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong></div>
-                  ))}
-                </div>
+                <ResultCardsGrid cards={output.cards} headline={output.text} />
                 <p className="nv-hint">{hi ? 'यह परिदृश्य / संभावना है, पक्का नुकसान नहीं।' : 'Scenario / probability — not a guaranteed loss.'}</p>
               </>
             ) : (

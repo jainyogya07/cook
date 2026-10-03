@@ -15,19 +15,22 @@ import {
   UserProfileData
 } from '@/types/shell';
 
-export const DEFAULT_USER_PROFILE: UserProfileData = {
-  name: 'crazybird',
-  handle: 'YogyaJain16',
-  avatarInitials: 'YJ',
+export const GUEST_USER_PROFILE: UserProfileData = {
+  name: 'Guest',
+  handle: 'guest',
+  avatarInitials: 'G',
   avatarColor: '#16181C',
-  roleBadge: 'Lead Researcher & 4D Core Architect',
-  bio: 'Building ATMOS 4D — Planetary-to-Agricultural Intelligence Ecosystem. 18-engine coupled cascade for NWP hazards, crop vulnerability, and market resilience. Open scientific intelligence.',
-  location: 'New Delhi / Coastal Ops',
-  website: 'https://atmos4d.ai',
-  joinedDate: 'Joined March 2024',
-  followingCount: 142,
-  followersCount: 3842
+  roleBadge: 'Browsing',
+  bio: '',
+  location: '',
+  website: '',
+  joinedDate: '',
+  followingCount: 0,
+  followersCount: 0,
+  plan: 'guest'
 };
+
+export const DEFAULT_USER_PROFILE = GUEST_USER_PROFILE;
 
 // =================== ACTIVE LIVE EVENTS ===================
 export const ACTIVE_LIVE_EVENTS: ActiveLiveEvent[] = [

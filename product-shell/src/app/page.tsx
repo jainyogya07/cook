@@ -9,6 +9,8 @@
 
 import React, { useEffect, useState } from 'react';
 import AppTopBar from '@/components/shell/AppTopBar';
+import ChatHistoryRail from '@/components/shell/ChatHistoryRail';
+import LivePulseTicker from '@/components/shell/LivePulseTicker';
 import NewsDeskView from '@/components/shell/NewsDeskView';
 import ModelsCatalogView from '@/components/shell/ModelsCatalogView';
 import ExploreView from '@/components/shell/ExploreView';
@@ -18,7 +20,6 @@ import ProfileView from '@/components/shell/ProfileView';
 import SubscriptionView from '@/components/shell/SubscriptionView';
 import ThreadView from '@/components/feed/ThreadView';
 import ReplyModal from '@/components/feed/ReplyModal';
-import ModuleWorkspaceView from '@/components/shell/ModuleWorkspaceView';
 import AtmosphericBackgroundCanvas from '@/components/canvas/BackgroundCanvas';
 import IntelligenceModelsDrawer from '@/components/shell/IntelligenceModelsDrawer';
 import AtmosAIChatModal from '@/components/ai/AtmosAIChatModal';
@@ -32,6 +33,7 @@ import AuthLoadingScreen from '@/components/shell/AuthLoadingScreen';
 import EngineFieldGuide from '@/components/shell/EngineFieldGuide';
 import { t } from '@/i18n/copy';
 import { authEndpoint } from '@/lib/api';
+import { GUEST_USER_PROFILE } from '@/data/mockFeedData';
 
 const AUTH_BYPASS = process.env.NEXT_PUBLIC_AUTH_BYPASS === 'true';
 const TOKEN_KEY = 'atmos_auth_token';
@@ -89,12 +91,7 @@ function syncAuthenticatedOperator(user: AuthenticatedOperator) {
 }
 
 function CenterViewRouter() {
-  const { activeView, activeModuleWorkspace } = useShellStore();
-
-  // Module Workspace takes over the center + right rail entirely
-  if (activeView === 'module_workspace' && activeModuleWorkspace) {
-    return <ModuleWorkspaceView />;
-  }
+  const { activeView } = useShellStore();
 
   switch (activeView) {
     case 'explore':
@@ -122,7 +119,7 @@ function CenterViewRouter() {
 }
 
 export default function ProductShellHome() {
-  const { openModuleWorkspace, accessPlan, locale, setAccessPlan } = useShellStore();
+  const { accessPlan, locale, setAccessPlan } = useShellStore();
   const [authReady, setAuthReady] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [authMode, setAuthMode] = useState(false);
@@ -140,6 +137,7 @@ export default function ProductShellHome() {
     localStorage.setItem(GUEST_KEY, 'true');
     setGuest(true);
     setAccessPlan('guest');
+    useShellStore.setState({ userProfile: GUEST_USER_PROFILE, accessPlan: 'guest' });
     window.history.replaceState({ atmosRoute: 'app' }, '', '#feed');
   };
 
@@ -165,7 +163,12 @@ export default function ProductShellHome() {
       sessionStorage.setItem('atmos_access_requested', 'true');
       setAuthenticated(true);
       setAuthReady(true);
-      useShellStore.setState({ accessPlan: 'pro' });
+      useShellStore.setState((state) => ({
+        accessPlan: 'pro',
+        userProfile: state.userProfile.name === 'Guest'
+          ? { ...state.userProfile, name: 'Operator', handle: 'operator', avatarInitials: 'OP', roleBadge: 'Atmos Pro', plan: 'pro' }
+          : { ...state.userProfile, plan: 'pro' }
+      }));
       return;
     }
 
@@ -179,6 +182,7 @@ export default function ProductShellHome() {
       if (guestBrowse) {
         setGuest(true);
         setAccessPlan('guest');
+        useShellStore.setState({ userProfile: GUEST_USER_PROFILE, accessPlan: 'guest' });
       }
       setAuthMode(window.location.hash === '#auth');
       setAuthReady(true);
@@ -239,7 +243,7 @@ export default function ProductShellHome() {
       const token = localStorage.getItem(TOKEN_KEY);
       const sessionActive = localStorage.getItem(SESSION_KEY) === 'true';
       const hash = window.location.hash.replace(/^#/, '');
-      const inAppHash = APP_HASHES.has(hash) || hash.startsWith('post/') || hash.startsWith('workspace/');
+      const inAppHash = APP_HASHES.has(hash) || hash.startsWith('post/') || hash.startsWith('workspace/') || hash.startsWith('models/');
 
       if (token || authenticated) {
         if (!inAppHash) {
@@ -280,19 +284,23 @@ export default function ProductShellHome() {
           activeView: 'ai_chat',
           activeNav: 'ai',
           activeModuleWorkspace: null,
-          activePostId: null
+          activePostId: null,
+          selectedModelId: null
         });
       } else if (hash === 'news') {
         useShellStore.setState({
           activeView: 'news',
           activeNav: 'news',
           activeModuleWorkspace: null,
-          activePostId: null
+          activePostId: null,
+          selectedModelId: null
         });
-      } else if (hash === 'models') {
+      } else if (hash === 'models' || hash.startsWith('models/')) {
+        const id = hash.startsWith('models/') ? parseInt(hash.split('/')[1], 10) : NaN;
         useShellStore.setState({
           activeView: 'models',
           activeNav: 'models',
+          selectedModelId: Number.isFinite(id) ? id : null,
           activeModuleWorkspace: null,
           activePostId: null
         });
@@ -301,14 +309,16 @@ export default function ProductShellHome() {
           activeView: 'explore',
           activeNav: 'explore',
           activeModuleWorkspace: null,
-          activePostId: null
+          activePostId: null,
+          selectedModelId: null
         });
       } else if (hash === 'alerts') {
         useShellStore.setState({
           activeView: 'alerts',
           activeNav: 'alerts',
           activeModuleWorkspace: null,
-          activePostId: null
+          activePostId: null,
+          selectedModelId: null
         });
       } else if (hash === 'bookmarks') {
         useShellStore.setState({
@@ -341,7 +351,9 @@ export default function ProductShellHome() {
       } else if (hash.startsWith('workspace/')) {
         const modNum = parseInt(hash.replace('workspace/', ''), 10);
         if (!isNaN(modNum)) {
-          openModuleWorkspace(modNum, 3000 + modNum, `Engine ${modNum}`);
+          useShellStore.getState().setSelectedModelId(modNum);
+          useShellStore.setState({ activeView: 'models', activeNav: 'models', activeModuleWorkspace: null });
+          window.history.replaceState(null, '', `#models/${modNum}`);
         }
       }
     };
@@ -353,7 +365,7 @@ export default function ProductShellHome() {
       window.removeEventListener('hashchange', handleHashSync);
       window.removeEventListener('popstate', handleHashSync);
     };
-  }, [openModuleWorkspace]);
+  }, []);
 
   if (!authReady) return <AuthLoadingScreen />;
   if (!authenticated && !authMode && !guest) {
@@ -372,9 +384,18 @@ export default function ProductShellHome() {
             <button type="button" onClick={() => accessPlan === 'guest' ? openAuth() : useShellStore.getState().setActiveNav('subscription')}>{accessPlan === 'guest' ? t(locale, 'signIn') : 'Pro'}</button>
           </div>
         )}
-        <main className="nv-main">
-          <CenterViewRouter />
-        </main>
+        {accessPlan === 'pro' && (
+          <div className="nv-banner nv-pro-banner">
+            <span>{t(locale, 'proOnBody')}</span>
+          </div>
+        )}
+        <LivePulseTicker />
+        <div className="gpt-body">
+          <ChatHistoryRail />
+          <main className="nv-main">
+            <CenterViewRouter />
+          </main>
+        </div>
       </div>
 
       <ReplyModal />

@@ -28,13 +28,44 @@ import {
   CONTEXTUAL_NEWS_REPOSITORY,
   INITIAL_NOTIFICATIONS,
   INITIAL_MODULE_HEALTH,
+  INITIAL_FEED_POSTS,
   EXPLORE_TOPICS,
-  DEFAULT_USER_PROFILE
+  GUEST_USER_PROFILE
 } from '@/data/mockFeedData';
 import { parseAndRouteQuery } from './intentRouter';
 import { AccessPlan, AppLocale, canPost, canUseEngines } from '@/i18n/copy';
 import { apiBase, newsEndpoint } from '@/lib/api';
 import { cleanNewsText, newsSummary } from '@/lib/cleanNews';
+
+function initialsFrom(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase() || 'G';
+}
+
+function hydrateUserProfile() {
+  if (typeof window === 'undefined') return GUEST_USER_PROFILE;
+  try {
+    const raw = localStorage.getItem('atmos_operator');
+    if (!raw) return GUEST_USER_PROFILE;
+    const op = JSON.parse(raw) as { name?: string; handle?: string; avatarInitials?: string; plan?: string };
+    const name = (op.name || '').trim() || 'Guest';
+    return {
+      ...GUEST_USER_PROFILE,
+      name,
+      handle: op.handle || name.replace(/\s+/g, '').slice(0, 24) || 'user',
+      avatarInitials: (op.avatarInitials || initialsFrom(name)).toUpperCase(),
+      roleBadge: op.plan === 'pro' ? 'Atmos Pro' : 'Member',
+      plan: op.plan === 'pro' ? 'pro' : 'free'
+    };
+  } catch {
+    return GUEST_USER_PROFILE;
+  }
+}
 
 interface ShellStoreState {
   // Navigation & Views
@@ -101,6 +132,7 @@ interface ShellStoreState {
 
   // Module Workspace (Full-Page Deep-Link)
   activeModuleWorkspace: ModuleWorkspaceContext | null;
+  selectedModelId: number | null;
 
   // Toast notifications
   activeToast: { id: string; message: string; type: 'success' | 'info' | 'warning' | 'error' } | null;
@@ -121,6 +153,8 @@ interface ShellStoreState {
   setAdvancedConfigOpen: (open: boolean) => void;
   setAccessPlan: (plan: AccessPlan) => void;
   setLocale: (locale: AppLocale) => void;
+  uiTheme: 'night' | 'field';
+  setUiTheme: (theme: 'night' | 'field') => void;
 
   submitComposerQuery: (overrideQuery?: string) => Promise<void>;
   toggleLikePost: (postId: string) => void;
@@ -148,6 +182,7 @@ interface ShellStoreState {
   // Module Workspace Actions
   openModuleWorkspace: (moduleNumber: number, port: number, title: string, category?: string) => void;
   closeModuleWorkspace: () => void;
+  setSelectedModelId: (id: number | null) => void;
 
   // Notification Actions
   markNotificationRead: (id: string) => void;
@@ -183,6 +218,7 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
   advancedConfigOpen: false,
   accessPlan: (typeof window !== 'undefined' && (localStorage.getItem('atmos_access_token') || localStorage.getItem('atmos_operator')) ? 'free' : 'guest') as AccessPlan,
   locale: 'en' as AppLocale,
+  uiTheme: (typeof window !== 'undefined' && localStorage.getItem('atmos_theme') === 'field' ? 'field' : 'night') as 'night' | 'field',
 
   isRouting: false,
   latestIntentResult: null,
@@ -196,13 +232,13 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
     completedAt: null
   },
 
-  posts: [],
+  posts: INITIAL_FEED_POSTS,
   activeEvents: [],
   bookmarks: [],
 
   activePostId: null,
   replyModalPost: null,
-  userProfile: DEFAULT_USER_PROFILE,
+  userProfile: hydrateUserProfile(),
   profileActiveTab: 'posts',
 
   notifications: INITIAL_NOTIFICATIONS || [],
@@ -220,6 +256,7 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
   activeModuleViewer: null,
 
   activeModuleWorkspace: null,
+  selectedModelId: null,
 
   activeToast: null,
 
@@ -242,7 +279,7 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
     } else if (tab === 'explore') {
       set({ activeView: 'explore', activeModuleWorkspace: null, activePostId: null });
     } else if (tab === 'intelligence' || tab === 'models') {
-      set({ activeView: 'models', activeModuleWorkspace: null, activePostId: null, modelsDrawerOpen: false });
+      set({ activeView: 'models', activeModuleWorkspace: null, activePostId: null, modelsDrawerOpen: false, selectedModelId: tab === 'models' ? null : get().selectedModelId });
     } else if (tab === 'news') {
       set({ activeView: 'news', activeModuleWorkspace: null, activePostId: null });
     } else if (tab === 'alerts') {
@@ -296,6 +333,13 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
     set({ locale });
     if (typeof window !== 'undefined') localStorage.setItem('atmos_locale', locale);
     void get().fetchLiveNews(undefined, undefined, locale);
+  },
+  setUiTheme: (theme) => {
+    set({ uiTheme: theme });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('atmos_theme', theme);
+      document.documentElement.dataset.theme = theme;
+    }
   },
 
   submitComposerQuery: async (overrideQuery) => {
@@ -617,9 +661,8 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
     }),
   closeModuleViewer: () => set({ activeModuleViewer: null }),
 
-  openModuleWorkspace: (moduleNumber, port, title, category) => {
+  openModuleWorkspace: (moduleNumber, _port, _title, _category) => {
     if (!canUseEngines(get().accessPlan, moduleNumber)) {
-      // Guest demo evaluation mode - allow smooth inspection for presentations
       get().showToast(
         get().locale === 'hi'
           ? `इंजन ${moduleNumber} पूर्वावलोकन मोड में सक्रिय है`
@@ -627,52 +670,24 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
         'info'
       );
     }
-    const categoryLookup: Record<number, string> = {
-      1: 'Atmospheric Physics', 2: 'Atmospheric Physics', 3: 'Atmospheric Physics',
-      4: 'Atmospheric Physics', 5: 'Atmospheric Physics', 6: 'Atmospheric Physics',
-      7: 'Downscaling', 8: 'Downscaling',
-      9: 'Agriculture', 10: 'Agriculture', 11: 'Agriculture', 12: 'Agriculture',
-      13: 'Agriculture', 14: 'Agriculture',
-      15: 'Market & Supply', 16: 'Market & Supply', 17: 'Market & Supply', 18: 'Market & Supply'
-    };
-
-    // Determine connected modules based on category
-    const connectedMap: Record<number, number[]> = {
-      1: [2, 3], 2: [1, 3], 3: [4, 5, 6], 4: [3, 5], 5: [3, 4, 6], 6: [5, 7, 8],
-      7: [6, 8, 9], 8: [6, 7], 9: [10, 11], 10: [9, 11, 13, 14],
-      11: [9, 10, 12], 12: [10, 11, 13], 13: [10, 12, 15],
-      14: [10, 11], 15: [13, 16, 17], 16: [15, 17], 17: [15, 16, 18], 18: [17, 16, 15]
-    };
-
     if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', `#workspace/${moduleNumber}`);
+      window.history.pushState(null, '', `#models/${moduleNumber}`);
     }
-
     set({
-      activeView: 'module_workspace',
-      activeModuleWorkspace: {
-        moduleNumber,
-        port,
-        title,
-        category: category || categoryLookup[moduleNumber] || 'Intelligence',
-        parentQueryId: get().latestIntentResult?.queryId,
-        parentEntities: get().latestIntentResult?.entities,
-        connectedModules: connectedMap[moduleNumber] || [],
-        breadcrumb: ['ATMOS 4D', categoryLookup[moduleNumber] || 'Intelligence', `Module ${moduleNumber}`]
-      }
+      activeView: 'models',
+      activeNav: 'models',
+      selectedModelId: moduleNumber,
+      activeModuleWorkspace: null
     });
   },
 
   closeModuleWorkspace: () => {
     if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', '#feed');
+      window.history.pushState(null, '', '#models');
     }
-    set({
-      activeView: 'feed',
-      activeNav: 'home',
-      activeModuleWorkspace: null
-    });
+    set({ activeView: 'models', activeNav: 'models', activeModuleWorkspace: null, selectedModelId: null });
   },
+  setSelectedModelId: (id) => set({ selectedModelId: id }),
 
   // Notification Actions
   markNotificationRead: (id) => {

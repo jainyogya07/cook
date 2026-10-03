@@ -30,12 +30,21 @@ function timeHi(horizon?: string) {
   return horizon.replace('Hours', 'घंटे').replace('Lead', '');
 }
 
+function timeEn(horizon?: string) {
+  if (!horizon) return 'the next 3 days';
+  if (horizon.includes('24')) return 'the next 24 hours';
+  if (horizon.includes('48')) return 'the next 2 days';
+  if (horizon.includes('72') || horizon.toLowerCase().includes('default')) return 'the next 3 days';
+  if (horizon.includes('96') || horizon.includes('120')) return 'the next 5 days';
+  return horizon.replace('Lead', '').replace('Hours', 'hours').trim();
+}
+
 export function buildHumanReply(result: IntentRoutingResult, locale: 'en' | 'hi' = 'en'): string {
   const place = result.entities.location || 'your region';
   const placeH = placeHi(result.entities.location);
   const crop = result.entities.crop;
   const cropH = cropHi(crop);
-  const time = timeHi(result.entities.horizon);
+  const time = locale === 'hi' ? timeHi(result.entities.horizon) : timeEn(result.entities.horizon);
   const engine = result.targetModuleLaunch?.moduleNumber || 6;
 
   if (result.mode === 'SIMULATE' || result.rawQuery.toLowerCase().includes('agar') || result.rawQuery.includes('अगर')) {
