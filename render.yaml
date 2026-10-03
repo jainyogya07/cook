@@ -17,14 +17,14 @@ services:
       - key: WORKERS
         value: "1"
       - key: AUTH_DATABASE_URL
-        sync: false
+        value: "postgresql://postgres:Yogyajain%4026@db.aiwdzqcfrhavsqejbyfv.supabase.co:5432/postgres?sslmode=require"
       - key: AUTH_SECRET
-        sync: false
+        value: "atmos-4d-supabase-session-secret"
       - key: ATMOS_SEED_EMAIL
         value: seed@atmos4d.ai
       - key: ATMOS_SEED_NAME
         value: ATMOS Seed
       - key: ATMOS_SEED_PASSWORD
-        sync: false
+        value: "kingdom"
       - key: ATMOS_SEED_PLAN
         value: pro
