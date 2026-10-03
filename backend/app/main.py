@@ -260,7 +260,7 @@ app.include_router(auth_router)
 # COMPATIBILITY & SYSTEM STATUS ENDPOINTS
 # ============================================================================
 
-@app.get("/", tags=["System Status"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["System Status"])
 def root():
     return {
         "status": "online",
@@ -293,7 +293,7 @@ def root():
     }
 
 
-@app.get("/health", tags=["System Status"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["System Status"])
 def health_check():
     return {
         "status": "healthy",

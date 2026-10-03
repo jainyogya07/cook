@@ -16,3 +16,15 @@ services:
         value: "false"
       - key: WORKERS
         value: "1"
+      - key: AUTH_DATABASE_URL
+        sync: false
+      - key: AUTH_SECRET
+        sync: false
+      - key: ATMOS_SEED_EMAIL
+        value: seed@atmos4d.ai
+      - key: ATMOS_SEED_NAME
+        value: ATMOS Seed
+      - key: ATMOS_SEED_PASSWORD
+        sync: false
+      - key: ATMOS_SEED_PLAN
+        value: pro
