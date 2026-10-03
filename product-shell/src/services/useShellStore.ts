@@ -54,13 +54,14 @@ function hydrateUserProfile() {
     if (!raw) return GUEST_USER_PROFILE;
     const op = JSON.parse(raw) as { name?: string; handle?: string; avatarInitials?: string; plan?: string };
     const name = (op.name || '').trim() || 'Guest';
+    const plan: 'guest' | 'free' | 'pro' = op.plan === 'pro' ? 'pro' : op.plan === 'guest' ? 'guest' : 'free';
     return {
       ...GUEST_USER_PROFILE,
       name,
       handle: op.handle || name.replace(/\s+/g, '').slice(0, 24) || 'user',
       avatarInitials: (op.avatarInitials || initialsFrom(name)).toUpperCase(),
-      roleBadge: op.plan === 'pro' ? 'Atmos Pro' : 'Member',
-      plan: op.plan === 'pro' ? 'pro' : 'free'
+      roleBadge: plan === 'pro' ? 'Atmos Pro' : plan === 'guest' ? 'Browsing' : 'Member',
+      plan
     };
   } catch {
     return GUEST_USER_PROFILE;
