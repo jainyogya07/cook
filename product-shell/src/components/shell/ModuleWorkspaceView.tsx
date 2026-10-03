@@ -44,6 +44,7 @@ import { useShellStore } from '@/services/useShellStore';
 import { GROUPED_MODEL_CATEGORIES } from '@/data/mockFeedData';
 import { ENGINE_FIELD_GUIDE } from '@/data/engineFieldGuide';
 import { apiBase } from '@/lib/api';
+import { VolumetricStratificationCanvas } from '@/components/canvas/VolumetricStratificationCanvas';
 
 interface BasinOption {
   id: string;
@@ -324,13 +325,21 @@ export default function ModuleWorkspaceView() {
         </div>
 
         <div style={{ flex: 1, backgroundColor: '#07090E', position: 'relative' }}>
-          <iframe
-            key={iframeKey}
-            src={targetUrl}
-            style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
-            title={`Module ${moduleNumber} Fullscreen`}
-            allow="accelerometer; autoplay; camera; gyroscope; payment"
-          />
+          {isLocalhost ? (
+            <iframe
+              key={iframeKey}
+              src={targetUrl}
+              style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
+              title={`Module ${moduleNumber} Fullscreen`}
+              allow="accelerometer; autoplay; camera; gyroscope; payment"
+            />
+          ) : (
+            <VolumetricStratificationCanvas
+              moduleNumber={moduleNumber}
+              moduleTitle={title}
+              leadHour={parseInt(selectedHorizon.replace(/[^\d]/g, ''), 10) || 72}
+            />
+          )}
         </div>
       </div>
     );
@@ -401,7 +410,7 @@ export default function ModuleWorkspaceView() {
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '9999px', backgroundColor: '#10B981' }} />
-            <span>ONLINE :{port}</span>
+            <span>{isLocalhost ? `ONLINE :${port}` : 'ENGINE ACTIVE // 60 FPS'}</span>
           </div>
         </div>
 
@@ -454,7 +463,7 @@ export default function ModuleWorkspaceView() {
               }}
             >
               <Radio style={{ width: '13px', height: '13px' }} />
-              <span>Live Port View</span>
+              <span>3D Volumetric Engine</span>
             </button>
           </div>
 
@@ -566,7 +575,7 @@ export default function ModuleWorkspaceView() {
                   ENGINE {moduleNumber < 10 ? `0${moduleNumber}` : moduleNumber}
                 </span>
                 <span style={{ fontSize: '11px', color: '#10B981', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-                  PORT :{port} (RUNNING)
+                  {isLocalhost ? `PORT :${port} (RUNNING)` : 'NEURAL TWIN (ONLINE)'}
                 </span>
               </div>
               <div style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.3 }}>
@@ -676,159 +685,14 @@ export default function ModuleWorkspaceView() {
         {/* Main Display: Scientific Studio OR Live Port View */}
         <div style={{ flex: 1, minWidth: 0, backgroundColor: '#07090E', position: 'relative', overflowY: 'auto' }}>
           {activeTab === 'iframe' ? (
-            /* Live Port Microservice Frame / Workstation Bridge */
-            !isLocalhost ? (
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  minHeight: 'calc(100vh - 53px)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '32px 20px',
-                  backgroundColor: '#07090E'
-                }}
-              >
-                <div
-                  style={{
-                    maxWidth: '680px',
-                    width: '100%',
-                    padding: '36px 32px',
-                    borderRadius: '20px',
-                    backgroundColor: 'rgba(15, 20, 29, 0.92)',
-                    border: '1px solid rgba(56, 189, 248, 0.2)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                    textAlign: 'center',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '16px'
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '60px',
-                      height: '60px',
-                      borderRadius: '16px',
-                      backgroundColor: 'rgba(56, 189, 248, 0.1)',
-                      border: '1px solid rgba(56, 189, 248, 0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#38BDF8'
-                    }}
-                  >
-                    <Terminal style={{ width: '30px', height: '30px' }} />
-                  </div>
-
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: '9999px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border)', fontSize: '12px', fontFamily: 'var(--font-mono)', color: '#9BA3AF' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#38BDF8' }} />
-                    <span>LOCAL WORKSTATION STREAM : {port}</span>
-                  </div>
-
-                  <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
-                    Module {moduleNumber < 10 ? `0${moduleNumber}` : moduleNumber} · Standalone Microservice
-                  </h3>
-
-                  <p style={{ fontSize: '14px', color: '#9BA3AF', lineHeight: 1.6, maxWidth: '520px', margin: 0 }}>
-                    Direct port streaming (<code style={{ color: '#38BDF8', fontFamily: 'var(--font-mono)' }}>http://localhost:{port}</code>) is enabled on local developer environments. In this Cloud Production build, all 19 atmospheric physics & agronomic neural pipelines run unified directly in the <strong>4D Scientific Studio</strong>.
-                  </p>
-
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '8px' }}>
-                    <button
-                      onClick={() => setActiveTab('cockpit')}
-                      style={{
-                        padding: '10px 22px',
-                        borderRadius: '9999px',
-                        backgroundColor: '#38BDF8',
-                        color: '#07090E',
-                        fontWeight: 800,
-                        fontSize: '13px',
-                        cursor: 'pointer',
-                        border: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 4px 14px rgba(56, 189, 248, 0.3)'
-                      }}
-                    >
-                      <Activity style={{ width: '16px', height: '16px' }} />
-                      <span>Switch to 4D Scientific Studio</span>
-                    </button>
-
-                    <button
-                      onClick={handleCopyCommand}
-                      style={{
-                        padding: '10px 18px',
-                        borderRadius: '9999px',
-                        backgroundColor: '#151B26',
-                        color: '#EFF3F4',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        cursor: 'pointer',
-                        border: '1px solid var(--border)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
-                      title="Copy local run command"
-                    >
-                      {isCopied ? <Check style={{ width: '14px', height: '14px', color: '#10B981' }} /> : <Copy style={{ width: '14px', height: '14px' }} />}
-                      <span style={{ fontFamily: 'var(--font-mono)' }}>{isCopied ? 'Copied to Clipboard!' : launchCommand}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div style={{ width: '100%', height: '100%', minHeight: 'calc(100vh - 53px)', position: 'relative' }}>
-                {isIframeLoading && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      zIndex: 10,
-                      backgroundColor: '#07090E',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '16px'
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '9999px',
-                        border: '3px solid rgba(255, 255, 255, 0.1)',
-                        borderTopColor: '#38BDF8',
-                        animation: 'spin 0.8s linear infinite'
-                      }}
-                    />
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#F1F3F5', fontFamily: 'var(--font-mono)' }}>
-                      Streaming Live Microservice on Port :{port}...
-                    </div>
-                  </div>
-                )}
-                <iframe
-                  key={iframeKey}
-                  src={targetUrl}
-                  onLoad={() => setIsIframeLoading(false)}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    minHeight: 'calc(100vh - 53px)',
-                    border: 'none',
-                    display: 'block',
-                    backgroundColor: '#07090E',
-                    colorScheme: 'dark'
-                  }}
-                  title={`Module ${moduleNumber} Workspace`}
-                  allow="accelerometer; autoplay; camera; gyroscope; payment"
-                />
-              </div>
-            )
+            /* 3D Volumetric Digital Twin / Interactive Simulation */
+            <div style={{ width: '100%', height: '100%', minHeight: 'calc(100vh - 53px)', position: 'relative' }}>
+              <VolumetricStratificationCanvas
+                moduleNumber={moduleNumber}
+                moduleTitle={title}
+                leadHour={parseInt(selectedHorizon.replace(/[^\d]/g, ''), 10) || 72}
+              />
+            </div>
           ) : (
             /* 4D Professional Scientific Studio & Connected Input/Output System */
             <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
