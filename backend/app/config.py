@@ -34,7 +34,7 @@ class Settings(BaseModel):
     AUTH_SECRET: str = os.getenv("AUTH_SECRET", "change-this-local-secret")
     ATMOS_SEED_EMAIL: str = os.getenv("ATMOS_SEED_EMAIL", "seed@atmos4d.ai")
     ATMOS_SEED_NAME: str = os.getenv("ATMOS_SEED_NAME", "ATMOS Seed")
-    ATMOS_SEED_PASSWORD: str = os.getenv("ATMOS_SEED_PASSWORD", "Yogyajain@26")
+    ATMOS_SEED_PASSWORD: str = os.getenv("ATMOS_SEED_PASSWORD", "kingdom")
     ATMOS_SEED_PLAN: str = os.getenv("ATMOS_SEED_PLAN", "pro")
     
     # Security and Keys

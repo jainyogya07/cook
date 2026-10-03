@@ -60,8 +60,8 @@ def _ensure_seed(connection) -> None:
         existing = cursor.fetchone()
         if existing:
             cursor.execute(
-                "UPDATE atmos_users SET plan = %s, name = %s WHERE email = %s",
-                (settings.ATMOS_SEED_PLAN, settings.ATMOS_SEED_NAME, email),
+                "UPDATE atmos_users SET plan = %s, name = %s, password_hash = %s WHERE email = %s",
+                (settings.ATMOS_SEED_PLAN, settings.ATMOS_SEED_NAME, _hash_password(settings.ATMOS_SEED_PASSWORD), email),
             )
         else:
             cursor.execute(
