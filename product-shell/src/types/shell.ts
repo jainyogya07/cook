@@ -10,6 +10,8 @@ export type LeftNavTab =
   | 'intelligence'
   | 'alerts'
   | 'ai'
+  | 'news'
+  | 'models'
   | 'saved'
   | 'subscription'
   | 'profile'
@@ -32,6 +34,8 @@ export type ShellView =
   | 'module_workspace'
   | 'subscription'
   | 'ai_chat'
+  | 'news'
+  | 'models'
   | 'profile'
   | 'post_detail';
 

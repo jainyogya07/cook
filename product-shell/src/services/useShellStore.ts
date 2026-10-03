@@ -167,8 +167,8 @@ interface ShellStoreState {
 }
 
 export const useShellStore = create<ShellStoreState>((set, get) => ({
-  activeNav: 'home',
-  activeView: 'feed',
+  activeNav: 'ai',
+  activeView: 'ai_chat',
   activeFeedTab: 'for_you',
   activeInputMode: 'ASK',
 
@@ -228,24 +228,25 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
   setActiveNav: (tab) => {
     set({ activeNav: tab });
     if (typeof window !== 'undefined') {
-      if (tab === 'home') window.history.pushState(null, '', '#feed');
+      if (tab === 'home' || tab === 'ai') window.history.pushState(null, '', '#ask');
       else if (tab === 'explore') window.history.pushState(null, '', '#explore');
       else if (tab === 'alerts') window.history.pushState(null, '', '#alerts');
       else if (tab === 'saved') window.history.pushState(null, '', '#bookmarks');
       else if (tab === 'subscription') window.history.pushState(null, '', '#subscription');
       else if (tab === 'profile') window.history.pushState(null, '', '#profile');
-      else if (tab === 'ai') window.history.pushState(null, '', '#ai_chat');
+      else if (tab === 'news') window.history.pushState(null, '', '#news');
+      else if (tab === 'models' || tab === 'intelligence') window.history.pushState(null, '', '#models');
     }
-    if (tab === 'home') {
-      set({ activeView: 'feed', activeModuleWorkspace: null, activePostId: null });
+    if (tab === 'home' || tab === 'ai') {
+      set({ activeView: 'ai_chat', activeModuleWorkspace: null, activePostId: null });
     } else if (tab === 'explore') {
       set({ activeView: 'explore', activeModuleWorkspace: null, activePostId: null });
-    } else if (tab === 'intelligence') {
-      set({ modelsDrawerOpen: true });
+    } else if (tab === 'intelligence' || tab === 'models') {
+      set({ activeView: 'models', activeModuleWorkspace: null, activePostId: null, modelsDrawerOpen: false });
+    } else if (tab === 'news') {
+      set({ activeView: 'news', activeModuleWorkspace: null, activePostId: null });
     } else if (tab === 'alerts') {
       set({ activeView: 'alerts', activeModuleWorkspace: null, activePostId: null });
-    } else if (tab === 'ai') {
-      set({ activeView: 'ai_chat', activeModuleWorkspace: null, activePostId: null });
     } else if (tab === 'saved') {
       set({ activeView: 'bookmarks', activeModuleWorkspace: null, activePostId: null });
     } else if (tab === 'subscription') {
@@ -262,7 +263,9 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
       else if (view === 'alerts') window.history.pushState(null, '', '#alerts');
       else if (view === 'bookmarks') window.history.pushState(null, '', '#bookmarks');
       else if (view === 'subscription') window.history.pushState(null, '', '#subscription');
-      else if (view === 'ai_chat') window.history.pushState(null, '', '#ai_chat');
+      else if (view === 'ai_chat') window.history.pushState(null, '', '#ask');
+      else if (view === 'news') window.history.pushState(null, '', '#news');
+      else if (view === 'models') window.history.pushState(null, '', '#models');
       else if (view === 'profile') window.history.pushState(null, '', '#profile');
     }
     set({ activeView: view, activeModuleWorkspace: view !== 'module_workspace' ? null : get().activeModuleWorkspace });

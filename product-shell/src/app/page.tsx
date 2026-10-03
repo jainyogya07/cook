@@ -8,9 +8,9 @@
 // ============================================================================
 
 import React, { useEffect, useState } from 'react';
-import LeftSidebar from '@/components/shell/LeftSidebar';
-import CenterFeed from '@/components/feed/CenterFeed';
-import RightRail from '@/components/shell/RightRail';
+import AppTopBar from '@/components/shell/AppTopBar';
+import NewsDeskView from '@/components/shell/NewsDeskView';
+import ModelsCatalogView from '@/components/shell/ModelsCatalogView';
 import ExploreView from '@/components/shell/ExploreView';
 import NotificationsView from '@/components/shell/NotificationsView';
 import BookmarksView from '@/components/shell/BookmarksView';
@@ -39,6 +39,7 @@ const SESSION_KEY = 'atmos_session_active';
 const GUEST_KEY = 'atmos_guest_browse';
 
 const APP_HASHES = new Set([
+  'ask',
   'feed',
   'explore',
   'alerts',
@@ -46,6 +47,8 @@ const APP_HASHES = new Set([
   'subscription',
   'profile',
   'ai_chat',
+  'news',
+  'models',
   'auth'
 ]);
 
@@ -96,6 +99,10 @@ function CenterViewRouter() {
   switch (activeView) {
     case 'explore':
       return <ExploreView />;
+    case 'news':
+      return <NewsDeskView />;
+    case 'models':
+      return <ModelsCatalogView />;
     case 'alerts':
       return <NotificationsView />;
     case 'bookmarks':
@@ -103,18 +110,19 @@ function CenterViewRouter() {
     case 'subscription':
       return <SubscriptionView />;
     case 'ai_chat':
+    case 'feed':
       return <AtmosAIChatView />;
     case 'profile':
       return <ProfileView />;
     case 'post_detail':
       return <ThreadView />;
     default:
-      return <CenterFeed />;
+      return <AtmosAIChatView />;
   }
 }
 
 export default function ProductShellHome() {
-  const { activeView, activeModuleWorkspace, openModuleWorkspace, accessPlan, locale, setAccessPlan } = useShellStore();
+  const { openModuleWorkspace, accessPlan, locale, setAccessPlan } = useShellStore();
   const [authReady, setAuthReady] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [authMode, setAuthMode] = useState(false);
@@ -267,10 +275,24 @@ export default function ProductShellHome() {
       if (typeof window === 'undefined') return;
       const hash = window.location.hash.replace(/^#/, '');
 
-      if (!hash || hash === 'feed') {
+      if (!hash || hash === 'feed' || hash === 'ask' || hash === 'ai_chat') {
         useShellStore.setState({
-          activeView: 'feed',
-          activeNav: 'home',
+          activeView: 'ai_chat',
+          activeNav: 'ai',
+          activeModuleWorkspace: null,
+          activePostId: null
+        });
+      } else if (hash === 'news') {
+        useShellStore.setState({
+          activeView: 'news',
+          activeNav: 'news',
+          activeModuleWorkspace: null,
+          activePostId: null
+        });
+      } else if (hash === 'models') {
+        useShellStore.setState({
+          activeView: 'models',
+          activeNav: 'models',
           activeModuleWorkspace: null,
           activePostId: null
         });
@@ -309,13 +331,6 @@ export default function ProductShellHome() {
           activeModuleWorkspace: null,
           activePostId: null
         });
-      } else if (hash === 'ai_chat') {
-        useShellStore.setState({
-          activeView: 'ai_chat',
-          activeNav: 'ai',
-          activeModuleWorkspace: null,
-          activePostId: null
-        });
       } else if (hash.startsWith('post/')) {
         const postId = hash.replace('post/', '');
         useShellStore.setState({
@@ -346,38 +361,22 @@ export default function ProductShellHome() {
   }
   if (!authenticated && authMode) return <AuthScreen onAuthenticated={completeAuthentication} onBack={() => { setAuthMode(false); window.history.replaceState({ atmosRoute: 'landing' }, '', '/'); }} />;
 
-  const isModuleWorkspace = activeView === 'module_workspace' && activeModuleWorkspace;
-
   return (
-    <div className="app-shell">
-      {/* Living Atmospheric Flow with Ambient Cosmic Glow */}
+    <div className="app-shell nv-app">
       <AtmosphericBackgroundCanvas variant="shell" />
-      {accessPlan !== 'pro' && (
-        <div style={{ position: 'fixed', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 80, display: 'flex', gap: 10, alignItems: 'center', padding: '7px 14px', borderRadius: 999, background: 'rgba(8,10,16,.82)', border: '1px solid rgba(255,255,255,.12)', color: '#E2E8F0', fontSize: 12, backdropFilter: 'blur(12px)' }}>
-          <span>{accessPlan === 'guest' ? t(locale, 'guestBanner') : t(locale, 'freeBanner')}</span>
-          <button onClick={() => accessPlan === 'guest' ? openAuth() : useShellStore.getState().setActiveNav('subscription')} style={{ color: '#E6C65C', fontWeight: 700 }}>{accessPlan === 'guest' ? t(locale, 'signIn') : 'Pro'}</button>
-        </div>
-      )}
-
-      {/* Floating 3-Column Cockpit Container (1480px, 24px Gap, Floating Glass Panels) */}
-      <div
-        className="app-container"
-        style={{
-          maxWidth: isModuleWorkspace ? '100%' : '1480px',
-          gridTemplateColumns: isModuleWorkspace ? '196px minmax(0, 1fr)' : undefined
-        }}
-      >
-        {/* Left Nav (~260px) — Stationed Floating Glass Command Deck */}
-        <LeftSidebar />
-
-        {/* Center Area: View Router (Feed, Explore, Alerts, Bookmarks, Profile, Thread) */}
-        <CenterViewRouter />
-
-        {/* Right Rail (~380px) — Stationed Floating Glass Intelligence Radar */}
-        {!isModuleWorkspace && <RightRail />}
+      <div className="nv-shell">
+        <AppTopBar />
+        {accessPlan !== 'pro' && (
+          <div className="nv-banner">
+            <span>{accessPlan === 'guest' ? t(locale, 'guestBanner') : t(locale, 'freeBanner')}</span>
+            <button type="button" onClick={() => accessPlan === 'guest' ? openAuth() : useShellStore.getState().setActiveNav('subscription')}>{accessPlan === 'guest' ? t(locale, 'signIn') : 'Pro'}</button>
+          </div>
+        )}
+        <main className="nv-main">
+          <CenterViewRouter />
+        </main>
       </div>
 
-      {/* Overlay Modals & Feedback */}
       <ReplyModal />
       <IntelligenceModelsDrawer />
       <AtmosAIChatModal />
