@@ -33,7 +33,7 @@ import {
   AlertTriangle,
   Play
 } from 'lucide-react';
-import AtmosphericBackgroundCanvas from '@/components/canvas/AtmosphericBackgroundCanvas';
+import AtmosphericBackgroundCanvas from '@/components/canvas/BackgroundCanvas';
 import AtmosAnimatedLogo from '@/components/common/AtmosAnimatedLogo';
 import { ENGINE_FIELD_GUIDE } from '@/data/engineFieldGuide';
 import { t } from '@/i18n/copy';

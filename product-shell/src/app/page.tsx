@@ -19,7 +19,7 @@ import SubscriptionView from '@/components/shell/SubscriptionView';
 import ThreadView from '@/components/feed/ThreadView';
 import ReplyModal from '@/components/feed/ReplyModal';
 import ModuleWorkspaceView from '@/components/shell/ModuleWorkspaceView';
-import AtmosphericBackgroundCanvas from '@/components/canvas/AtmosphericBackgroundCanvas';
+import AtmosphericBackgroundCanvas from '@/components/canvas/BackgroundCanvas';
 import IntelligenceModelsDrawer from '@/components/shell/IntelligenceModelsDrawer';
 import AtmosAIChatModal from '@/components/ai/AtmosAIChatModal';
 import AtmosAIChatView from '@/components/ai/AtmosAIChatView';

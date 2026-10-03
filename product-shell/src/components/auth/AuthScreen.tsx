@@ -2,7 +2,7 @@
 
 import React, { FormEvent, useState } from 'react';
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, UserRound } from 'lucide-react';
-import AtmosphericBackgroundCanvas from '@/components/canvas/AtmosphericBackgroundCanvas';
+import AtmosphericBackgroundCanvas from '@/components/canvas/BackgroundCanvas';
 import AtmosAnimatedLogo from '@/components/common/AtmosAnimatedLogo';
 import { t } from '@/i18n/copy';
 import { useShellStore } from '@/services/useShellStore';

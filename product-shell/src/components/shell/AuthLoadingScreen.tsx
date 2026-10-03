@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import AtmosAnimatedLogo from '@/components/common/AtmosAnimatedLogo';
-import AtmosphericBackgroundCanvas from '@/components/canvas/AtmosphericBackgroundCanvas';
+import AtmosphericBackgroundCanvas from '@/components/canvas/BackgroundCanvas';
 
 export default function AuthLoadingScreen() {
   const [telemetryStep, setTelemetryStep] = useState(0);
