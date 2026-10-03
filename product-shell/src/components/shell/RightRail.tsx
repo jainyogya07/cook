@@ -14,6 +14,7 @@ import { useShellStore } from '@/services/useShellStore';
 import { NewsItem } from '@/types/shell';
 import NewsTranslator from '@/components/feed/NewsTranslator';
 import { newsEndpoint } from '@/lib/api';
+import { cleanNewsText } from '@/lib/cleanNews';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -91,12 +92,12 @@ export default function RightRail() {
         if (data && data.articles && data.articles.length > 0) {
           const fetchedItems: NewsItem[] = data.articles.map((art: any, idx: number) => ({
             id: `live_wire_${newsPage}_${art.id || idx}_${Date.now()}`,
-            headline: art.title || art.message?.substring(0, 120) || 'Extreme Meteorological Bulletin',
-            headlineHi: art.title_hi || art.titleHi || art.translations?.hi,
-            source: art.profile?.name || art.source || 'IMD / MoES Bulletin',
+            headline: cleanNewsText(art.title || art.message || 'Weather bulletin'),
+            headlineHi: cleanNewsText(art.title_hi || art.titleHi || art.translations?.hi || ''),
+            source: cleanNewsText(art.profile?.name || art.source) || 'IMD / MoES Bulletin',
             timestamp: art.time_ago || `${newsPage * 3}m ago`,
             category: (art.hazard || targetHazard).toUpperCase(),
-            aiRelevanceContext: art.description || art.message || 'National disaster response & regional meteorological advisories.',
+            aiRelevanceContext: cleanNewsText(art.description || art.message) || 'National disaster response & regional meteorological advisories.',
             aiRelevanceContextHi: art.description_hi || art.descriptionHi || art.translations?.hi_context,
             relatedRegion: art.region || targetRegion,
             relatedHazard: art.hazard || targetHazard

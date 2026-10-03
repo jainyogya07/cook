@@ -26,6 +26,7 @@ import { FeedPost } from '@/types/shell';
 import { useShellStore } from '@/services/useShellStore';
 import ReportExport from './ReportExport';
 import NewsTranslator from './NewsTranslator';
+import { cleanNewsText } from '@/lib/cleanNews';
 
 interface FeedPostCardProps {
   post: FeedPost;
@@ -44,7 +45,7 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const { author, timestamp, content, contentHi, intelCard, stats, routingPipeline, tags, imageUrl, expandable } = post;
-  const body = locale === 'hi' && contentHi ? contentHi : content;
+  const body = cleanNewsText(locale === 'hi' && contentHi ? contentHi : content);
   const long = Boolean(expandable) && body.length > 280;
   const shown = expanded || !long ? body : `${body.slice(0, 280)}…`;
 
@@ -344,7 +345,7 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
                     style={{ fontSize: '14px', color: 'var(--text-1)', display: 'flex', alignItems: 'flex-start', gap: '8px', lineHeight: 1.6 }}
                   >
                     <span style={{ color: '#38BDF8', marginTop: '1px', fontSize: '14px', lineHeight: 1 }}>•</span>
-                    <span>{bullet}</span>
+                    <span>{cleanNewsText(bullet)}</span>
                   </div>
                 ))}
               </div>

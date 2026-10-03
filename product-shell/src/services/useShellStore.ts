@@ -34,6 +34,7 @@ import {
 import { parseAndRouteQuery } from './intentRouter';
 import { AccessPlan, AppLocale, canPost, canUseEngines } from '@/i18n/copy';
 import { apiBase, newsEndpoint } from '@/lib/api';
+import { cleanNewsText, newsSummary } from '@/lib/cleanNews';
 
 interface ShellStoreState {
   // Navigation & Views
@@ -744,24 +745,31 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
       const data = await res.json();
 
       if (data && data.articles && Array.isArray(data.articles)) {
-        const mappedNews: NewsItem[] = data.articles.map((art: any) => ({
+        const mappedNews: NewsItem[] = data.articles.map((art: any) => {
+          const title = cleanNewsText(art.title || art.message || 'Live bulletin');
+          const description = cleanNewsText(art.description || '');
+          return {
           id: art.id || `news_${Math.random().toString(36).substring(7)}`,
-          headline: art.title || art.message?.substring(0, 120) || 'Live bulletin',
-          headlineHi: language === 'hi' ? (art.title || art.message) : undefined,
-          source: art.profile?.name || art.source || 'IMD / MoES Bulletin',
+          headline: title,
+          headlineHi: language === 'hi' ? title : undefined,
+          source: cleanNewsText(art.profile?.name || art.source) || 'IMD / MoES Bulletin',
           timestamp: art.time_ago || 'Live',
           category: (art.hazard || 'DISASTER').toUpperCase(),
-          aiRelevanceContext: art.description || art.message || '',
-          aiRelevanceContextHi: art.description_hi || art.descriptionHi || art.translations?.hi_context || undefined,
+          aiRelevanceContext: description || title,
+          aiRelevanceContextHi: cleanNewsText(art.description_hi || art.descriptionHi || art.translations?.hi_context || ''),
           relatedRegion: art.region || 'India',
           relatedHazard: art.hazard || 'cyclone',
           imageUrl: art.image || art.media?.url || undefined
-        }));
+        };
+        });
 
-        const backendPosts: FeedPost[] = data.articles.map((art: any) => ({
+        const backendPosts: FeedPost[] = data.articles.map((art: any) => {
+          const title = cleanNewsText(art.title || 'Weather bulletin');
+          const summary = newsSummary(title, art.description || art.message);
+          return {
           id: `news_${art.id || Math.random().toString(36).substring(7)}`,
           author: {
-            name: art.profile?.name || art.source || 'IMD Severe Weather Watch',
+            name: cleanNewsText(art.profile?.name || art.source) || 'IMD Severe Weather Watch',
             handle: art.profile?.handle || '@Indiametdept',
             avatarInitials: art.profile?.name?.substring(0, 2) || 'IMD',
             avatarColor: '#1E3A8A',
@@ -769,14 +777,14 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
             roleBadge: 'Government Agency'
           },
           timestamp: art.time_ago || 'Recent',
-          content: art.message || art.title || art.description || '',
-          contentHi: language === 'hi' ? (art.message || art.title || art.description || '') : undefined,
+          content: summary,
+          contentHi: language === 'hi' ? summary : undefined,
           imageUrl: art.image || art.media?.url || undefined,
           expandable: true,
           tags: [art.urgency || 'DISASTER ALERT', art.hazard || 'Cyclone'],
           intelCard: {
             id: `card_${art.id || Math.random().toString(36).substring(7)}`,
-            title: art.title || 'Severe Meteorological Bulletin',
+            title,
             region: art.region || 'India',
             hazardType: (art.hazard || 'Cyclone').toUpperCase(),
             leadTime: '+72h Lead',
@@ -788,8 +796,8 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
               { label: 'NDRF Status', value: 'Pre-Deployed', direction: 'up' }
             ],
             evidenceBullets: [
-              art.description || art.title || '',
-              art.url || ''
+              cleanNewsText(art.description) || title,
+              art.source ? `Source: ${cleanNewsText(art.source)}` : ''
             ].filter(Boolean),
             targetModuleNumber: 6,
             targetPort: 3006,
@@ -804,7 +812,8 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
             isLiked: false,
             isBookmarked: false
           }
-        }));
+        };
+        });
 
         set((state) => {
           const existingIds = new Set(state.posts.map((p) => p.id));

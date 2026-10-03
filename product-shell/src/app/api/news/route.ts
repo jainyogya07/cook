@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cleanNewsText, newsSummary } from '@/lib/cleanNews';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -20,16 +21,16 @@ export async function GET(request: NextRequest) {
       const pick = (tag: string) => block.match(new RegExp(`<${tag}><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tag}>`))?.[1]
         || block.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`))?.[1]
         || '';
-      const title = pick('title').trim();
-      const description = pick('description').replace(/<[^>]+>/g, '').trim();
+      const title = cleanNewsText(pick('title'));
+      const description = cleanNewsText(pick('description'));
       return {
         id: `gnews_${index}_${Buffer.from(title).toString('base64').slice(0, 10)}`,
         title,
-        description,
-        source: pick('source') || 'Google News',
-        url: pick('link'),
+        description: description && description !== title ? description : title,
+        source: cleanNewsText(pick('source')) || 'Google News',
+        url: pick('link').replace(/<[^>]+>/g, '').trim(),
         image: null,
-        message: description ? `${title}\n\n${description}` : title,
+        message: newsSummary(title, description),
         hazard,
         region,
         time_ago: 'Live'

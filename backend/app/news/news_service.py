@@ -6,11 +6,23 @@ with spatio-temporal extreme weather anomaly detection layers.
 
 from typing import Any
 import os
+import re
+import html
 import logging
 import requests
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def clean_news_text(raw: str | None) -> str:
+    text = html.unescape(raw or "")
+    for _ in range(2):
+        text = html.unescape(text)
+    text = re.sub(r"<a\b[^>]*>.*?</a>", " ", text, flags=re.I | re.S)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"https?://\S+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 class WeatherNewsService:
@@ -122,16 +134,18 @@ class WeatherNewsService:
             root = ET.fromstring(resp.content)
             articles: list[dict[str, Any]] = []
             for item in root.findall("./channel/item")[:limit]:
-                title = (item.findtext("title") or "").strip()
-                source = (item.findtext("source") or "Google News").strip()
+                title = clean_news_text(item.findtext("title"))
+                source = clean_news_text(item.findtext("source")) or "Google News"
                 link = (item.findtext("link") or "").strip()
-                description = (item.findtext("description") or "").strip()
+                description = clean_news_text(item.findtext("description"))
                 pub = (item.findtext("pubDate") or "").strip()
                 if not title:
                     continue
+                if description == title:
+                    description = title
                 articles.append({
                     "title": title,
-                    "description": description[:280] if description else title,
+                    "description": description[:400] if description else title,
                     "source": source,
                     "url": link,
                     "image": None,
@@ -313,12 +327,13 @@ class WeatherNewsService:
                 return f"{n / 1_000:.1f}K"
             return str(n)
 
-        title = item.get("title", "")
-        desc = item.get("description", "")
-        if desc and desc not in title:
+        title = clean_news_text(item.get("title"))
+        desc = clean_news_text(item.get("description"))
+        if desc and desc not in title and title[:40] not in desc:
             message_text = f"{title}\n\n{desc}"
         else:
             message_text = title
+            desc = title
 
         clean_hazard = hazard.replace("_", " ").title()
         clean_reg = region.replace("_", " ").title()
