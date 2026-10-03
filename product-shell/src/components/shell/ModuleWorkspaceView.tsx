@@ -925,7 +925,7 @@ export default function ModuleWorkspaceView() {
           {moduleNumber === 1 ? (
             <iframe
               key={iframeKey}
-              src={isLocalhost && isPortOnline ? targetUrl : '/module01/index.html'}
+              src="/module01/index.html"
               style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
               title="Module 01 Planetary Volumetric Atmospheric Earth Globe"
               allow="accelerometer; autoplay; camera; gyroscope; payment"
@@ -1170,7 +1170,7 @@ export default function ModuleWorkspaceView() {
                   ENGINE {moduleNumber < 10 ? `0${moduleNumber}` : moduleNumber}
                 </span>
                 <span style={{ fontSize: '11px', color: '#10B981', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-                  {isLocalhost ? `PORT :${port} (RUNNING)` : 'NEURAL TWIN (ONLINE)'}
+                  3D SCIENTIFIC ENGINE (ONLINE)
                 </span>
               </div>
               <div style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.3 }}>
@@ -1285,7 +1285,7 @@ export default function ModuleWorkspaceView() {
               {moduleNumber === 1 ? (
                 <iframe
                   key={iframeKey}
-                  src={isLocalhost && isPortOnline ? targetUrl : '/module01/index.html'}
+                  src="/module01/index.html"
                   style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#07090E' }}
                   title="Module 01 Planetary Volumetric Atmospheric Earth Globe"
                   allow="accelerometer; autoplay; camera; gyroscope; payment"

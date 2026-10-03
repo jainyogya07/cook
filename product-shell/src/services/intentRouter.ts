@@ -96,7 +96,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Probabilistic Downscaling',
         shortRole: 'Orographic terrain boundary layer',
         port: 3007,
-        routeUrl: 'http://localhost:3007',
+        routeUrl: '/modules/7',
         status: 'RESOLVED',
         metricOutput: '5km Field Resampling'
       },
@@ -105,7 +105,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Living Phenology',
         shortRole: 'Sowing date thermal alignment',
         port: 3010,
-        routeUrl: 'http://localhost:3010',
+        routeUrl: '/modules/10',
         status: 'RESOLVED',
         metricOutput: 'Panicle Initiation Stage'
       },
@@ -114,7 +114,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'SWAT 3-Tier Hydrology',
         shortRole: 'Unsaturated hydraulic conductivity balance',
         port: 3011,
-        routeUrl: 'http://localhost:3011',
+        routeUrl: '/modules/11',
         status: 'RESOLVED',
         metricOutput: 'Perched Table at 0.82m'
       },
@@ -123,7 +123,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Counterfactual Decision Simulator',
         shortRole: 'Coupled Hydro-Thermal-Market Simulator',
         port: 3018,
-        routeUrl: 'http://localhost:3018',
+        routeUrl: '/modules/18',
         status: 'RESOLVED',
         metricOutput: 'Δ Deficit: -3.76 LMT | Modal Price: ₹2,315/qtl'
       }
@@ -151,7 +151,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Extreme Anomaly Engine',
         shortRole: 'Quantile precipitation exceedance',
         port: 3003,
-        routeUrl: 'http://localhost:3003',
+        routeUrl: '/modules/3',
         status: 'RESOLVED',
         metricOutput: 'EFI = +0.86 (> P95)'
       },
@@ -160,7 +160,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Crop Exposure Engine',
         shortRole: 'Geospatial acreage intersection (Exposure ≠ Loss)',
         port: 3009,
-        routeUrl: 'http://localhost:3009',
+        routeUrl: '/modules/9',
         status: 'RESOLVED',
         metricOutput: '342,400 ha Exposed (30.8%)'
       },
@@ -169,7 +169,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Phenology & Growth Stage',
         shortRole: 'CSM-CERES-Rice anthesis vulnerability clock',
         port: 3010,
-        routeUrl: 'http://localhost:3010',
+        routeUrl: '/modules/10',
         status: 'RESOLVED',
         metricOutput: 'Floret Sterility Risk: 12.4%'
       },
@@ -178,7 +178,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Soil & Water Balance',
         shortRole: 'SWAT 3-tier root zone hypoxia duration',
         port: 3011,
-        routeUrl: 'http://localhost:3011',
+        routeUrl: '/modules/11',
         status: 'RESOLVED',
         metricOutput: '44.5% Saturation (Hypoxia 42h)'
       },
@@ -187,7 +187,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Quantile Yield Risk',
         shortRole: 'Skew-t continuous probability distribution',
         port: 3013,
-        routeUrl: 'http://localhost:3013',
+        routeUrl: '/modules/13',
         status: 'RESOLVED',
         metricOutput: 'P50 Yield: 3.12 t/ha (P10: 2.45 t/ha)'
       },
@@ -196,7 +196,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Mandi Market Intelligence',
         shortRole: 'Arrival elasticity & wholesale price spread',
         port: 3015,
-        routeUrl: 'http://localhost:3015',
+        routeUrl: '/modules/15',
         status: 'RESOLVED',
         metricOutput: 'Modal Price: ₹2,315/qtl (+6.0%)'
       }
@@ -224,7 +224,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Planetary 4D Telemetry',
         shortRole: '5D NCUM/NEPS tensor ingestion',
         port: 3001,
-        routeUrl: 'http://localhost:3001',
+        routeUrl: '/modules/1',
         status: 'RESOLVED',
         metricOutput: '850 hPa Moisture Convergence'
       },
@@ -233,7 +233,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Climatological Anomaly',
         shortRole: '30-year normal exceedance calculation',
         port: 3003,
-        routeUrl: 'http://localhost:3003',
+        routeUrl: '/modules/3',
         status: 'RESOLVED',
         metricOutput: 'EFI = +0.89 Extreme'
       },
@@ -242,7 +242,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Dynamic Event Footprint',
         shortRole: 'Bounding-box adaptive isolation',
         port: 3004,
-        routeUrl: 'http://localhost:3004',
+        routeUrl: '/modules/4',
         status: 'RESOLVED',
         metricOutput: 'Spatial IoU = 0.84'
       },
@@ -251,7 +251,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Spherical Temporal GNN',
         shortRole: 'Icosahedral mesh trajectory solver',
         port: 3005,
-        routeUrl: 'http://localhost:3005',
+        routeUrl: '/modules/5',
         status: 'RESOLVED',
         metricOutput: 'Coastward Track (32 km/h)'
       },
@@ -260,7 +260,7 @@ export function parseAndRouteQuery(rawQuery: string, mode: InputMode): IntentRou
         moduleName: 'Ensemble Probability Field',
         shortRole: '50-member probability surface',
         port: 3006,
-        routeUrl: 'http://localhost:3006',
+        routeUrl: '/modules/6',
         status: 'RESOLVED',
         metricOutput: '78% Probability (+48h)'
       }

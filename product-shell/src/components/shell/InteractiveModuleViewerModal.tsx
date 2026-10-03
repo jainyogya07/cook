@@ -10,25 +10,31 @@
 import React, { useState } from 'react';
 import {
   X,
-  ExternalLink,
   RotateCcw,
-  Maximize2,
-  Minimize2,
-  Cpu,
-  Layers,
   Sparkles,
   ArrowLeft
 } from 'lucide-react';
 import { useShellStore } from '@/services/useShellStore';
+import DedicatedModuleSimulator from './DedicatedModuleSimulator';
 
 export default function InteractiveModuleViewerModal() {
-  const { activeModuleViewer, closeModuleViewer } = useShellStore();
-  const [iframeKey, setIframeKey] = useState(0);
+  const { activeModuleViewer, closeModuleViewer, locale } = useShellStore();
+  const [key, setKey] = useState(0);
 
   if (!activeModuleViewer) return null;
 
-  const { moduleNumber, port, title } = activeModuleViewer;
-  const targetUrl = `http://localhost:${port}`;
+  const { moduleNumber, title } = activeModuleViewer;
+
+  const defaultBasin = {
+    id: 'odisha',
+    nameEn: 'Coastal Odisha / Bay of Bengal',
+    nameHi: 'तटीय ओडिशा / बंगाल की खाड़ी',
+    coords: '85.8°E, 19.8°N',
+    hazardEn: 'Heavy Rain / Cyclone Alert',
+    hazardHi: 'भारी बारिश / चक्रवात',
+    soilTypeEn: 'Alluvial / Coastal Saturated Clay',
+    soilTypeHi: 'जलोढ़ / तटीय संतृप्त मिट्टी'
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-[#07111F]/95 backdrop-blur-xl flex flex-col font-sans select-none animate-in fade-in duration-200">
@@ -49,8 +55,8 @@ export default function InteractiveModuleViewerModal() {
             <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#18A9E8]/10 text-[#36C5FF] border border-[#18A9E8]/30 font-bold">
               ENGINE {moduleNumber < 10 ? `0${moduleNumber}` : moduleNumber}
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#0B1728] text-[#9BAFC3] border border-[rgba(110,170,220,0.14)]">
-              :{port}
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#0B1728] text-[#10B981] border border-[#10B981]/30 font-bold">
+              3D ACCELERATED
             </span>
             <h2 className="text-sm font-bold text-white font-mono tracking-wide truncate max-w-md">
               {title}
@@ -61,19 +67,11 @@ export default function InteractiveModuleViewerModal() {
         {/* Right Tools */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setIframeKey((prev) => prev + 1)}
+            onClick={() => setKey((prev) => prev + 1)}
             className="p-2 rounded-full hover:bg-[#13253B] text-[#9BAFC3] hover:text-white transition-colors"
-            title="Reload Module Engine"
+            title="Reset Engine Simulation"
           >
             <RotateCcw className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => window.open(targetUrl, '_blank')}
-            className="p-2 rounded-full hover:bg-[#13253B] text-[#9BAFC3] hover:text-white transition-colors"
-            title="Open in Standalone New Tab"
-          >
-            <ExternalLink className="w-4 h-4" />
           </button>
 
           <button
@@ -86,15 +84,30 @@ export default function InteractiveModuleViewerModal() {
         </div>
       </header>
 
-      {/* Embedded High-Performance Live Module Iframe */}
+      {/* Embedded High-Performance Live 3D Module */}
       <div className="flex-1 w-full h-full relative bg-[#040914] overflow-hidden">
-        <iframe
-          key={iframeKey}
-          src={targetUrl}
-          className="w-full h-full border-none"
-          title={`Module ${moduleNumber} Live Engine View`}
-          allow="accelerometer; autoplay; camera; gyroscope; payment"
-        />
+        {moduleNumber === 1 ? (
+          <iframe
+            key={key}
+            src="/module01/index.html"
+            className="w-full h-full border-none"
+            title="Module 01 Planetary Volumetric Earth Globe"
+            allow="accelerometer; autoplay; camera; gyroscope; payment"
+          />
+        ) : (
+          <DedicatedModuleSimulator
+            key={key}
+            moduleNumber={moduleNumber}
+            title={title}
+            basin={defaultBasin}
+            horizon="+72h"
+            locale={locale || 'en'}
+            realtimeData={{
+              riskCategory: 'CRITICAL CONVERGENCE',
+              advisoryBullet: 'Active 3D biophysical monitoring along coastal river corridor.'
+            }}
+          />
+        )}
       </div>
     </div>
   );

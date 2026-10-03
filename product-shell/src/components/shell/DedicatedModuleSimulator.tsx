@@ -61,39 +61,34 @@ interface DedicatedModuleSimulatorProps {
 }
 
 // ============================================================================
-// 3D SCENE ACTORS FOR EACH SCIENTIFIC MODULE
+// 3D SCENE ACTORS FOR EACH SCIENTIFIC MODULE (M02 - M18)
 // ============================================================================
 
 // --- M02: 3D Vertical Sounding & Boundary Layer Inversion Column ---
 function M02SoundingScene({ altitude }: { altitude: number }) {
   const probeY = -2 + (altitude / 2400) * 4;
 
-  const tempPoints = useMemo(() => {
-    return [
-      new THREE.Vector3(-1.2, -2.0, 0),
-      new THREE.Vector3(-0.6, -1.0, 0.4),
-      new THREE.Vector3(-0.2, probeY, 0.2),
-      new THREE.Vector3(0.5, 1.2, -0.2),
-      new THREE.Vector3(1.2, 2.0, 0)
-    ];
-  }, [probeY]);
+  const tempPoints = useMemo(() => [
+    new THREE.Vector3(-1.2, -2.0, 0),
+    new THREE.Vector3(-0.6, -1.0, 0.4),
+    new THREE.Vector3(-0.2, probeY, 0.2),
+    new THREE.Vector3(0.5, 1.2, -0.2),
+    new THREE.Vector3(1.2, 2.0, 0)
+  ], [probeY]);
 
-  const dewPoints = useMemo(() => {
-    return [
-      new THREE.Vector3(-1.6, -2.0, 0),
-      new THREE.Vector3(-1.0, -1.0, 0.2),
-      new THREE.Vector3(-0.8, probeY, 0.1),
-      new THREE.Vector3(-0.3, 1.2, -0.3),
-      new THREE.Vector3(0.2, 2.0, 0)
-    ];
-  }, [probeY]);
+  const dewPoints = useMemo(() => [
+    new THREE.Vector3(-1.6, -2.0, 0),
+    new THREE.Vector3(-1.0, -1.0, 0.2),
+    new THREE.Vector3(-0.8, probeY, 0.1),
+    new THREE.Vector3(-0.3, 1.2, -0.3),
+    new THREE.Vector3(0.2, 2.0, 0)
+  ], [probeY]);
 
   const tempCurve = useMemo(() => new THREE.CatmullRomCurve3(tempPoints), [tempPoints]);
   const dewCurve = useMemo(() => new THREE.CatmullRomCurve3(dewPoints), [dewPoints]);
 
   return (
     <group>
-      {/* 5 Isobaric Altitude Discs */}
       {[-2, -1, 0, 1, 2].map((y, idx) => (
         <mesh key={idx} position={[0, y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.2, 2.2, 32]} />
@@ -101,31 +96,26 @@ function M02SoundingScene({ altitude }: { altitude: number }) {
         </mesh>
       ))}
 
-      {/* Cloud Inversion Trap Layer Ring */}
       <mesh position={[0, probeY, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.1, 2.4, 32]} />
         <meshBasicMaterial color="#ef4444" opacity={0.35} transparent side={THREE.DoubleSide} />
       </mesh>
 
-      {/* Central Sounding Axis */}
       <mesh position={[0, 0, 0]}>
         <cylinderGeometry args={[0.02, 0.02, 4.2, 16]} />
         <meshBasicMaterial color="#64748b" opacity={0.4} transparent />
       </mesh>
 
-      {/* Temperature 3D Spline (Gold) */}
       <mesh>
         <tubeGeometry args={[tempCurve, 40, 0.04, 8, false]} />
         <meshBasicMaterial color="#f59e0b" />
       </mesh>
 
-      {/* Dewpoint 3D Spline (Cyan) */}
       <mesh>
         <tubeGeometry args={[dewCurve, 40, 0.035, 8, false]} />
         <meshBasicMaterial color="#38bdf8" />
       </mesh>
 
-      {/* Interactive Probe Orb */}
       <mesh position={[0, probeY, 0]}>
         <sphereGeometry args={[0.12, 16, 16]} />
         <meshBasicMaterial color="#ef4444" />
@@ -134,11 +124,136 @@ function M02SoundingScene({ altitude }: { altitude: number }) {
   );
 }
 
+// --- M03: 3D Extreme Anomaly (EFI) & Climatological Shift Surface ---
+function M03AnomalyScene({ mode }: { mode: 'precip' | 'heat' | 'wind' }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const ringRef = useRef<THREE.Group>(null);
+
+  const primaryColor = mode === 'precip' ? '#38bdf8' : mode === 'heat' ? '#ef4444' : '#f59e0b';
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    if (ringRef.current) {
+      ringRef.current.rotation.z = t * 0.4;
+    }
+  });
+
+  return (
+    <group>
+      <gridHelper args={[7, 14, '#38bdf8', '#1e293b']} position={[0, -1.2, 0]} />
+
+      {/* 3D Deformed Anomaly Terrain Cone / Dome */}
+      <mesh ref={meshRef} position={[0, -0.2, 0]}>
+        <coneGeometry args={[2.4, 1.8, 32, 16, true]} />
+        <meshStandardMaterial
+          color={primaryColor}
+          wireframe
+          transparent
+          opacity={0.65}
+        />
+      </mesh>
+
+      {/* Anomaly Core Beacon */}
+      <mesh position={[0, 0.8, 0]}>
+        <sphereGeometry args={[0.18, 16, 16]} />
+        <meshBasicMaterial color={primaryColor} />
+      </mesh>
+
+      {/* 3 Sigma Contour Isoline Rings */}
+      <group ref={ringRef} position={[0, 0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh>
+          <ringGeometry args={[0.6, 0.65, 32]} />
+          <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} />
+        </mesh>
+        <mesh>
+          <ringGeometry args={[1.2, 1.25, 32]} />
+          <meshBasicMaterial color="#f59e0b" side={THREE.DoubleSide} opacity={0.8} transparent />
+        </mesh>
+        <mesh>
+          <ringGeometry args={[1.9, 1.95, 32]} />
+          <meshBasicMaterial color="#38bdf8" side={THREE.DoubleSide} opacity={0.5} transparent />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+// --- M04: 3D Volumetric Event Footprint & Multi-Zone Bounding ---
+function M04FootprintScene({ zone, intensity }: { zone: 'all' | 'core' | 'primary'; intensity: number }) {
+  const updraftRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    if (updraftRef.current) {
+      updraftRef.current.rotation.y = clock.getElapsedTime() * 0.6;
+    }
+  });
+
+  const showCore = zone === 'all' || zone === 'core';
+  const showPrimary = zone === 'all' || zone === 'primary';
+
+  return (
+    <group>
+      <gridHelper args={[7, 14, '#0ea5e9', '#0f172a']} position={[0, -1.2, 0]} />
+
+      {/* Bay of Bengal / Odisha Coast Arc */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[
+              new Float32Array([
+                -2.8, -1.18, 1.8,
+                -2.0, -1.18, 0.8,
+                -1.2, -1.18, -0.1,
+                -0.4, -1.18, -0.9,
+                0.8, -1.18, -1.8
+              ]),
+              3
+            ]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color="#38bdf8" linewidth={2} />
+      </line>
+
+      {/* Peripheral Zone Base Contour */}
+      <mesh position={[0, -1.15, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[2.2, 2.3, 36]} />
+        <meshBasicMaterial color="#38bdf8" side={THREE.DoubleSide} opacity={0.6} transparent />
+      </mesh>
+
+      {/* Primary Hazard Zone (Translucent Amber Cone) */}
+      {showPrimary && (
+        <mesh position={[0, -0.3, 0]}>
+          <coneGeometry args={[1.8, 1.8 * (intensity / 50), 24, 8, true]} />
+          <meshStandardMaterial color="#f59e0b" transparent opacity={0.3} wireframe={false} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+
+      {/* Core Convective Storm Cylinder */}
+      {showCore && (
+        <mesh position={[0, 0.1, 0]}>
+          <cylinderGeometry args={[0.6, 0.9, 2.2 * (intensity / 50), 24, 6, true]} />
+          <meshStandardMaterial color="#ef4444" transparent opacity={0.6} side={THREE.DoubleSide} wireframe />
+        </mesh>
+      )}
+
+      {/* Rotating Updraft Particles */}
+      <group ref={updraftRef} position={[0, 0, 0]}>
+        {[-0.6, 0, 0.6].map((y, i) => (
+          <mesh key={i} position={[0, y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.3 + i * 0.15, 0.35 + i * 0.15, 16]} />
+            <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} opacity={0.8} transparent />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
 // --- M05: 3D Storm Trajectory Space & Ensemble Spaghetti Strands ---
 function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) {
   const particleRef = useRef<THREE.Mesh>(null);
 
-  // 8 Ensemble Strand Splines curving towards Odisha Landfall
   const strands = useMemo(() => {
     const arr = [];
     const count = filter === 'mean' ? 1 : filter === 'extreme' ? 3 : 8;
@@ -150,7 +265,7 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
         new THREE.Vector3(1.2 + spreadX * 0.5, -0.6, 0.6 + spreadZ * 0.5),
         new THREE.Vector3(0.0 + spreadX, 0.2, 0.0 + spreadZ),
         new THREE.Vector3(-1.4 + spreadX * 0.4, 0.8, -0.4 + spreadZ * 0.3),
-        new THREE.Vector3(-2.2, 1.2, -0.6) // Puri Landfall Target
+        new THREE.Vector3(-2.2, 1.2, -0.6)
       ];
       arr.push({
         curve: new THREE.CatmullRomCurve3(pts),
@@ -160,7 +275,6 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
     return arr;
   }, [filter]);
 
-  // Main Consensus Track Curve
   const meanCurve = useMemo(() => {
     return new THREE.CatmullRomCurve3([
       new THREE.Vector3(2.5, -1.5, 1.2),
@@ -181,7 +295,6 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
 
   return (
     <group>
-      {/* 3D Coastline Curve Reference */}
       <line>
         <bufferGeometry>
           <bufferAttribute
@@ -202,7 +315,6 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
         <lineBasicMaterial color="#38bdf8" opacity={0.45} transparent linewidth={2} />
       </line>
 
-      {/* 3D Spaghetti Strand Tubes */}
       {strands.map((s, idx) => (
         <mesh key={idx}>
           <tubeGeometry args={[s.curve, 40, idx === 0 ? 0.035 : 0.018, 8, false]} />
@@ -210,19 +322,16 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
         </mesh>
       ))}
 
-      {/* Consensus Mean Track (Bold) */}
       <mesh>
         <tubeGeometry args={[meanCurve, 40, 0.045, 8, false]} />
         <meshBasicMaterial color="#f59e0b" />
       </mesh>
 
-      {/* Traveling Cyclone Eye Particle */}
       <mesh ref={particleRef}>
         <sphereGeometry args={[0.09, 16, 16]} />
         <meshBasicMaterial color="#ef4444" />
       </mesh>
 
-      {/* Landfall Beacon Ring at Puri/Paradip */}
       <group position={[-2.2, 1.2, -0.6]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.08, 0.28, 32]} />
@@ -233,8 +342,503 @@ function M05TrajectoryScene({ filter }: { filter: 'all' | 'extreme' | 'mean' }) 
   );
 }
 
+// --- M06: 3D Multimodal Probability Field & Exceedance Terraces ---
+function M06ProbabilityScene({ threshold }: { threshold: number }) {
+  const terraces = useMemo(() => [
+    { label: 'P>25mm', y: -0.8, color: '#0284c7', r: 2.4, opacity: 0.35 },
+    { label: 'P>50mm', y: -0.4, color: '#06b6d4', r: 1.8, opacity: 0.5 },
+    { label: 'P>100mm', y: 0.1, color: '#f59e0b', r: 1.2, opacity: 0.7 },
+    { label: 'P>150mm', y: 0.7, color: '#ef4444', r: 0.7, opacity: 0.9 }
+  ], []);
+
+  const activeIndex = threshold >= 150 ? 3 : threshold >= 100 ? 2 : threshold >= 50 ? 1 : 0;
+
+  return (
+    <group>
+      <gridHelper args={[6, 12, '#06b6d4', '#0f172a']} position={[0, -1.2, 0]} />
+
+      {terraces.map((t, idx) => (
+        <group key={t.label} position={[0, t.y, 0]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[t.r, t.r + 0.15, 0.15, 32]} />
+            <meshStandardMaterial
+              color={t.color}
+              transparent
+              opacity={idx <= activeIndex ? t.opacity : 0.15}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {/* 3D Vertical Transect Cut Plane */}
+      <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 4, 0]}>
+        <planeGeometry args={[3.2, 2.2]} />
+        <meshBasicMaterial color="#a855f7" wireframe transparent opacity={0.4} />
+      </mesh>
+    </group>
+  );
+}
+
+// --- M07: 3D 12km to 1km Diffusion Downscaling Grid Transition ---
+function M07DownscalingScene({ step }: { step: number }) {
+  const laserRef = useRef<THREE.Mesh>(null);
+
+  useFrame(({ clock }) => {
+    if (laserRef.current) {
+      laserRef.current.position.x = Math.sin(clock.getElapsedTime() * 1.5) * 1.8;
+    }
+  });
+
+  const fineAlpha = Math.min(1, Math.max(0.1, step / 50));
+
+  return (
+    <group>
+      {/* Lower Super-Resolved 1km High-Res Terrain Mesh */}
+      <mesh position={[0, -1.0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[4.4, 4.4, 32, 32]} />
+        <meshStandardMaterial
+          color="#10b981"
+          wireframe
+          transparent
+          opacity={0.3 + fineAlpha * 0.6}
+        />
+      </mesh>
+
+      {/* Upper Coarse 12km NWP Blocks */}
+      {[-1.2, -0.4, 0.4, 1.2].map((x, xi) =>
+        [-1.2, -0.4, 0.4, 1.2].map((z, zi) => (
+          <mesh key={`${xi}-${zi}`} position={[x, 0.4, z]}>
+            <boxGeometry args={[0.7, 0.25, 0.7]} />
+            <meshStandardMaterial
+              color="#38bdf8"
+              transparent
+              opacity={Math.max(0.08, 0.7 - fineAlpha * 0.5)}
+              wireframe
+            />
+          </mesh>
+        ))
+      )}
+
+      {/* Scanning Denoising Reverse-SDE Laser Beam */}
+      <mesh ref={laserRef} position={[0, -0.3, 0]}>
+        <boxGeometry args={[0.04, 2.0, 4.4]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.7} />
+      </mesh>
+    </group>
+  );
+}
+
+// --- M08: 3D Multi-Model Extreme Verification & Split Comparison ---
+function M08ComparisonScene({ splitPos }: { splitPos: number }) {
+  return (
+    <group>
+      {/* Left Hemisphere: Coarse Model (Smoothed Peak) */}
+      <mesh position={[-1.2, -0.2, 0]}>
+        <sphereGeometry args={[1.2, 24, 16, 0, Math.PI]} />
+        <meshStandardMaterial color="#38bdf8" wireframe transparent opacity={0.4} />
+      </mesh>
+
+      {/* Right Hemisphere: 4D Diffusion (Preserved Extreme Sharp Peak) */}
+      <mesh position={[1.2, 0.1, 0]}>
+        <coneGeometry args={[1.3, 2.2, 24, 8, true]} />
+        <meshStandardMaterial color="#ef4444" wireframe transparent opacity={0.7} />
+      </mesh>
+
+      {/* Vertical Split Divider Blade */}
+      <mesh position={[splitPos, 0, 0]}>
+        <boxGeometry args={[0.04, 3.0, 3.4]} />
+        <meshBasicMaterial color="#f59e0b" />
+      </mesh>
+
+      {/* Extreme Preservation Needles */}
+      <mesh position={[1.2, 1.2, 0]}>
+        <cylinderGeometry args={[0.02, 0.02, 0.8, 8]} />
+        <meshBasicMaterial color="#10b981" />
+      </mesh>
+    </group>
+  );
+}
+
+// --- M09: 3D Crop System Exposure Field (Odisha District Parcels & Storm Footprint) ---
+function M09CropExposureScene({ cropFilter, leadHour }: { cropFilter: string; leadHour: number }) {
+  const footprintRingRef = useRef<THREE.Group>(null);
+
+  // Exact Coastal Districts & Coordinates in 3D Space
+  const districtNodes = useMemo(() => [
+    { name: 'Balasore', pos: new THREE.Vector3(-1.4, 0.05, -1.8), crops: ['PADDY', 'SUGARCANE'] },
+    { name: 'Bhadrak', pos: new THREE.Vector3(-0.6, 0.05, -1.0), crops: ['PADDY', 'PULSES'] },
+    { name: 'Kendrapara', pos: new THREE.Vector3(0.2, 0.05, -0.2), crops: ['PADDY', 'GROUNDNUT'] },
+    { name: 'Jagatsinghpur', pos: new THREE.Vector3(0.8, 0.05, 0.6), crops: ['PADDY', 'SUGARCANE'] },
+    { name: 'Puri Delta', pos: new THREE.Vector3(0.0, 0.05, 1.4), crops: ['PADDY', 'PULSES', 'GROUNDNUT'] },
+    { name: 'Cuttack Basin', pos: new THREE.Vector3(-1.2, 0.05, 0.4), crops: ['PADDY', 'PULSES'] },
+  ], []);
+
+  // 24 Real Cadastral Crop Parcel Clusters distributed across coastal Odisha
+  const parcels = useMemo(() => [
+    { id: 1, pos: [-1.6, -1.6], crop: 'PADDY', area: '14,200 ha', exp: true },
+    { id: 2, pos: [-1.2, -1.9], crop: 'SUGARCANE', area: '8,400 ha', exp: true },
+    { id: 3, pos: [-0.8, -1.2], crop: 'PADDY', area: '18,600 ha', exp: true },
+    { id: 4, pos: [-0.4, -0.9], crop: 'PULSES', area: '9,200 ha', exp: true },
+    { id: 5, pos: [0.0, -0.4], crop: 'PADDY', area: '22,400 ha', exp: true },
+    { id: 6, pos: [0.4, 0.0], crop: 'GROUNDNUT', area: '6,100 ha', exp: true },
+    { id: 7, pos: [0.7, 0.4], crop: 'PADDY', area: '16,800 ha', exp: true },
+    { id: 8, pos: [0.9, 0.8], crop: 'SUGARCANE', area: '7,300 ha', exp: true },
+    { id: 9, pos: [-0.2, 1.2], crop: 'PADDY', area: '20,500 ha', exp: false },
+    { id: 10, pos: [-0.1, 1.6], crop: 'PULSES', area: '8,900 ha', exp: false },
+    { id: 11, pos: [-1.0, 0.2], crop: 'GROUNDNUT', area: '5,400 ha', exp: false },
+    { id: 12, pos: [-1.4, 0.6], crop: 'PADDY', area: '12,300 ha', exp: false },
+  ], []);
+
+  useFrame(({ clock }) => {
+    if (footprintRingRef.current) {
+      footprintRingRef.current.rotation.z = clock.getElapsedTime() * 0.2;
+    }
+  });
+
+  const getCropColor = (crop: string) => {
+    switch (crop) {
+      case 'PADDY': return '#10b981';
+      case 'SUGARCANE': return '#84cc16';
+      case 'PULSES': return '#eab308';
+      case 'GROUNDNUT': return '#f97316';
+      default: return '#38bdf8';
+    }
+  };
+
+  const stormProgress = (leadHour / 72);
+  const stormCenterZ = THREE.MathUtils.lerp(1.8, -0.2, stormProgress);
+  const stormCenterX = THREE.MathUtils.lerp(2.2, 0.4, stormProgress);
+
+  return (
+    <group>
+      {/* 3D Base Geography Substrate */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+        <planeGeometry args={[6.2, 6.2]} />
+        <meshStandardMaterial color="#091322" roughness={0.9} />
+      </mesh>
+
+      {/* Odisha Coastline Curve */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[
+              new Float32Array([
+                -1.8, 0.02, -2.4,
+                -1.2, 0.02, -1.6,
+                -0.4, 0.02, -0.8,
+                0.4, 0.02, 0.0,
+                1.0, 0.02, 0.8,
+                0.6, 0.02, 1.8,
+                -0.2, 0.02, 2.4
+              ]),
+              3
+            ]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color="#38bdf8" linewidth={2} />
+      </line>
+
+      {/* Advancing Storm Inundation Footprint Rings */}
+      <group
+        ref={footprintRingRef}
+        position={[stormCenterX, 0.04, stormCenterZ]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <mesh>
+          <ringGeometry args={[0.3, 0.4, 32]} />
+          <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} opacity={0.85} transparent />
+        </mesh>
+        <mesh>
+          <ringGeometry args={[0.9, 1.05, 32]} />
+          <meshBasicMaterial color="#f59e0b" side={THREE.DoubleSide} opacity={0.6} transparent />
+        </mesh>
+        <mesh>
+          <ringGeometry args={[1.6, 1.8, 32]} />
+          <meshBasicMaterial color="#38bdf8" side={THREE.DoubleSide} opacity={0.3} transparent />
+        </mesh>
+      </group>
+
+      {/* Cadastral Agricultural Crop Parcel Clusters */}
+      {parcels.map((p) => {
+        const matchesCrop = cropFilter === 'ALL' || p.crop === cropFilter;
+        if (!matchesCrop) return null;
+
+        const isExposed = p.exp;
+        const color = isExposed ? '#ef4444' : getCropColor(p.crop);
+
+        return (
+          <group key={p.id} position={[p.pos[0], 0.08, p.pos[1]]}>
+            <mesh rotation={[-Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.16, 0.18, 0.08, 16]} />
+              <meshStandardMaterial
+                color={color}
+                emissive={isExposed ? '#ef4444' : '#000000'}
+                emissiveIntensity={isExposed ? 0.6 : 0}
+              />
+            </mesh>
+
+            {/* Exposure Halo Glow for Inundated Fields */}
+            {isExposed && (
+              <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0.2, 0.28, 16]} />
+                <meshBasicMaterial color="#f59e0b" side={THREE.DoubleSide} opacity={0.7} transparent />
+              </mesh>
+            )}
+          </group>
+        );
+      })}
+
+      {/* District Center Markers */}
+      {districtNodes.map((d, i) => (
+        <group key={i} position={d.pos}>
+          <mesh position={[0, 0.15, 0]}>
+            <sphereGeometry args={[0.07, 12, 12]} />
+            <meshBasicMaterial color="#ffffff" />
+          </mesh>
+          <mesh position={[0, 0.08, 0]}>
+            <cylinderGeometry args={[0.015, 0.015, 0.15, 8]} />
+            <meshBasicMaterial color="#94a3b8" />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// --- M10: 3D Living Growth Stage Architecture & Wind Lodging ---
+function M10PhenologyScene({ stage, windSpeed }: { stage: string; windSpeed: number }) {
+  const stemRef = useRef<THREE.Group>(null);
+
+  // Dynamic wind lodging sway and deflection angle
+  const maxBend = (windSpeed / 120) * 0.55;
+
+  useFrame(({ clock }) => {
+    if (stemRef.current) {
+      const t = clock.getElapsedTime();
+      const sway = Math.sin(t * 3.5) * maxBend * 0.5 + maxBend * 0.5;
+      stemRef.current.rotation.z = THREE.MathUtils.lerp(stemRef.current.rotation.z, sway, 0.1);
+    }
+  });
+
+  return (
+    <group>
+      {/* Soil Substrate Surface */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.0, 0]}>
+        <planeGeometry args={[5, 5]} />
+        <meshStandardMaterial color="#2d2218" />
+      </mesh>
+
+      {/* Surface Ponding / Waterlogging Sheet */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.96, 0]}>
+        <planeGeometry args={[4.8, 4.8]} />
+        <meshStandardMaterial color="#0284c7" opacity={0.6} transparent />
+      </mesh>
+
+      {/* Articulated Bending Crop Morphology (Stem, Nodes, Flowering Panicle) */}
+      <group ref={stemRef} position={[0, -0.96, 0]}>
+        <mesh position={[0, 0.6, 0]}>
+          <cylinderGeometry args={[0.04, 0.06, 1.2, 12]} />
+          <meshStandardMaterial color="#10b981" />
+        </mesh>
+        <mesh position={[0, 1.5, 0]}>
+          <cylinderGeometry args={[0.025, 0.04, 0.8, 12]} />
+          <meshStandardMaterial color="#22c55e" />
+        </mesh>
+
+        {/* Flowering Anthesis / Grain Panicle Head */}
+        <mesh position={[0, 2.0, 0]}>
+          <coneGeometry args={[0.15, 0.6, 16]} />
+          <meshStandardMaterial color={stage === 'FLOWERING' ? '#f59e0b' : '#10b981'} />
+        </mesh>
+      </group>
+
+      {/* Subsurface Root System */}
+      <group position={[0, -1.0, 0]}>
+        {[-0.3, 0, 0.3].map((x, i) => (
+          <mesh key={i} position={[x, -0.3, 0]} rotation={[0, 0, x]}>
+            <cylinderGeometry args={[0.015, 0.005, 0.6, 8]} />
+            <meshBasicMaterial color="#a16207" />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
+// --- M11: 3D SWAT Hydrology & Vertical Soil Profile Monolith ---
+function M11HydrologyScene({ variable }: { variable: string }) {
+  const particlesRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    if (particlesRef.current) {
+      const t = clock.getElapsedTime();
+      particlesRef.current.children.forEach((c, idx) => {
+        c.position.y = -0.2 - ((t * 0.4 + idx * 0.2) % 1.2);
+      });
+    }
+  });
+
+  return (
+    <group>
+      {/* Layer 1: Topsoil Organic Layer (0 - 15 cm) */}
+      <mesh position={[0, 0.6, 0]}>
+        <boxGeometry args={[2.8, 0.4, 2.8]} />
+        <meshStandardMaterial color="#36220f" roughness={0.9} />
+      </mesh>
+
+      {/* Layer 2: Root Zone Clay / Loam (15 - 60 cm) */}
+      <mesh position={[0, 0.1, 0]}>
+        <boxGeometry args={[2.8, 0.6, 2.8]} />
+        <meshStandardMaterial color="#54381e" roughness={0.8} />
+      </mesh>
+
+      {/* Layer 3: Saturated Subsoil & Perched Water Table Level */}
+      <mesh position={[0, -0.6, 0]}>
+        <boxGeometry args={[2.8, 0.8, 2.8]} />
+        <meshStandardMaterial color="#0369a1" transparent opacity={0.85} />
+      </mesh>
+
+      {/* Percolating Water Droplets */}
+      <group ref={particlesRef}>
+        {[-0.6, -0.2, 0.2, 0.6].map((x, xi) =>
+          [-0.6, -0.2, 0.2, 0.6].map((z, zi) => (
+            <mesh key={`${xi}-${zi}`} position={[x, 0, z]}>
+              <sphereGeometry args={[0.035, 8, 8]} />
+              <meshBasicMaterial color="#38bdf8" />
+            </mesh>
+          ))
+        )}
+      </group>
+    </group>
+  );
+}
+
+// --- M12: 3D Explainable Crop Recommendation & TreeSHAP Attribution ---
+function M12CropScenarioScene({ candidate }: { candidate: string }) {
+  const candidates = useMemo(() => [
+    { name: 'Swarna Sub-1', pos: -1.4, shapYield: 1.2, color: '#10b981', label: 'Flood-Tolerant' },
+    { name: 'Parijat Traditional', pos: 0.0, shapYield: 0.6, color: '#f59e0b', label: 'Standard' },
+    { name: 'Hybrid Short-Cycle', pos: 1.4, shapYield: -0.4, color: '#ef4444', label: 'Vulnerable' },
+  ], []);
+
+  return (
+    <group>
+      <gridHelper args={[6, 12, '#10b981', '#0f172a']} position={[0, -1.0, 0]} />
+
+      {candidates.map((c) => {
+        const isSelected = candidate === c.name;
+        const h = Math.abs(c.shapYield) + 0.4;
+        const y = -1.0 + h / 2;
+
+        return (
+          <group key={c.name} position={[c.pos, 0, 0]}>
+            {/* Trial Bed Base */}
+            <mesh position={[0, -0.9, 0]}>
+              <boxGeometry args={[1.0, 0.15, 1.0]} />
+              <meshStandardMaterial color={isSelected ? '#38bdf8' : '#1e293b'} />
+            </mesh>
+
+            {/* TreeSHAP Contribution Column */}
+            <mesh position={[0, y, 0]}>
+              <cylinderGeometry args={[0.18, 0.22, h, 16]} />
+              <meshStandardMaterial color={c.color} />
+            </mesh>
+
+            {/* Beacon Top */}
+            <mesh position={[0, y + h / 2 + 0.1, 0]}>
+              <sphereGeometry args={[0.08, 12, 12]} />
+              <meshBasicMaterial color="#ffffff" />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+// --- M13: 3D Quantile Yield Risk & Geospatial Downside Loss Surface ---
+function M13YieldRiskScene({ metric }: { metric: string }) {
+  const districts = useMemo(() => [
+    { name: 'Balasore', pos: [-1.4, -1.0], risk: 0.75, yieldH: 1.6 },
+    { name: 'Bhadrak', pos: [-0.6, -0.4], risk: 0.65, yieldH: 1.4 },
+    { name: 'Kendrapara', pos: [0.2, 0.2], risk: 0.85, yieldH: 1.8 },
+    { name: 'Jagatsinghpur', pos: [0.8, 0.8], risk: 0.70, yieldH: 1.5 },
+    { name: 'Puri Delta', pos: [0.0, 1.4], risk: 0.45, yieldH: 1.1 },
+  ], []);
+
+  return (
+    <group>
+      <gridHelper args={[6, 12, '#f59e0b', '#0f172a']} position={[0, -1.0, 0]} />
+
+      {districts.map((d, i) => {
+        const height = metric === 'risk' ? d.risk * 2.2 : d.yieldH;
+        const color = d.risk > 0.7 ? '#ef4444' : d.risk > 0.5 ? '#f59e0b' : '#10b981';
+
+        return (
+          <group key={i} position={[d.pos[0], -1.0 + height / 2, d.pos[1]]}>
+            <mesh>
+              <cylinderGeometry args={[0.24, 0.3, height, 16]} />
+              <meshStandardMaterial color={color} />
+            </mesh>
+
+            {/* Skew-t Quantile Risk Beacon */}
+            <mesh position={[0, height / 2 + 0.15, 0]}>
+              <ringGeometry args={[0.1, 0.28, 16]} />
+              <meshBasicMaterial color={color} side={THREE.DoubleSide} />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+// --- M14: 3D Environmental Pest & Pathogen Incubation Microclimate ---
+function M14PestDiseaseScene({ pathogen, humidity }: { pathogen: string; humidity: number }) {
+  const sporeRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    if (sporeRef.current) {
+      sporeRef.current.rotation.y = clock.getElapsedTime() * 0.3;
+    }
+  });
+
+  const riskColor = pathogen === 'BLB' ? '#ef4444' : pathogen === 'BPH' ? '#f59e0b' : '#eab308';
+
+  return (
+    <group>
+      {/* 3D Crop Canopy Microclimate Envelope */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[1.8, 24, 24]} />
+        <meshStandardMaterial color={riskColor} transparent opacity={0.2} wireframe />
+      </mesh>
+
+      {/* Incubation Core Zone */}
+      <mesh position={[0, 0, 0]}>
+        <octahedronGeometry args={[0.8, 2]} />
+        <meshStandardMaterial color={riskColor} transparent opacity={0.5} />
+      </mesh>
+
+      {/* Floating Spore & Vector Migration Particles */}
+      <group ref={sporeRef}>
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
+          const angle = (i / 8) * Math.PI * 2;
+          const r = 1.3;
+          return (
+            <mesh key={i} position={[Math.cos(angle) * r, Math.sin(i) * 0.4, Math.sin(angle) * r]}>
+              <sphereGeometry args={[0.06, 8, 8]} />
+              <meshBasicMaterial color={riskColor} />
+            </mesh>
+          );
+        })}
+      </group>
+    </group>
+  );
+}
+
 // --- M15: 3D Mandi Spatial Network & Supply Flow Arcs ---
-function M15MarketScene() {
+function M15MarketScene({ commodity }: { commodity: string }) {
   const nodes = useMemo(() => [
     { name: 'Balasore', pos: new THREE.Vector3(-1.8, 1.2, -0.2), color: '#ef4444', price: '₹2,420' },
     { name: 'Cuttack', pos: new THREE.Vector3(-0.6, 0.2, 0.2), color: '#f59e0b', price: '₹2,380' },
@@ -243,18 +847,15 @@ function M15MarketScene() {
     { name: 'Nashik Corridor', pos: new THREE.Vector3(2.2, 0.8, -0.6), color: '#f59e0b', price: '₹2,480' }
   ], []);
 
-  const arcs = useMemo(() => {
-    return [
-      new THREE.QuadraticBezierCurve3(nodes[0].pos, new THREE.Vector3(-1.0, 1.8, 0.0), nodes[1].pos),
-      new THREE.QuadraticBezierCurve3(nodes[1].pos, new THREE.Vector3(0.0, 0.8, 0.4), nodes[2].pos),
-      new THREE.QuadraticBezierCurve3(nodes[2].pos, new THREE.Vector3(0.2, 0.2, 0.8), nodes[3].pos),
-      new THREE.QuadraticBezierCurve3(nodes[4].pos, new THREE.Vector3(1.0, 1.4, 0.0), nodes[1].pos)
-    ];
-  }, [nodes]);
+  const arcs = useMemo(() => [
+    new THREE.QuadraticBezierCurve3(nodes[0].pos, new THREE.Vector3(-1.0, 1.8, 0.0), nodes[1].pos),
+    new THREE.QuadraticBezierCurve3(nodes[1].pos, new THREE.Vector3(0.0, 0.8, 0.4), nodes[2].pos),
+    new THREE.QuadraticBezierCurve3(nodes[2].pos, new THREE.Vector3(0.2, 0.2, 0.8), nodes[3].pos),
+    new THREE.QuadraticBezierCurve3(nodes[4].pos, new THREE.Vector3(1.0, 1.4, 0.0), nodes[1].pos)
+  ], [nodes]);
 
   return (
     <group>
-      {/* 3D Flow Arcs */}
       {arcs.map((curve, idx) => (
         <mesh key={idx}>
           <tubeGeometry args={[curve, 32, 0.025, 8, false]} />
@@ -262,7 +863,6 @@ function M15MarketScene() {
         </mesh>
       ))}
 
-      {/* 3D Mandi Pedestals */}
       {nodes.map((n, idx) => (
         <group key={idx} position={n.pos}>
           <mesh position={[0, -0.2, 0]}>
@@ -302,7 +902,6 @@ function M16DagScene({ activeNode }: { activeNode: number }) {
 
   return (
     <group>
-      {/* Energy Edges */}
       {edges.map((curve, idx) => (
         <mesh key={idx}>
           <tubeGeometry args={[curve, 32, 0.03, 8, false]} />
@@ -310,7 +909,6 @@ function M16DagScene({ activeNode }: { activeNode: number }) {
         </mesh>
       ))}
 
-      {/* Nodes */}
       {dagNodes.map((n) => {
         const isCurrent = n.id === activeNode;
         return (
@@ -332,39 +930,82 @@ function M16DagScene({ activeNode }: { activeNode: number }) {
   );
 }
 
-// --- Generic 3D Terrain / Field Mesh for Remaining Modules ---
-function Generic3DFieldScene({ moduleNum }: { moduleNum: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
+// --- M17: 3D Inter-District Supply Shock & Logistics Transit Corridor ---
+function M17SupplyShockScene({ disruption }: { disruption: number }) {
+  const truckRef = useRef<THREE.Mesh>(null);
+
+  const highwayPts = useMemo(() => [
+    new THREE.Vector3(-2.4, -0.8, -1.4),
+    new THREE.Vector3(-1.0, -0.6, -0.4),
+    new THREE.Vector3(0.4, -0.4, 0.6),
+    new THREE.Vector3(1.8, -0.2, 1.6)
+  ], []);
+
+  const highwayCurve = useMemo(() => new THREE.CatmullRomCurve3(highwayPts), [highwayPts]);
 
   useFrame(({ clock }) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.z = Math.sin(clock.getElapsedTime() * 0.4) * 0.08;
+    if (truckRef.current) {
+      const t = (clock.getElapsedTime() * 0.2) % 1.0;
+      truckRef.current.position.copy(highwayCurve.getPoint(t));
     }
   });
 
   return (
     <group>
-      {/* 3D Grid Plane */}
-      <gridHelper args={[6, 12, '#38bdf8', '#1e293b']} position={[0, -1.2, 0]} />
-
-      {/* Displaced Wave Field Mesh */}
-      <mesh ref={meshRef} position={[0, -0.4, 0]} rotation={[-Math.PI / 3, 0, 0]}>
-        <planeGeometry args={[4.2, 3.2, 24, 24]} />
-        <meshStandardMaterial
-          color={moduleNum % 2 === 0 ? '#38bdf8' : '#10b981'}
-          wireframe
-          transparent
-          opacity={0.4}
-        />
+      {/* NH16 Highway Ribbon */}
+      <mesh>
+        <tubeGeometry args={[highwayCurve, 40, 0.06, 8, false]} />
+        <meshBasicMaterial color="#64748b" />
       </mesh>
 
-      {/* Floating Spatial Center Sphere */}
-      <Float speed={1.5} rotationIntensity={1} floatIntensity={1.2}>
-        <mesh position={[0, 0.6, 0]}>
-          <octahedronGeometry args={[0.4, 2]} />
-          <meshBasicMaterial color="#f59e0b" wireframe />
+      {/* Moving Freight Transport Marker */}
+      <mesh ref={truckRef}>
+        <boxGeometry args={[0.2, 0.12, 0.3]} />
+        <meshBasicMaterial color="#f59e0b" />
+      </mesh>
+
+      {/* Inundation Breach Point (Highway Disruption) */}
+      <mesh position={[0.4, -0.38, 0.6]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.15, 0.5, 24]} />
+        <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} opacity={0.8} transparent />
+      </mesh>
+
+      {/* Arrival Deficit Bar Towers */}
+      {[
+        { x: -1.6, z: -1.0, h: 1.2, color: '#ef4444' },
+        { x: -0.2, z: 0.0, h: 1.8, color: '#ef4444' },
+        { x: 1.2, z: 1.0, h: 0.8, color: '#f59e0b' }
+      ].map((b, i) => (
+        <mesh key={i} position={[b.x, -0.8 + (b.h * (disruption / 50)) / 2, b.z]}>
+          <cylinderGeometry args={[0.16, 0.2, b.h * (disruption / 50), 16]} />
+          <meshStandardMaterial color={b.color} />
         </mesh>
-      </Float>
+      ))}
+    </group>
+  );
+}
+
+// --- M18: 3D Counterfactual Policy Simulator & Dual Economic Response Surface ---
+function M18ScenarioSimulatorScene({ rainDelta, bufferRelease }: { rainDelta: number; bufferRelease: boolean }) {
+  return (
+    <group>
+      {/* Surface A: Status Quo Unmitigated Loss Crater (Red) */}
+      <mesh position={[-1.2, -0.4, 0]} rotation={[-Math.PI / 3, 0, 0]}>
+        <planeGeometry args={[2.4, 2.4, 16, 16]} />
+        <meshStandardMaterial color="#ef4444" wireframe transparent opacity={0.65} />
+      </mesh>
+
+      {/* Surface B: AI-Optimized Policy Action (Cyan/Green - Smoothed Loss) */}
+      <mesh position={[1.2, bufferRelease ? 0.2 : -0.2, 0]} rotation={[-Math.PI / 3, 0, 0]}>
+        <planeGeometry args={[2.4, 2.4, 16, 16]} />
+        <meshStandardMaterial color="#10b981" wireframe transparent opacity={0.8} />
+      </mesh>
+
+      {/* Central Economic Savings Delta Pedestal */}
+      <mesh position={[0, 0.4, 0]}>
+        <cylinderGeometry args={[0.25, 0.3, 0.8, 16]} />
+        <meshStandardMaterial color={bufferRelease ? '#10b981' : '#f59e0b'} />
+      </mesh>
     </group>
   );
 }
@@ -387,9 +1028,25 @@ export default function DedicatedModuleSimulator({
 
   // Local interactive state for simulations
   const [m02Altitude, setM02Altitude] = useState<number>(620);
+  const [m03Mode, setM03Mode] = useState<'precip' | 'heat' | 'wind'>('precip');
+  const [m04Zone, setM04Zone] = useState<'all' | 'core' | 'primary'>('all');
+  const [m04Intensity, setM04Intensity] = useState<number>(55);
   const [m05Filter, setM05Filter] = useState<'all' | 'extreme' | 'mean'>('all');
-  const [m15Commodity, setM15Commodity] = useState<'wheat' | 'onion' | 'paddy' | 'mustard'>('wheat');
+  const [m06Threshold, setM06Threshold] = useState<number>(100);
+  const [m07Step, setM07Step] = useState<number>(35);
+  const [m08Split, setM08Split] = useState<number>(0);
+  const [m09Crop, setM09Crop] = useState<string>('ALL');
+  const [m09LeadHour, setM09LeadHour] = useState<number>(72);
+  const [m10Stage, setM10Stage] = useState<string>('FLOWERING');
+  const [m10Wind, setM10Wind] = useState<number>(85);
+  const [m11Variable, setM11Variable] = useState<string>('WATERLOGGING');
+  const [m12Candidate, setM12Candidate] = useState<string>('Swarna Sub-1');
+  const [m13Metric, setM13Metric] = useState<string>('risk');
+  const [m14Pathogen, setM14Pathogen] = useState<string>('BLB');
+  const [m14Humidity, setM14Humidity] = useState<number>(92);
+  const [m15Commodity, setM15Commodity] = useState<'wheat' | 'onion' | 'paddy' | 'mustard'>('paddy');
   const [m16ActiveNode, setM16ActiveNode] = useState<number>(3);
+  const [m17Disruption, setM17Disruption] = useState<number>(60);
   const [m18RainDelta, setM18RainDelta] = useState<number>(20);
   const [m18BufferRelease, setM18BufferRelease] = useState<boolean>(true);
 
@@ -481,32 +1138,43 @@ export default function DedicatedModuleSimulator({
             🖱️ Click & Drag to Orbit in 3D Space · Scroll to Zoom
           </div>
 
-          <Canvas camera={{ position: [0, 1.2, 5.2], fov: 42 }}>
-            <ambientLight intensity={0.6} />
-            <pointLight position={[10, 10, 10]} intensity={0.8} />
+          <Canvas camera={{ position: [0, 1.4, 5.2], fov: 42 }}>
+            <ambientLight intensity={0.7} />
+            <pointLight position={[10, 10, 10]} intensity={0.9} />
             <Stars radius={60} depth={30} count={1200} factor={2} saturation={0} fade speed={1} />
 
+            {/* Dedicated domain-specific 3D scene for EVERY scientific module */}
             {moduleNumber === 2 && <M02SoundingScene altitude={m02Altitude} />}
+            {moduleNumber === 3 && <M03AnomalyScene mode={m03Mode} />}
+            {moduleNumber === 4 && <M04FootprintScene zone={m04Zone} intensity={m04Intensity} />}
             {moduleNumber === 5 && <M05TrajectoryScene filter={m05Filter} />}
-            {moduleNumber === 15 && <M15MarketScene />}
+            {moduleNumber === 6 && <M06ProbabilityScene threshold={m06Threshold} />}
+            {moduleNumber === 7 && <M07DownscalingScene step={m07Step} />}
+            {moduleNumber === 8 && <M08ComparisonScene splitPos={m08Split} />}
+            {moduleNumber === 9 && <M09CropExposureScene cropFilter={m09Crop} leadHour={m09LeadHour} />}
+            {moduleNumber === 10 && <M10PhenologyScene stage={m10Stage} windSpeed={m10Wind} />}
+            {moduleNumber === 11 && <M11HydrologyScene variable={m11Variable} />}
+            {moduleNumber === 12 && <M12CropScenarioScene candidate={m12Candidate} />}
+            {moduleNumber === 13 && <M13YieldRiskScene metric={m13Metric} />}
+            {moduleNumber === 14 && <M14PestDiseaseScene pathogen={m14Pathogen} humidity={m14Humidity} />}
+            {moduleNumber === 15 && <M15MarketScene commodity={m15Commodity} />}
             {moduleNumber === 16 && <M16DagScene activeNode={m16ActiveNode} />}
-            {moduleNumber !== 2 && moduleNumber !== 5 && moduleNumber !== 15 && moduleNumber !== 16 && (
-              <Generic3DFieldScene moduleNum={moduleNumber} />
-            )}
+            {moduleNumber === 17 && <M17SupplyShockScene disruption={m17Disruption} />}
+            {moduleNumber === 18 && <M18ScenarioSimulatorScene rainDelta={m18RainDelta} bufferRelease={m18BufferRelease} />}
 
             <OrbitControls
               enablePan={false}
               enableZoom={true}
-              minDistance={3.0}
+              minDistance={2.5}
               maxDistance={12.0}
               dampingFactor={0.08}
             />
           </Canvas>
         </div>
 
-        {/* Interactive Controls Bar for Specific Module Levers */}
+        {/* Interactive Controls Bar Tailored to Current Module */}
         {moduleNumber === 2 && (
-          <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ padding: '14px', borderRadius: '12px', backgroundColor: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span style={{ fontSize: '12px', color: '#94A3B8', whiteSpace: 'nowrap' }}>
               {isHi ? '3D ऊँचाई स्क्रबर:' : '3D Altitude Probe:'} <strong style={{ color: '#EF4444' }}>{m02Altitude}m AGL</strong>
             </span>
@@ -518,6 +1186,56 @@ export default function DedicatedModuleSimulator({
               onChange={(e) => setM02Altitude(parseInt(e.target.value, 10))}
               style={{ flex: 1, accentColor: '#38BDF8', cursor: 'pointer' }}
             />
+          </div>
+        )}
+
+        {moduleNumber === 3 && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8', marginRight: '6px' }}>{isHi ? 'विसंगति मोड:' : 'Anomaly Focus:'}</span>
+            {(['precip', 'heat', 'wind'] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => setM03Mode(m)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m03Mode === m ? '#38BDF8' : '#121826',
+                  color: m03Mode === m ? '#07090E' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                {m === 'precip' ? 'EXTREME PRECIP (EFI +0.94)' : m === 'heat' ? 'HEAT ANTHESIS (+4.2°C)' : 'GALE JET (118 KM/H)'}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {moduleNumber === 4 && (
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8' }}>{isHi ? 'फुटप्रिंट ज़ोन:' : 'Footprint Layer:'}</span>
+            {(['all', 'core', 'primary'] as const).map((z) => (
+              <button
+                key={z}
+                onClick={() => setM04Zone(z)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m04Zone === z ? '#EF4444' : '#121826',
+                  color: m04Zone === z ? '#07090E' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                {z.toUpperCase()}
+              </button>
+            ))}
           </div>
         )}
 
@@ -541,6 +1259,236 @@ export default function DedicatedModuleSimulator({
                 }}
               >
                 {mode.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {moduleNumber === 6 && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8', marginRight: '6px' }}>{isHi ? 'थ्रेसहोल्ड:' : 'Exceedance P(X):'}</span>
+            {[25, 50, 100, 150].map((val) => (
+              <button
+                key={val}
+                onClick={() => setM06Threshold(val)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m06Threshold === val ? '#06B6D4' : '#121826',
+                  color: m06Threshold === val ? '#07090E' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                &gt;{val}mm
+              </button>
+            ))}
+          </div>
+        )}
+
+        {moduleNumber === 7 && (
+          <div style={{ padding: '14px', borderRadius: '12px', backgroundColor: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8', whiteSpace: 'nowrap' }}>
+              {isHi ? 'डिफ्यूजन डीनोइज़िंग स्टेप:' : 'Diffusion Reverse SDE Step:'} <strong style={{ color: '#10B981' }}>{m07Step} / 50</strong>
+            </span>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={m07Step}
+              onChange={(e) => setM07Step(parseInt(e.target.value, 10))}
+              style={{ flex: 1, accentColor: '#10B981', cursor: 'pointer' }}
+            />
+          </div>
+        )}
+
+        {moduleNumber === 8 && (
+          <div style={{ padding: '14px', borderRadius: '12px', backgroundColor: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8', whiteSpace: 'nowrap' }}>
+              {isHi ? '3D स्प्लिट वाइप स्थिति:' : '3D Split Wipe Position:'} <strong style={{ color: '#F59E0B' }}>{m08Split > 0 ? `+${m08Split}` : m08Split}</strong>
+            </span>
+            <input
+              type="range"
+              min="-1.8"
+              max="1.8"
+              step="0.1"
+              value={m08Split}
+              onChange={(e) => setM08Split(parseFloat(e.target.value))}
+              style={{ flex: 1, accentColor: '#F59E0B', cursor: 'pointer' }}
+            />
+          </div>
+        )}
+
+        {moduleNumber === 9 && (
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8' }}>{isHi ? 'फसल फ़िल्टर:' : 'Crop System Filter:'}</span>
+            {['ALL', 'PADDY', 'SUGARCANE', 'PULSES', 'GROUNDNUT'].map((c) => (
+              <button
+                key={c}
+                onClick={() => setM09Crop(c)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m09Crop === c ? '#10B981' : '#121826',
+                  color: m09Crop === c ? '#07090E' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                {c}
+              </button>
+            ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
+              <span style={{ fontSize: '12px', color: '#94A3B8' }}>{isHi ? 'लीड समय:' : 'Lead Time:'}</span>
+              {[24, 48, 72].map((h) => (
+                <button
+                  key={h}
+                  onClick={() => setM09LeadHour(h)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                    backgroundColor: m09LeadHour === h ? '#38BDF8' : '#0B132B',
+                    color: m09LeadHour === h ? '#07090E' : '#94A3B8',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  +{h}H
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {moduleNumber === 10 && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8' }}>{isHi ? 'वृद्धि चरण:' : 'Phenology Stage:'}</span>
+            {['TILLERING', 'FLOWERING', 'GRAIN_FILL', 'MATURITY'].map((st) => (
+              <button
+                key={st}
+                onClick={() => setM10Stage(st)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m10Stage === st ? '#10B981' : '#121826',
+                  color: m10Stage === st ? '#07090E' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {moduleNumber === 11 && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8' }}>{isHi ? 'हाइड्रोलॉजी चर:' : 'Hydrology Layer:'}</span>
+            {['WATERLOGGING', 'SOIL_MOISTURE', 'INFILTRATION'].map((v) => (
+              <button
+                key={v}
+                onClick={() => setM11Variable(v)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m11Variable === v ? '#0284C7' : '#121826',
+                  color: m11Variable === v ? '#FFFFFF' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {moduleNumber === 12 && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8' }}>{isHi ? 'उम्मीदवार फसल:' : 'Candidate Switch:'}</span>
+            {['Swarna Sub-1', 'Parijat Traditional', 'Hybrid Short-Cycle'].map((can) => (
+              <button
+                key={can}
+                onClick={() => setM12Candidate(can)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m12Candidate === can ? '#10B981' : '#121826',
+                  color: m12Candidate === can ? '#07090E' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                {can}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {moduleNumber === 13 && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8' }}>{isHi ? 'जोखिम मीट्रिक:' : 'Yield Risk View:'}</span>
+            {['risk', 'yield'].map((m) => (
+              <button
+                key={m}
+                onClick={() => setM13Metric(m)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m13Metric === m ? '#EF4444' : '#121826',
+                  color: m13Metric === m ? '#07090E' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                {m === 'risk' ? 'DOWNSIDE LOSS RISK (P10/P50)' : 'EXPECTED YIELD (T/HA)'}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {moduleNumber === 14 && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8' }}>{isHi ? 'रोग / कीट:' : 'Target Pathogen:'}</span>
+            {['BLB', 'BPH', 'BLAST'].map((pat) => (
+              <button
+                key={pat}
+                onClick={() => setM14Pathogen(pat)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  backgroundColor: m14Pathogen === pat ? '#EF4444' : '#121826',
+                  color: m14Pathogen === pat ? '#07090E' : '#94A3B8',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer'
+                }}
+              >
+                {pat === 'BLB' ? 'BACTERIAL LEAF BLIGHT' : pat === 'BPH' ? 'BROWN PLANT HOPPER' : 'PADDY BLAST'}
               </button>
             ))}
           </div>
@@ -596,6 +1544,22 @@ export default function DedicatedModuleSimulator({
           </div>
         )}
 
+        {moduleNumber === 17 && (
+          <div style={{ padding: '14px', borderRadius: '12px', backgroundColor: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <span style={{ fontSize: '12px', color: '#94A3B8', whiteSpace: 'nowrap' }}>
+              {isHi ? 'सप्लाई झटका व्यवधान तीव्रता:' : 'Supply Corridor Disruption:'} <strong style={{ color: '#EF4444' }}>{m17Disruption}%</strong>
+            </span>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              value={m17Disruption}
+              onChange={(e) => setM17Disruption(parseInt(e.target.value, 10))}
+              style={{ flex: 1, accentColor: '#EF4444', cursor: 'pointer' }}
+            />
+          </div>
+        )}
+
         {moduleNumber === 18 && (
           <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(56, 189, 248, 0.25)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
             <div>
@@ -632,7 +1596,7 @@ export default function DedicatedModuleSimulator({
           <div style={{ padding: '14px', borderRadius: '12px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>PRIMARY OBSERVATION</div>
             <div style={{ fontSize: '20px', fontWeight: 800, color: '#38BDF8', marginTop: '4px' }}>
-              {realtimeData?.riskCategory ?? 'CRITICAL CONVERGENCE'}
+              {realtimeData?.riskCategory ?? 'HIGH CROP EXPOSURE'}
             </div>
             <div style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '2px' }}>{basin.soilTypeEn}</div>
           </div>
@@ -640,7 +1604,7 @@ export default function DedicatedModuleSimulator({
           <div style={{ padding: '14px', borderRadius: '12px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'var(--font-mono)' }}>ADVISORY DIRECTIVE</div>
             <div style={{ fontSize: '13px', fontWeight: 700, color: '#10B981', marginTop: '4px', lineHeight: 1.4 }}>
-              {realtimeData?.advisoryBullet ?? 'Active biophysical monitoring along coastal river corridor'}
+              {realtimeData?.advisoryBullet ?? 'Upholding Exposure ≠ Loss doctrine: 30.8% of district net sown area is physically exposed to inundation.'}
             </div>
           </div>
         </div>

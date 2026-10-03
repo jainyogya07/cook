@@ -98,10 +98,10 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     contentHi: 'बंगाल की खाड़ी में तूफान तेज़ हो रहा है। अगले 2 दिन में पुरी–केन्द्रापारा तट पर आने की संभावना अब 78% है। निचले गाँव अभी से तैयार रहें।',
     tags: ['#ExtremeWeather', '#BayOfBengal', '#Odisha', '#Downscaling'],
     routingPipeline: [
-      { moduleNumber: 1, moduleName: 'Planetary Telemetry', shortRole: '5D tensor ingestion', port: 3001, routeUrl: 'http://localhost:3001', status: 'RESOLVED', metricOutput: '850 hPa Convergence' },
-      { moduleNumber: 3, moduleName: 'Anomaly Engine', shortRole: 'EFI calculation', port: 3003, routeUrl: 'http://localhost:3003', status: 'RESOLVED', metricOutput: 'EFI = +0.89' },
-      { moduleNumber: 5, moduleName: 'GNN Trajectory', shortRole: 'Track prediction', port: 3005, routeUrl: 'http://localhost:3005', status: 'RESOLVED', metricOutput: 'WNW 32 km/h' },
-      { moduleNumber: 6, moduleName: 'Probability Field', shortRole: 'Ensemble surface', port: 3006, routeUrl: 'http://localhost:3006', status: 'RESOLVED', metricOutput: '78% Agreement' }
+      { moduleNumber: 1, moduleName: 'Planetary Telemetry', shortRole: '5D tensor ingestion', port: 3001, routeUrl: '/modules/1', status: 'RESOLVED', metricOutput: '850 hPa Convergence' },
+      { moduleNumber: 3, moduleName: 'Anomaly Engine', shortRole: 'EFI calculation', port: 3003, routeUrl: '/modules/3', status: 'RESOLVED', metricOutput: 'EFI = +0.89' },
+      { moduleNumber: 5, moduleName: 'GNN Trajectory', shortRole: 'Track prediction', port: 3005, routeUrl: '/modules/5', status: 'RESOLVED', metricOutput: 'WNW 32 km/h' },
+      { moduleNumber: 6, moduleName: 'Probability Field', shortRole: 'Ensemble surface', port: 3006, routeUrl: '/modules/6', status: 'RESOLVED', metricOutput: '78% Agreement' }
     ],
     intelCard: {
       id: 'card_1',
@@ -185,10 +185,10 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     contentHi: 'भारी बारिश का मतलब पूरी धान बर्बाद नहीं। फूल आने वाली फसल सबसे संवेदनशील है। ओडिशा में देर से बोई स्वर्णा पर अभी खास ध्यान दें।',
     tags: ['#AgriIntelligence', '#CropExposure', '#Paddy', '#OdishaKharif'],
     routingPipeline: [
-      { moduleNumber: 9, moduleName: 'Crop Exposure', shortRole: 'Geospatial intersection', port: 3009, routeUrl: 'http://localhost:3009', status: 'RESOLVED', metricOutput: '342.4k ha' },
-      { moduleNumber: 10, moduleName: 'Phenology', shortRole: 'Growth stage clock', port: 3010, routeUrl: 'http://localhost:3010', status: 'RESOLVED', metricOutput: 'Panicle Init.' },
-      { moduleNumber: 11, moduleName: 'Soil Water', shortRole: 'Hypoxia duration', port: 3011, routeUrl: 'http://localhost:3011', status: 'RESOLVED', metricOutput: '0.82m Table' },
-      { moduleNumber: 13, moduleName: 'Yield Risk', shortRole: 'Skew-t distribution', port: 3013, routeUrl: 'http://localhost:3013', status: 'RESOLVED', metricOutput: 'P50: 3.12 t/ha' }
+      { moduleNumber: 9, moduleName: 'Crop Exposure', shortRole: 'Geospatial intersection', port: 3009, routeUrl: '/modules/9', status: 'RESOLVED', metricOutput: '342.4k ha' },
+      { moduleNumber: 10, moduleName: 'Phenology', shortRole: 'Growth stage clock', port: 3010, routeUrl: '/modules/10', status: 'RESOLVED', metricOutput: 'Panicle Init.' },
+      { moduleNumber: 11, moduleName: 'Soil Water', shortRole: 'Hypoxia duration', port: 3011, routeUrl: '/modules/11', status: 'RESOLVED', metricOutput: '0.82m Table' },
+      { moduleNumber: 13, moduleName: 'Yield Risk', shortRole: 'Skew-t distribution', port: 3013, routeUrl: '/modules/13', status: 'RESOLVED', metricOutput: 'P50: 3.12 t/ha' }
     ],
     intelCard: {
       id: 'card_2',
@@ -256,9 +256,9 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     contentHi: 'केन्द्रापारा और जगतसिंहपुर मंडियों में आवक करीब 14% घटी है। थोक भाव लगभग ₹2,315/क्विंटल है। 40,000 टन भंडार छोड़ने की सलाह दी जा रही है।',
     tags: ['#SupplyShock', '#MandiPrices', '#FoodSecurity', '#MarketEquilibrium'],
     routingPipeline: [
-      { moduleNumber: 13, moduleName: 'Yield Risk', shortRole: 'Production aggregation', port: 3013, routeUrl: 'http://localhost:3013', status: 'RESOLVED', metricOutput: '-3.76 LMT' },
-      { moduleNumber: 15, moduleName: 'Market Intel', shortRole: 'Price elasticity', port: 3015, routeUrl: 'http://localhost:3015', status: 'RESOLVED', metricOutput: '₹2,315/qtl' },
-      { moduleNumber: 17, moduleName: 'Supply Shock', shortRole: 'District deficit map', port: 3017, routeUrl: 'http://localhost:3017', status: 'RESOLVED', metricOutput: '-14.2% Arrivals' }
+      { moduleNumber: 13, moduleName: 'Yield Risk', shortRole: 'Production aggregation', port: 3013, routeUrl: '/modules/13', status: 'RESOLVED', metricOutput: '-3.76 LMT' },
+      { moduleNumber: 15, moduleName: 'Market Intel', shortRole: 'Price elasticity', port: 3015, routeUrl: '/modules/15', status: 'RESOLVED', metricOutput: '₹2,315/qtl' },
+      { moduleNumber: 17, moduleName: 'Supply Shock', shortRole: 'District deficit map', port: 3017, routeUrl: '/modules/17', status: 'RESOLVED', metricOutput: '-14.2% Arrivals' }
     ],
     intelCard: {
       id: 'card_3',
@@ -308,8 +308,8 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     contentHi: 'पत्तियाँ 14 घंटे से ज्यादा गीली रहने और नमी बढ़ने से महानदी डेल्टा में जीवाणु झुलसा का खतरा है। केन्द्रापारा और जगतसिंहपुर की देर से बोई धान पर 48 घंटे में छिड़काव की सलाह है।',
     tags: ['#PestRisk', '#BacterialBlight', '#CropProtection', '#LeafWetness'],
     routingPipeline: [
-      { moduleNumber: 7, moduleName: 'Downscaling', shortRole: '5km microclimate', port: 3007, routeUrl: 'http://localhost:3007', status: 'RESOLVED', metricOutput: '5km RH Field' },
-      { moduleNumber: 14, moduleName: 'Pest & Disease', shortRole: 'Pathogen favorability', port: 3014, routeUrl: 'http://localhost:3014', status: 'RESOLVED', metricOutput: 'BLB High Risk' }
+      { moduleNumber: 7, moduleName: 'Downscaling', shortRole: '5km microclimate', port: 3007, routeUrl: '/modules/7', status: 'RESOLVED', metricOutput: '5km RH Field' },
+      { moduleNumber: 14, moduleName: 'Pest & Disease', shortRole: 'Pathogen favorability', port: 3014, routeUrl: '/modules/14', status: 'RESOLVED', metricOutput: 'BLB High Risk' }
     ],
     stats: {
       replies: 7,
@@ -335,8 +335,8 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     contentHi: 'ओडिशा तट का गाँव-स्तर बारिश नक्शा और साफ़ हो गया है। पहाड़ियों और नदी मुहाने पर पानी कहाँ जमा होगा, अब बेहतर दिख रहा है।',
     tags: ['#Downscaling', '#ModelValidation', '#CRPS', '#ConditionalDiffusion'],
     routingPipeline: [
-      { moduleNumber: 7, moduleName: 'Downscaling', shortRole: 'Diffusion SDE', port: 3007, routeUrl: 'http://localhost:3007', status: 'RESOLVED', metricOutput: 'CRPS = 0.18mm' },
-      { moduleNumber: 8, moduleName: 'Extreme Comparison', shortRole: 'Run-to-run drift', port: 3008, routeUrl: 'http://localhost:3008', status: 'RESOLVED', metricOutput: 'Δ Intensity +24%' }
+      { moduleNumber: 7, moduleName: 'Downscaling', shortRole: 'Diffusion SDE', port: 3007, routeUrl: '/modules/7', status: 'RESOLVED', metricOutput: 'CRPS = 0.18mm' },
+      { moduleNumber: 8, moduleName: 'Extreme Comparison', shortRole: 'Run-to-run drift', port: 3008, routeUrl: '/modules/8', status: 'RESOLVED', metricOutput: 'Δ Intensity +24%' }
     ],
     stats: {
       replies: 18,
@@ -362,10 +362,10 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     contentHi: 'अगर बारिश अनुमान से 20% ज्यादा हुई तो करीब 58,000 हेक्टेयर अतिरिक्त धान पानी में रह सकती है। मंडी आवक और गिर सकती है, भाव ₹2,480/क्विंटल तक जा सकते हैं। यह “अगर ऐसा हो तो” है — पक्का नुकसान नहीं।',
     tags: ['#WhatIf', '#Counterfactual', '#ScenarioEngine', '#SupplyShock'],
     routingPipeline: [
-      { moduleNumber: 7, moduleName: 'Downscaling', shortRole: 'Boundary layer', port: 3007, routeUrl: 'http://localhost:3007', status: 'RESOLVED', metricOutput: '5km Resampling' },
-      { moduleNumber: 10, moduleName: 'Phenology', shortRole: 'Thermal alignment', port: 3010, routeUrl: 'http://localhost:3010', status: 'RESOLVED', metricOutput: 'Panicle Stage' },
-      { moduleNumber: 11, moduleName: 'Soil Water', shortRole: 'Hydraulic balance', port: 3011, routeUrl: 'http://localhost:3011', status: 'RESOLVED', metricOutput: 'Perched 0.82m' },
-      { moduleNumber: 18, moduleName: 'Scenario Simulator', shortRole: 'Coupled HPC solver', port: 3018, routeUrl: 'http://localhost:3018', status: 'RESOLVED', metricOutput: 'Δ: -5.12 LMT' }
+      { moduleNumber: 7, moduleName: 'Downscaling', shortRole: 'Boundary layer', port: 3007, routeUrl: '/modules/7', status: 'RESOLVED', metricOutput: '5km Resampling' },
+      { moduleNumber: 10, moduleName: 'Phenology', shortRole: 'Thermal alignment', port: 3010, routeUrl: '/modules/10', status: 'RESOLVED', metricOutput: 'Panicle Stage' },
+      { moduleNumber: 11, moduleName: 'Soil Water', shortRole: 'Hydraulic balance', port: 3011, routeUrl: '/modules/11', status: 'RESOLVED', metricOutput: 'Perched 0.82m' },
+      { moduleNumber: 18, moduleName: 'Scenario Simulator', shortRole: 'Coupled HPC solver', port: 3018, routeUrl: '/modules/18', status: 'RESOLVED', metricOutput: 'Δ: -5.12 LMT' }
     ],
     intelCard: {
       id: 'card_6',
@@ -415,8 +415,8 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     contentHi: 'गाँव वाला बारिश नक्शा और फसल अवस्था की सलाह अब साथ चल रहे हैं। कटक और जगतसिंहपुर में झूठी “फसल गिर गई” चेतावनी करीब 34% कम हुई।',
     tags: ['#4DArchitecture', '#DiffusionDownscaling', '#PhenologyClock', '#Odisha'],
     routingPipeline: [
-      { moduleNumber: 7, moduleName: 'Downscaling', shortRole: 'Diffusion SDE', port: 3007, routeUrl: 'http://localhost:3007', status: 'RESOLVED', metricOutput: 'CRPS = 0.18mm' },
-      { moduleNumber: 10, moduleName: 'Phenology', shortRole: 'Growth stage clock', port: 3010, routeUrl: 'http://localhost:3010', status: 'RESOLVED', metricOutput: 'Panicle Init.' }
+      { moduleNumber: 7, moduleName: 'Downscaling', shortRole: 'Diffusion SDE', port: 3007, routeUrl: '/modules/7', status: 'RESOLVED', metricOutput: 'CRPS = 0.18mm' },
+      { moduleNumber: 10, moduleName: 'Phenology', shortRole: 'Growth stage clock', port: 3010, routeUrl: '/modules/10', status: 'RESOLVED', metricOutput: 'Panicle Init.' }
     ],
     intelCard: {
       id: 'card_user_1',
@@ -609,12 +609,12 @@ export const GROUPED_MODEL_CATEGORIES: GroupedModelCategory[] = [
     description: 'Raw 4D/5D gridded tensor ingestion, 30-year climatological EFI, and spherical GNN trajectory prediction.',
     colorHex: '#38bdf8',
     models: [
-      { moduleNumber: 1, title: 'Planetary 4D Atmospheric Telemetry', shortDescription: 'Volumetric atmospheric stratification across 5 pressure levels (1000–300 hPa).', port: 3001, routeUrl: 'http://localhost:3001', keyMetric: '5 Levels // 12km Grid', tag: 'NWP Core' },
-      { moduleNumber: 2, title: 'Volumetric Stratified Atmosphere', shortDescription: 'Rayleigh scattering and physical wind streamlines across boundary layers.', port: 3002, routeUrl: 'http://localhost:3002', keyMetric: 'GLSL Raymarching // 60 FPS', tag: 'Atmosphere 3D' },
-      { moduleNumber: 3, title: 'Climatological Extreme Anomaly (EFI)', shortDescription: 'Multi-variable quantile departure scoring against 30-year climatological normal.', port: 3003, routeUrl: 'http://localhost:3003', keyMetric: 'EFI > 0.85 // P95 Mask', tag: 'Anomaly Engine' },
-      { moduleNumber: 4, title: 'Dynamic Hazard Footprint Bounding', shortDescription: 'Adaptive storm bounding box isolation with Core/Primary/Halo zoning.', port: 3004, routeUrl: 'http://localhost:3004', keyMetric: 'Spatial IoU = 0.84', tag: 'Footprint' },
-      { moduleNumber: 5, title: 'Spherical Temporal GNN Trajectory', shortDescription: 'Icosahedral spherical graph neural network tracking 3–10 day storm tracks.', port: 3005, routeUrl: 'http://localhost:3005', keyMetric: 'Displacement < 42 km', tag: 'GNN Solver' },
-      { moduleNumber: 6, title: 'Multimodal Ensemble Probability', shortDescription: 'Continuous probability density surfaces separating aleatoric from epistemic uncertainty.', port: 3006, routeUrl: 'http://localhost:3006', keyMetric: '50 Members // Brier 0.082', tag: 'Probability' }
+      { moduleNumber: 1, title: 'Planetary 4D Atmospheric Telemetry', shortDescription: 'Volumetric atmospheric stratification across 5 pressure levels (1000–300 hPa).', port: 3001, routeUrl: '/modules/1', keyMetric: '5 Levels // 12km Grid', tag: 'NWP Core' },
+      { moduleNumber: 2, title: 'Volumetric Stratified Atmosphere', shortDescription: 'Rayleigh scattering and physical wind streamlines across boundary layers.', port: 3002, routeUrl: '/modules/2', keyMetric: 'GLSL Raymarching // 60 FPS', tag: 'Atmosphere 3D' },
+      { moduleNumber: 3, title: 'Climatological Extreme Anomaly (EFI)', shortDescription: 'Multi-variable quantile departure scoring against 30-year climatological normal.', port: 3003, routeUrl: '/modules/3', keyMetric: 'EFI > 0.85 // P95 Mask', tag: 'Anomaly Engine' },
+      { moduleNumber: 4, title: 'Dynamic Hazard Footprint Bounding', shortDescription: 'Adaptive storm bounding box isolation with Core/Primary/Halo zoning.', port: 3004, routeUrl: '/modules/4', keyMetric: 'Spatial IoU = 0.84', tag: 'Footprint' },
+      { moduleNumber: 5, title: 'Spherical Temporal GNN Trajectory', shortDescription: 'Icosahedral spherical graph neural network tracking 3–10 day storm tracks.', port: 3005, routeUrl: '/modules/5', keyMetric: 'Displacement < 42 km', tag: 'GNN Solver' },
+      { moduleNumber: 6, title: 'Multimodal Ensemble Probability', shortDescription: 'Continuous probability density surfaces separating aleatoric from epistemic uncertainty.', port: 3006, routeUrl: '/modules/6', keyMetric: '50 Members // Brier 0.082', tag: 'Probability' }
     ]
   },
   {
@@ -622,8 +622,8 @@ export const GROUPED_MODEL_CATEGORIES: GroupedModelCategory[] = [
     description: 'Conditional diffusion models super-resolving 12km regional fields into 5km coastal hazard fields.',
     colorHex: '#06b6d4',
     models: [
-      { moduleNumber: 7, title: 'Probabilistic Downscaling (12km → 5km)', shortDescription: 'Terrain-conditioned diffusion honoring orographic boundaries and moisture conservation.', port: 3007, routeUrl: 'http://localhost:3007', keyMetric: 'CRPS = 0.18 mm // 5km Meso', tag: 'Diffusion SDE' },
-      { moduleNumber: 8, title: 'Multi-Run Extreme Event Comparison', shortDescription: 'Synchronized run-to-run verification detecting model drift and rapid intensification.', port: 3008, routeUrl: 'http://localhost:3008', keyMetric: 'Δ Intensity +24%', tag: 'Diagnostics' }
+      { moduleNumber: 7, title: 'Probabilistic Downscaling (12km → 5km)', shortDescription: 'Terrain-conditioned diffusion honoring orographic boundaries and moisture conservation.', port: 3007, routeUrl: '/modules/7', keyMetric: 'CRPS = 0.18 mm // 5km Meso', tag: 'Diffusion SDE' },
+      { moduleNumber: 8, title: 'Multi-Run Extreme Event Comparison', shortDescription: 'Synchronized run-to-run verification detecting model drift and rapid intensification.', port: 3008, routeUrl: '/modules/8', keyMetric: 'Δ Intensity +24%', tag: 'Diagnostics' }
     ]
   },
   {
@@ -631,12 +631,12 @@ export const GROUPED_MODEL_CATEGORIES: GroupedModelCategory[] = [
     description: 'Cadastral agricultural intersections, thermal GDD phenology, SWAT hydrology, and skew-t yield risk.',
     colorHex: '#10b981',
     models: [
-      { moduleNumber: 9, title: 'Crop System Exposure Field', shortDescription: 'Geospatial agricultural exposure mapping strictly upholding Exposure ≠ Loss.', port: 3009, routeUrl: 'http://localhost:3009', keyMetric: '342,400 ha // 30.8% Area', tag: 'Cadastral Overlay' },
-      { moduleNumber: 10, title: 'Living Growth Stage & Phenology', shortDescription: 'Thermal GDD clock tracking flowering anthesis vs vegetative lodging vulnerability.', port: 3010, routeUrl: 'http://localhost:3010', keyMetric: 'GDD: 1,420 °C-d // Panicle', tag: 'CSM-CERES' },
-      { moduleNumber: 11, title: '3D Soil & Water Balance', shortDescription: 'SWAT 3-tier unsaturated hydraulic conductivity and perched water table depth.', port: 3011, routeUrl: 'http://localhost:3011', keyMetric: '44.5% Sat // 0.82m Table', tag: 'SWAT Hydrology' },
-      { moduleNumber: 12, title: 'Explainable Crop Recommendation', shortDescription: 'TreeSHAP waterfall and counterfactual agronomic switches with transparent justifications.', port: 3012, routeUrl: 'http://localhost:3012', keyMetric: 'SHAP +0.42 t/ha', tag: 'SHAP Optimizer' },
-      { moduleNumber: 13, title: 'Quantile Yield Risk & Distribution', shortDescription: 'Skew-t probability density curves capturing fat left-tail losses and downside breakeven risk.', port: 3013, routeUrl: 'http://localhost:3013', keyMetric: 'P50: 3.12 t/ha // Risk: 18.2%', tag: 'Skew-t KDE' },
-      { moduleNumber: 14, title: 'Environmental Pest & Disease Risk', shortDescription: 'Microclimate pathogen favorability indicators for Bacterial Blight, Blast, and BPH vector.', port: 3014, routeUrl: 'http://localhost:3014', keyMetric: 'Leaf Wetness: 14.2h/d', tag: 'NPSS Pathogens' }
+      { moduleNumber: 9, title: 'Crop System Exposure Field', shortDescription: 'Geospatial agricultural exposure mapping strictly upholding Exposure ≠ Loss.', port: 3009, routeUrl: '/modules/9', keyMetric: '342,400 ha // 30.8% Area', tag: 'Cadastral Overlay' },
+      { moduleNumber: 10, title: 'Living Growth Stage & Phenology', shortDescription: 'Thermal GDD clock tracking flowering anthesis vs vegetative lodging vulnerability.', port: 3010, routeUrl: '/modules/10', keyMetric: 'GDD: 1,420 °C-d // Panicle', tag: 'CSM-CERES' },
+      { moduleNumber: 11, title: '3D Soil & Water Balance', shortDescription: 'SWAT 3-tier unsaturated hydraulic conductivity and perched water table depth.', port: 3011, routeUrl: '/modules/11', keyMetric: '44.5% Sat // 0.82m Table', tag: 'SWAT Hydrology' },
+      { moduleNumber: 12, title: 'Explainable Crop Recommendation', shortDescription: 'TreeSHAP waterfall and counterfactual agronomic switches with transparent justifications.', port: 3012, routeUrl: '/modules/12', keyMetric: 'SHAP +0.42 t/ha', tag: 'SHAP Optimizer' },
+      { moduleNumber: 13, title: 'Quantile Yield Risk & Distribution', shortDescription: 'Skew-t probability density curves capturing fat left-tail losses and downside breakeven risk.', port: 3013, routeUrl: '/modules/13', keyMetric: 'P50: 3.12 t/ha // Risk: 18.2%', tag: 'Skew-t KDE' },
+      { moduleNumber: 14, title: 'Environmental Pest & Disease Risk', shortDescription: 'Microclimate pathogen favorability indicators for Bacterial Blight, Blast, and BPH vector.', port: 3014, routeUrl: '/modules/14', keyMetric: 'Leaf Wetness: 14.2h/d', tag: 'NPSS Pathogens' }
     ]
   },
   {
@@ -644,10 +644,10 @@ export const GROUPED_MODEL_CATEGORIES: GroupedModelCategory[] = [
     description: 'District deficit aggregation, non-causal mandi elasticity, and what-if counterfactual scenario simulator.',
     colorHex: '#c084fc',
     models: [
-      { moduleNumber: 15, title: 'Supply & Mandi Market Intelligence', shortDescription: 'Spatial equilibrium pricing respecting weather as contextual evidence rather than single cause.', port: 3015, routeUrl: 'http://localhost:3015', keyMetric: '₹2,315/qtl // Arrivals -14.2%', tag: 'Spatial Mandi' },
-      { moduleNumber: 16, title: 'Cross-Domain Cascade Dependency Chain', shortDescription: 'End-to-end signal propagation tracing uncertainty widening from ±14% to ±41%.', port: 3016, routeUrl: 'http://localhost:3016', keyMetric: '5-Hop Graph DAG', tag: 'Cascade Chain' },
-      { moduleNumber: 17, title: 'Regional Supply Shock Map & FPO Logistics', shortDescription: '3D extruded district deficit aggregation and buffer evacuation protocols for state planners.', port: 3017, routeUrl: 'http://localhost:3017', keyMetric: 'Deficit: -3.76 LMT', tag: 'Supply Shock' },
-      { moduleNumber: 18, title: 'Counterfactual Decision / Scenario Simulator', shortDescription: 'Decision support environment preserving baseline vs scenario with full async HPC solver.', port: 3018, routeUrl: 'http://localhost:3018', keyMetric: 'Async HPC 5-Step Solver', tag: 'Simulator Engine' }
+      { moduleNumber: 15, title: 'Supply & Mandi Market Intelligence', shortDescription: 'Spatial equilibrium pricing respecting weather as contextual evidence rather than single cause.', port: 3015, routeUrl: '/modules/15', keyMetric: '₹2,315/qtl // Arrivals -14.2%', tag: 'Spatial Mandi' },
+      { moduleNumber: 16, title: 'Cross-Domain Cascade Dependency Chain', shortDescription: 'End-to-end signal propagation tracing uncertainty widening from ±14% to ±41%.', port: 3016, routeUrl: '/modules/16', keyMetric: '5-Hop Graph DAG', tag: 'Cascade Chain' },
+      { moduleNumber: 17, title: 'Regional Supply Shock Map & FPO Logistics', shortDescription: '3D extruded district deficit aggregation and buffer evacuation protocols for state planners.', port: 3017, routeUrl: '/modules/17', keyMetric: 'Deficit: -3.76 LMT', tag: 'Supply Shock' },
+      { moduleNumber: 18, title: 'Counterfactual Decision / Scenario Simulator', shortDescription: 'Decision support environment preserving baseline vs scenario with full async HPC solver.', port: 3018, routeUrl: '/modules/18', keyMetric: 'Async HPC 5-Step Solver', tag: 'Simulator Engine' }
     ]
   }
 ];
