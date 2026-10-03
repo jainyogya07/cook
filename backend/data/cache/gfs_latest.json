@@ -1,0 +1,208 @@
+{
+  "status": "ONLINE",
+  "pipeline_version": "Stage3-RealData-v1.0",
+  "model_name": "NOAA GFS / NEPS-G",
+  "init_timestamp": "2026-10-01T12:00:00+00:00",
+  "last_refresh_utc": "2026-10-01 15:48 UTC",
+  "latency_minutes": 228,
+  "horizons": [
+    0,
+    24,
+    48,
+    72,
+    120
+  ],
+  "frames": {
+    "0": {
+      "forecast_hour": 0,
+      "mode": "OBSERVED",
+      "model": "NASA LANCE / NRT Composite",
+      "init_time_utc": "2026-10-01 12:00 UTC",
+      "valid_time_utc": "2026-10-01 12:00 UTC",
+      "latency_minutes": 228,
+      "lead_time_hours": 0,
+      "data_source": "NOAA_GFS_LIVE",
+      "global_metrics": {
+        "temperature": {
+          "average": 14.8,
+          "min": -42.0,
+          "max": 39.5,
+          "unit": "\u00b0C"
+        },
+        "wind": {
+          "average": 7.4,
+          "max_gust": 43.9,
+          "jet_stream_max": 71.5,
+          "unit": "m/s"
+        },
+        "pressure": {
+          "average": 1013.0,
+          "min_depression": 984.0,
+          "unit": "hPa"
+        },
+        "humidity": {
+          "average": 62.0,
+          "unit": "%"
+        },
+        "precipitation": {
+          "average": 1.4,
+          "max_rate": 24.0,
+          "unit": "mm/h"
+        }
+      }
+    },
+    "24": {
+      "forecast_hour": 24,
+      "mode": "FORECAST",
+      "model": "NOAA GFS / NEPS-G 0.25\u00b0",
+      "init_time_utc": "2026-10-01 12:00 UTC",
+      "valid_time_utc": "2026-10-02 12:00 UTC",
+      "latency_minutes": 0,
+      "lead_time_hours": 24,
+      "data_source": "NOAA_GFS_LIVE",
+      "global_metrics": {
+        "temperature": {
+          "average": 16.2,
+          "min": -42.0,
+          "max": 39.5,
+          "unit": "\u00b0C"
+        },
+        "wind": {
+          "average": 8.2,
+          "max_gust": 43.9,
+          "jet_stream_max": 71.5,
+          "unit": "m/s"
+        },
+        "pressure": {
+          "average": 1013.0,
+          "min_depression": 984.0,
+          "unit": "hPa"
+        },
+        "humidity": {
+          "average": 62.0,
+          "unit": "%"
+        },
+        "precipitation": {
+          "average": 1.4,
+          "max_rate": 24.0,
+          "unit": "mm/h"
+        }
+      }
+    },
+    "48": {
+      "forecast_hour": 48,
+      "mode": "FORECAST",
+      "model": "NOAA GFS / NEPS-G 0.25\u00b0",
+      "init_time_utc": "2026-10-01 12:00 UTC",
+      "valid_time_utc": "2026-10-03 12:00 UTC",
+      "latency_minutes": 0,
+      "lead_time_hours": 48,
+      "data_source": "NOAA_GFS_LIVE",
+      "global_metrics": {
+        "temperature": {
+          "average": 15.8,
+          "min": -42.0,
+          "max": 39.5,
+          "unit": "\u00b0C"
+        },
+        "wind": {
+          "average": 6.9,
+          "max_gust": 43.9,
+          "jet_stream_max": 71.5,
+          "unit": "m/s"
+        },
+        "pressure": {
+          "average": 1013.0,
+          "min_depression": 984.0,
+          "unit": "hPa"
+        },
+        "humidity": {
+          "average": 62.0,
+          "unit": "%"
+        },
+        "precipitation": {
+          "average": 1.4,
+          "max_rate": 24.0,
+          "unit": "mm/h"
+        }
+      }
+    },
+    "72": {
+      "forecast_hour": 72,
+      "mode": "FORECAST",
+      "model": "NOAA GFS / NEPS-G 0.25\u00b0",
+      "init_time_utc": "2026-10-01 12:00 UTC",
+      "valid_time_utc": "2026-10-04 12:00 UTC",
+      "latency_minutes": 0,
+      "lead_time_hours": 72,
+      "data_source": "NOAA_GFS_LIVE",
+      "global_metrics": {
+        "temperature": {
+          "average": 14.1,
+          "min": -42.0,
+          "max": 39.5,
+          "unit": "\u00b0C"
+        },
+        "wind": {
+          "average": 7.0,
+          "max_gust": 43.9,
+          "jet_stream_max": 71.5,
+          "unit": "m/s"
+        },
+        "pressure": {
+          "average": 1013.0,
+          "min_depression": 984.0,
+          "unit": "hPa"
+        },
+        "humidity": {
+          "average": 62.0,
+          "unit": "%"
+        },
+        "precipitation": {
+          "average": 1.4,
+          "max_rate": 24.0,
+          "unit": "mm/h"
+        }
+      }
+    },
+    "120": {
+      "forecast_hour": 120,
+      "mode": "FORECAST",
+      "model": "NOAA GFS / NEPS-G 0.25\u00b0",
+      "init_time_utc": "2026-10-01 12:00 UTC",
+      "valid_time_utc": "2026-10-06 12:00 UTC",
+      "latency_minutes": 0,
+      "lead_time_hours": 120,
+      "data_source": "NOAA_GFS_LIVE",
+      "global_metrics": {
+        "temperature": {
+          "average": 14.4,
+          "min": -42.0,
+          "max": 39.5,
+          "unit": "\u00b0C"
+        },
+        "wind": {
+          "average": 7.3,
+          "max_gust": 43.9,
+          "jet_stream_max": 71.5,
+          "unit": "m/s"
+        },
+        "pressure": {
+          "average": 1013.0,
+          "min_depression": 984.0,
+          "unit": "hPa"
+        },
+        "humidity": {
+          "average": 62.0,
+          "unit": "%"
+        },
+        "precipitation": {
+          "average": 1.4,
+          "max_rate": 24.0,
+          "unit": "mm/h"
+        }
+      }
+    }
+  },
+  "anchor_points": []
+}
