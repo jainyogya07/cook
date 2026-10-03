@@ -26,13 +26,33 @@ def _user_payload(row: Any) -> dict[str, Any]:
     return {"id": row[0], "email": row[1], "name": row[2], "plan": plan}
 
 
+def _auth_dsn() -> str:
+    """Supabase direct db hosts are IPv6-only; Render cannot reach them."""
+    from urllib.parse import quote, urlparse
+
+    url = settings.AUTH_DATABASE_URL.strip()
+    parsed = urlparse(url)
+    host = parsed.hostname or ""
+    if host.startswith("db.") and host.endswith(".supabase.co"):
+        ref = host.removeprefix("db.").removesuffix(".supabase.co")
+        user = parsed.username or "postgres"
+        if "." not in user:
+            user = f"{user}.{ref}"
+        password = quote(parsed.password or "", safe="")
+        return (
+            f"postgresql://{user}:{password}"
+            f"@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
+        )
+    return url
+
+
 def _db():
     try:
         import psycopg
     except ImportError as exc:
         raise HTTPException(503, "Postgres driver is not installed. Run: pip install -r backend/requirements.txt") from exc
     try:
-        connection = psycopg.connect(settings.AUTH_DATABASE_URL, connect_timeout=8)
+        connection = psycopg.connect(_auth_dsn(), connect_timeout=8)
         connection.execute("""
           CREATE TABLE IF NOT EXISTS atmos_users (
             id BIGSERIAL PRIMARY KEY,

@@ -17,7 +17,7 @@ services:
       - key: WORKERS
         value: "1"
       - key: AUTH_DATABASE_URL
-        value: "postgresql://postgres:Yogyajain%4026@db.aiwdzqcfrhavsqejbyfv.supabase.co:5432/postgres?sslmode=require"
+        value: "postgresql://postgres.aiwdzqcfrhavsqejbyfv:Yogyajain%4026@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
       - key: AUTH_SECRET
         value: "atmos-4d-supabase-session-secret"
       - key: ATMOS_SEED_EMAIL
