@@ -12,6 +12,7 @@ export type LeftNavTab =
   | 'ai'
   | 'news'
   | 'models'
+  | 'research'
   | 'saved'
   | 'subscription'
   | 'profile'
@@ -36,6 +37,7 @@ export type ShellView =
   | 'ai_chat'
   | 'news'
   | 'models'
+  | 'research'
   | 'profile'
   | 'post_detail';
 
@@ -169,6 +171,7 @@ export interface NewsItem {
   relatedRegion: string;
   relatedHazard: string;
   imageUrl?: string;
+  url?: string;
 }
 
 export interface ActiveLiveEvent {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Bot, Newspaper, Boxes, Compass, Bell, Zap, BookOpen, Sun, Moon } from 'lucide-react';
+import { Bot, Newspaper, Boxes, Compass, Bell, Zap, BookOpen, Sun, Moon, FlaskConical } from 'lucide-react';
 import { useShellStore } from '@/services/useShellStore';
 import { LeftNavTab } from '@/types/shell';
 import { t } from '@/i18n/copy';
@@ -18,6 +18,7 @@ export default function AppTopBar() {
     { id: 'ai', label: t(locale, 'ask'), icon: Bot },
     { id: 'news', label: t(locale, 'news'), icon: Newspaper },
     { id: 'models', label: t(locale, 'models'), icon: Boxes },
+    { id: 'research', label: t(locale, 'research'), icon: FlaskConical },
     { id: 'explore', label: t(locale, 'explore'), icon: Compass },
     { id: 'alerts', label: t(locale, 'alerts'), icon: Bell }
   ];

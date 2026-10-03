@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Newspaper, Bell, Boxes, Compass, Zap, MessageSquare } from 'lucide-react';
+import { Plus, Newspaper, Bell, Boxes, Compass, Zap, MessageSquare, FlaskConical } from 'lucide-react';
 import { useShellStore } from '@/services/useShellStore';
 import { t } from '@/i18n/copy';
 
@@ -51,6 +51,7 @@ export default function ChatHistoryRail() {
         <button type="button" onClick={() => setActiveNav('news')}><Newspaper size={14} /> {t(locale, 'news')}</button>
         <button type="button" onClick={() => setActiveNav('alerts')}><Bell size={14} /> {t(locale, 'alerts')}{unreadNotificationCount ? ` (${unreadNotificationCount})` : ''}</button>
         <button type="button" onClick={() => setActiveNav('models')}><Boxes size={14} /> {t(locale, 'models')}</button>
+        <button type="button" onClick={() => setActiveNav('research')}><FlaskConical size={14} /> {t(locale, 'research')}</button>
         <button type="button" onClick={() => setActiveNav('explore')}><Compass size={14} /> {t(locale, 'explore')}</button>
         <button type="button" onClick={() => setActiveNav('subscription')}><Zap size={14} /> {accessPlan === 'pro' ? t(locale, 'proOn') : t(locale, 'plans')}</button>
       </nav>

@@ -33,6 +33,7 @@ import {
   GUEST_USER_PROFILE
 } from '@/data/mockFeedData';
 import { parseAndRouteQuery } from './intentRouter';
+import { ResearchRun } from './resultCards';
 import { AccessPlan, AppLocale, canPost, canUseEngines } from '@/i18n/copy';
 import { apiBase, newsEndpoint } from '@/lib/api';
 import { cleanNewsText, newsSummary } from '@/lib/cleanNews';
@@ -66,6 +67,20 @@ function hydrateUserProfile() {
   } catch {
     return GUEST_USER_PROFILE;
   }
+}
+
+function readResearchLog(): ResearchRun[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem('atmos_research_log') || '[]') as ResearchRun[];
+  } catch {
+    return [];
+  }
+}
+
+function persistResearchLog(rows: ResearchRun[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('atmos_research_log', JSON.stringify(rows.slice(0, 40)));
 }
 
 interface ShellStoreState {
@@ -134,6 +149,8 @@ interface ShellStoreState {
   // Module Workspace (Full-Page Deep-Link)
   activeModuleWorkspace: ModuleWorkspaceContext | null;
   selectedModelId: number | null;
+  researchLog: ResearchRun[];
+  pushResearchRun: (run: Omit<ResearchRun, 'id' | 'at'> & { id?: string; at?: number }) => void;
 
   // Toast notifications
   activeToast: { id: string; message: string; type: 'success' | 'info' | 'warning' | 'error' } | null;
@@ -258,7 +275,7 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
 
   activeModuleWorkspace: null,
   selectedModelId: null,
-
+  researchLog: readResearchLog(),
   activeToast: null,
 
   // ========== ACTION IMPLEMENTATIONS ==========
@@ -274,6 +291,7 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
       else if (tab === 'profile') window.history.pushState(null, '', '#profile');
       else if (tab === 'news') window.history.pushState(null, '', '#news');
       else if (tab === 'models' || tab === 'intelligence') window.history.pushState(null, '', '#models');
+      else if (tab === 'research') window.history.pushState(null, '', '#research');
     }
     if (tab === 'home' || tab === 'ai') {
       set({ activeView: 'ai_chat', activeModuleWorkspace: null, activePostId: null });
@@ -283,6 +301,8 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
       set({ activeView: 'models', activeModuleWorkspace: null, activePostId: null, modelsDrawerOpen: false, selectedModelId: tab === 'models' ? null : get().selectedModelId });
     } else if (tab === 'news') {
       set({ activeView: 'news', activeModuleWorkspace: null, activePostId: null });
+    } else if (tab === 'research') {
+      set({ activeView: 'research', activeModuleWorkspace: null, activePostId: null });
     } else if (tab === 'alerts') {
       set({ activeView: 'alerts', activeModuleWorkspace: null, activePostId: null });
     } else if (tab === 'saved') {
@@ -304,6 +324,7 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
       else if (view === 'ai_chat') window.history.pushState(null, '', '#ask');
       else if (view === 'news') window.history.pushState(null, '', '#news');
       else if (view === 'models') window.history.pushState(null, '', '#models');
+      else if (view === 'research') window.history.pushState(null, '', '#research');
       else if (view === 'profile') window.history.pushState(null, '', '#profile');
     }
     set({ activeView: view, activeModuleWorkspace: view !== 'module_workspace' ? null : get().activeModuleWorkspace });
@@ -689,6 +710,19 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
     set({ activeView: 'models', activeNav: 'models', activeModuleWorkspace: null, selectedModelId: null });
   },
   setSelectedModelId: (id) => set({ selectedModelId: id }),
+  pushResearchRun: (run) => {
+    const row: ResearchRun = {
+      id: run.id || `rs_${Date.now()}`,
+      at: run.at || Date.now(),
+      query: run.query,
+      headline: run.headline,
+      cards: run.cards,
+      links: run.links
+    };
+    const next = [row, ...get().researchLog].slice(0, 40);
+    persistResearchLog(next);
+    set({ researchLog: next });
+  },
 
   // Notification Actions
   markNotificationRead: (id) => {
@@ -775,7 +809,8 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
           aiRelevanceContextHi: cleanNewsText(art.description_hi || art.descriptionHi || art.translations?.hi_context || ''),
           relatedRegion: art.region || 'India',
           relatedHazard: art.hazard || 'cyclone',
-          imageUrl: art.image || art.media?.url || undefined
+          imageUrl: art.image || art.media?.url || undefined,
+          url: art.url || undefined
         };
         });
 

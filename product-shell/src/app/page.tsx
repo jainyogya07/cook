@@ -13,6 +13,7 @@ import ChatHistoryRail from '@/components/shell/ChatHistoryRail';
 import LivePulseTicker from '@/components/shell/LivePulseTicker';
 import NewsDeskView from '@/components/shell/NewsDeskView';
 import ModelsCatalogView from '@/components/shell/ModelsCatalogView';
+import ResearchView from '@/components/shell/ResearchView';
 import ExploreView from '@/components/shell/ExploreView';
 import NotificationsView from '@/components/shell/NotificationsView';
 import BookmarksView from '@/components/shell/BookmarksView';
@@ -51,6 +52,7 @@ const APP_HASHES = new Set([
   'ai_chat',
   'news',
   'models',
+  'research',
   'auth'
 ]);
 
@@ -100,6 +102,8 @@ function CenterViewRouter() {
       return <NewsDeskView />;
     case 'models':
       return <ModelsCatalogView />;
+    case 'research':
+      return <ResearchView />;
     case 'alerts':
       return <NotificationsView />;
     case 'bookmarks':
@@ -303,6 +307,14 @@ export default function ProductShellHome() {
           selectedModelId: Number.isFinite(id) ? id : null,
           activeModuleWorkspace: null,
           activePostId: null
+        });
+      } else if (hash === 'research') {
+        useShellStore.setState({
+          activeView: 'research',
+          activeNav: 'research',
+          activeModuleWorkspace: null,
+          activePostId: null,
+          selectedModelId: null
         });
       } else if (hash === 'explore') {
         useShellStore.setState({

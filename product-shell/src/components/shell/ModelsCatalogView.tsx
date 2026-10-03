@@ -59,6 +59,12 @@ export default function ModelsCatalogView() {
         metrics: result.activatedModules.map((step) => ({ label: step.moduleName, value: step.metricOutput })),
         cards: cardsFromModules(result.activatedModules, locale)
       });
+      useShellStore.getState().pushResearchRun({
+        query: `${query} ${variable}`,
+        headline: buildHumanReply(result, locale),
+        cards: cardsFromModules(result.activatedModules, locale),
+        links: []
+      });
       setTab('result');
       setRunning(false);
     }, 800);
@@ -91,6 +97,9 @@ export default function ModelsCatalogView() {
               whileHover={{ y: -4 }}
               onClick={() => { setSelectedModelId(item.moduleNumber); setTab('experience'); setOutput(null); window.history.pushState(null, '', `#models/${item.moduleNumber}`); }}
             >
+              <div className={`nv-engine-poster is-${item.family === 'Atmosphere' ? 'sky' : item.family === 'Village' ? 'village' : item.family === 'Field' ? 'crop' : 'mandi'} is-mini`} aria-hidden="true">
+                <div className="nv-engine-art"><i /><i /><i /></div>
+              </div>
               <div className="nv-feature-top">
                 <span>M{String(item.moduleNumber).padStart(2, '0')}</span>
                 <em>{hi ? item.familyHi : item.family}</em>
@@ -112,7 +121,8 @@ export default function ModelsCatalogView() {
 
   const title = farmerTitle(card.moduleNumber, locale);
   const event = card.sampleEvents[eventIdx];
-  const scene = <EngineScene moduleNumber={card.moduleNumber} title={title} />;
+  const poster = <EngineScene moduleNumber={card.moduleNumber} title={title} variant="poster" />;
+  const liveScene = <EngineScene moduleNumber={card.moduleNumber} title={title} variant="live" />;
 
   return (
     <div className="nv-page nv-nim">
@@ -173,8 +183,8 @@ export default function ModelsCatalogView() {
               )}
             </div>
             <div>
-              <div className="nv-io-title">{hi ? '3D इंजन' : 'Live 3D'}</div>
-              {scene}
+              <div className="nv-io-title">{hi ? 'इंजन थंबनेल' : 'Engine thumbnail'}</div>
+              {poster}
               <div className="nv-output">
                 {output ? (
                   <>
@@ -193,8 +203,8 @@ export default function ModelsCatalogView() {
       {tab === 'scene' && (
         <FeatureLock need="signin">
           <div className="nv-scene-full">
-            {scene}
-            <p className="nv-hint">{hi ? 'यह वही 3D इंजन है जो forecast चलाता है।' : 'This is the same 3D engine the forecast uses.'}</p>
+            {liveScene}
+            <p className="nv-hint">{hi ? 'पूरा 3D यहाँ है। Full दबाकर चौड़ा खोलो।' : 'Full live 3D lives here. Use Full if the HUD needs room.'}</p>
           </div>
         </FeatureLock>
       )}
@@ -278,7 +288,7 @@ export default function ModelsCatalogView() {
 
       {tab === 'result' && (
         <div className="nv-result-page">
-          {scene}
+          {poster}
           <div className="nv-output nv-output-full">
             {output ? (
               <>

@@ -18,8 +18,9 @@ import FeatureLock from '@/components/shell/FeatureLock';
 import { canPost, t } from '@/i18n/copy';
 import { readChatIndex, writeChatIndex } from '@/components/shell/ChatHistoryRail';
 import { getAtmosNimCard } from '@/data/modelNimCards';
-import { cardsFromModules, ResultCard } from '@/services/resultCards';
+import { cardsFromModules, ResultCard, SourceLink } from '@/services/resultCards';
 import ResultCardsGrid from '@/components/shell/ResultCardsGrid';
+import { linksForQuery } from '@/services/chatSources';
 
 interface ChatMessage {
   id: string;
@@ -27,6 +28,7 @@ interface ChatMessage {
   text: string;
   timestamp: string;
   resultCards?: ResultCard[];
+  links?: SourceLink[];
   actionButtons?: {
     label: string;
     targetModule: number;
@@ -53,7 +55,7 @@ const SUGGESTION_CARDS_EN = [
 ];
 
 export default function AtmosAIChatView() {
-  const { openModuleWorkspace, showToast, userProfile, locale, accessPlan, selectedModelId } = useShellStore();
+  const { openModuleWorkspace, showToast, userProfile, locale, accessPlan, selectedModelId, liveNews, pushResearchRun } = useShellStore();
 
   const [threadId, setThreadId] = useState(() => `t_${Date.now()}`);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -127,6 +129,7 @@ export default function AtmosAIChatView() {
     const routingResult = parseAndRouteQuery(text, 'ASK');
     const model = selectedModelId ? getAtmosNimCard(selectedModelId) : getAtmosNimCard(routingResult.targetModuleLaunch?.moduleNumber || 1);
     const resultCards = cardsFromModules(routingResult.activatedModules, locale);
+    const links = linksForQuery(text, liveNews, locale);
     let reply = buildHumanReply(routingResult, useShellStore.getState().locale);
 
     try {
@@ -140,6 +143,7 @@ export default function AtmosAIChatView() {
             title: card.title,
             metric: card.metric
           })),
+          news: links.map((link) => ({ title: link.label, url: link.url })),
           messages: nextMessages.map((m) => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }))
         })
       });
@@ -156,6 +160,7 @@ export default function AtmosAIChatView() {
       text: reply,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       resultCards,
+      links,
       actionButtons: [
         {
           label: locale === 'hi' ? 'मॉडल कार्ड' : 'Open model card',
@@ -167,14 +172,10 @@ export default function AtmosAIChatView() {
           targetModule: 7,
           targetPort: 3007
         }
-      ],
-      evidenceMetrics: [
-        { label: locale === 'hi' ? 'भरोसा' : 'Confidence', value: `${Math.round((routingResult.entities.confidenceScore || 0.9) * 100)}%` },
-        { label: locale === 'hi' ? 'समय' : 'Horizon', value: routingResult.entities.horizon || '+72 Hours' },
-        { label: locale === 'hi' ? 'इंजन' : 'Engines', value: `${routingResult.activatedModules.length}` }
       ]
     };
 
+    pushResearchRun({ query: text, headline: reply, cards: resultCards, links });
     setMessages((prev) => [...prev, aiMsg]);
     setIsGenerating(false);
   };
@@ -227,78 +228,25 @@ export default function AtmosAIChatView() {
               />
             </div>
 
-            <div style={{ textAlign: 'center', maxWidth: '440px' }}>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '3px 12px',
-                borderRadius: '9999px',
-                backgroundColor: 'rgba(212, 175, 55, 0.12)',
-                border: '1px solid rgba(212, 175, 55, 0.28)',
-                marginBottom: '10px'
-              }}>
-                <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#E6C65C', letterSpacing: '0.04em' }}>
-                  गगनात् भूमौ, ज्ञानात् समृद्धौ
-                </span>
+            <div className="nv-ask-hero">
+              <div className="nv-ask-kicker">
+                <span>गगनात् भूमौ, ज्ञानात् समृद्धौ</span>
               </div>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: 700,
-                color: 'var(--text-0)',
-                letterSpacing: '-0.02em',
-                marginBottom: '8px'
-              }}>
-              {locale === 'hi' ? 'क्या जानना है?' : 'What do you need to know?'}
-            </h2>
-              <p style={{
-                fontSize: '14px',
-                color: 'var(--text-2)',
-                lineHeight: 1.5
-              }}>
-                {locale === 'hi' ? 'जगह, समय, फसल या खतरा लिखें। हिंदी में पूछें — जवाब हिंदी में मिलेगा।' : 'Write a place, a time, a crop or hazard. Ask in English — the answer stays in English.'}
+              <h2>{locale === 'hi' ? 'क्या जानना है?' : 'What do you need to know?'}</h2>
+              <p>
+                {locale === 'hi'
+                  ? 'जगह, समय, फसल या खतरा लिखें। हिंदी में पूछें — जवाब हिंदी में मिलेगा।'
+                  : 'Write a place, a time, a crop or hazard. Ask in English — the answer stays in English.'}
               </p>
             </div>
 
-            {/* Suggestion Cards — 2x2 grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-              gap: '10px',
-              maxWidth: '640px',
-              width: '100%'
-            }}>
+            <div className="nv-ask-grid">
               {(locale === 'hi' ? SUGGESTION_CARDS_HI : SUGGESTION_CARDS_EN).map((card, idx) => {
                 const Icon = card.icon;
                 return (
-                  <button
-                    key={idx}
-                    onClick={() => handleSend(card.query)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '14px 16px',
-                      borderRadius: '14px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                      border: '1px solid var(--stroke)',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.15s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.07)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)';
-                      e.currentTarget.style.borderColor = 'var(--stroke)';
-                    }}
-                  >
-                    <Icon style={{ width: '16px', height: '16px', color: 'var(--text-2)', flexShrink: 0 }} />
-                    <span style={{ fontSize: '13px', color: 'var(--text-1)', fontWeight: 500, lineHeight: 1.3 }}>
-                      {card.label}
-                    </span>
+                  <button key={idx} type="button" className="nv-ask-chip" onClick={() => handleSend(card.query)}>
+                    <Icon />
+                    <span>{card.label}</span>
                   </button>
                 );
               })}
@@ -363,29 +311,12 @@ export default function AtmosAIChatView() {
                     {msg.resultCards && msg.resultCards.length > 0 && (
                       <ResultCardsGrid cards={msg.resultCards} />
                     )}
-
-                    {/* Evidence Metrics */}
-                    {msg.evidenceMetrics && (
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: '6px',
-                        paddingTop: '8px',
-                        borderTop: '1px solid var(--stroke)',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '10px'
-                      }}>
-                        {msg.evidenceMetrics.map((em, i) => (
-                          <div key={i} style={{
-                            padding: '6px',
-                            borderRadius: '8px',
-                            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                            border: '1px solid var(--stroke)',
-                            textAlign: 'center'
-                          }}>
-                            <div style={{ color: 'var(--text-2)', textTransform: 'uppercase' }}>{em.label}</div>
-                            <div style={{ color: '#38BDF8', fontWeight: 700, marginTop: '2px' }}>{em.value}</div>
-                          </div>
+                    {msg.links && msg.links.length > 0 && (
+                      <div className="nv-source-row">
+                        {msg.links.map((link) => (
+                          <a key={link.url} href={link.url} target="_blank" rel="noreferrer">
+                            {link.label}
+                          </a>
                         ))}
                       </div>
                     )}
@@ -471,17 +402,9 @@ export default function AtmosAIChatView() {
 
       {/* Bottom Input Bar — always visible */}
       <FeatureLock>
-      <div style={{
-        borderTop: '1px solid var(--stroke)',
-        padding: '14px 20px',
-        backgroundColor: 'rgba(5, 5, 6, 0.85)',
-        backdropFilter: 'blur(20px)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-2)', fontSize: 11 }}>
-          <Info style={{ width: 13, height: 13 }} />
+      <div className="nv-chat-dock">
+        <div className="nv-chat-rule">
+          <Info size={13} />
           {locale === 'hi' ? QUERY_INPUT_RULE : QUERY_INPUT_RULE_EN}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
