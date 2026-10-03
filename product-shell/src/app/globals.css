@@ -476,15 +476,16 @@ a {
   height: 100dvh;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #030508;
+  background: transparent;
   color: #f1f5f9;
   font-family: var(--font-sans, system-ui, sans-serif);
   scrollbar-width: thin;
   scrollbar-color: rgba(212, 175, 55, 0.35) transparent;
 }
 
-.landing-page > .atmospheric-background-canvas {
-  opacity: 0.78;
+.landing-page > .atmospheric-background-canvas,
+.landing-page > .hyperspeed-galaxy-bg {
+  opacity: 1;
 }
 
 /* 1. STICKY GLASS HEADER WITH EMBLEM LOGO */
