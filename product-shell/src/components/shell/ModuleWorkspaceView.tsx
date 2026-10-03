@@ -38,7 +38,8 @@ import {
   ShieldAlert,
   BarChart3,
   CheckCircle2,
-  Compass
+  Compass,
+  Globe
 } from 'lucide-react';
 import { useShellStore } from '@/services/useShellStore';
 import { GROUPED_MODEL_CATEGORIES } from '@/data/mockFeedData';
@@ -889,17 +890,18 @@ export default function ModuleWorkspaceView() {
                 borderRadius: '9999px',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: activeTab === 'iframe' ? '#07090E' : '#9BA3AF',
-                backgroundColor: activeTab === 'iframe' ? '#FFFFFF' : 'transparent',
+                color: activeTab === 'iframe' ? '#07090E' : '#38BDF8',
+                backgroundColor: activeTab === 'iframe' ? '#38BDF8' : 'rgba(56, 189, 248, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.15s ease',
+                border: activeTab === 'iframe' ? 'none' : '1px solid rgba(56, 189, 248, 0.3)'
               }}
             >
-              <Radio style={{ width: '13px', height: '13px' }} />
-              <span>3D Volumetric Engine</span>
+              <Globe style={{ width: '13px', height: '13px' }} />
+              <span>{locale === 'hi' ? '🌍 3D पृथ्वी और वायुमंडल' : '🌍 3D Earth Globe & Orbit'}</span>
             </button>
           </div>
 
@@ -1134,6 +1136,92 @@ export default function ModuleWorkspaceView() {
             <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
               {/* ==============================================================
+                 0. PROMINENT 3D EARTH GLOBE QUICK-LAUNCH BANNER
+                 ============================================================== */}
+              <div
+                style={{
+                  padding: '16px 20px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.22) 0%, rgba(15, 23, 42, 0.9) 100%)',
+                  border: '1px solid rgba(56, 189, 248, 0.45)',
+                  boxShadow: '0 8px 30px rgba(2, 132, 199, 0.18)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '14px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                      border: '1px solid rgba(56, 189, 248, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '24px',
+                      flexShrink: 0
+                    }}
+                  >
+                    🌍
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                      <span style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>
+                        {locale === 'hi' ? '🌍 3D पृथ्वी और वायुमंडल विंडो' : '🌍 Interactive 3D Earth Globe & Atmospheric Twin'}
+                      </span>
+                      <span
+                        style={{
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          fontSize: '10px',
+                          fontFamily: 'var(--font-mono)',
+                          fontWeight: 700,
+                          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                          color: '#10B981',
+                          border: '1px solid rgba(16, 185, 129, 0.4)'
+                        }}
+                      >
+                        {locale === 'hi' ? 'लाइव 3D' : 'LIVE 3D'}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#94A3B8', lineHeight: 1.4 }}>
+                      {locale === 'hi'
+                        ? 'घूमती हुई 3D पृथ्वी, भारत-ओडिशा तट, चक्रवाती हवाएं और 5 वायुमंडलीय परतें लाइव स्क्रीन पर देखें।'
+                        : 'Inspect the rotating 3D Earth globe, Indian subcontinent coastline, Bay of Bengal cyclone track & 5 isobaric air layers.'}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setActiveTab('iframe')}
+                  style={{
+                    padding: '10px 22px',
+                    borderRadius: '9999px',
+                    backgroundColor: '#38BDF8',
+                    color: '#07090E',
+                    fontWeight: 800,
+                    fontSize: '13px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 0 20px rgba(56, 189, 248, 0.4)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Globe style={{ width: '16px', height: '16px' }} />
+                  <span>{locale === 'hi' ? '🌍 3D पृथ्वी विंडो खोलें →' : '🌍 Open 3D Earth Window →'}</span>
+                </button>
+              </div>
+
+              {/* ==============================================================
                  1. INTERACTIVE USER INPUT CONTROL STATION
                  ============================================================== */}
               <div
@@ -1330,10 +1418,19 @@ export default function ModuleWorkspaceView() {
               {/* ==============================================================
                  2. REAL-TIME OUTPUT INTELLIGENCE DASHBOARD
                  ============================================================== */}
+              {/* ==============================================================
+                 2. REAL-TIME OUTPUT INTELLIGENCE DASHBOARD (Child & Citizen Friendly Dual Tagging)
+                 ============================================================== */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                {/* Metric 1: Risk */}
                 <div style={{ padding: '16px', borderRadius: '14px', backgroundColor: 'rgba(15, 20, 29, 0.85)', border: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: '11px', color: '#687486', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
-                    {locale === 'hi' ? 'भौतिक जोखिम सूचकांक' : 'BIOPHYSICAL RISK INDEX'}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '11px', color: '#687486', fontFamily: 'var(--font-mono)' }}>
+                      {locale === 'hi' ? 'भौतिक जोखिम' : 'BIOPHYSICAL RISK'}
+                    </span>
+                    <span style={{ fontSize: '10px', padding: '2px 7px', borderRadius: '4px', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#EF4444', fontWeight: 700 }}>
+                      ⚠️ {locale === 'hi' ? 'खतरा स्तर: बहुत ज़्यादा' : 'Danger: High'}
+                    </span>
                   </div>
                   <div style={{ fontSize: '24px', fontWeight: 900, color: (realtimeData?.riskScore ?? 0) > 75 ? '#EF4444' : '#38BDF8', fontFamily: 'var(--font-mono)' }}>
                     {realtimeData ? `${realtimeData.riskScore}%` : '—'}
@@ -1343,40 +1440,81 @@ export default function ModuleWorkspaceView() {
                   </div>
                 </div>
 
+                {/* Metric 2: Spatial Area */}
                 <div style={{ padding: '16px', borderRadius: '14px', backgroundColor: 'rgba(15, 20, 29, 0.85)', border: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: '11px', color: '#687486', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
-                    {locale === 'hi' ? 'प्रभावित क्षेत्र' : 'AFFECTED SPATIAL FOOTPRINT'}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '11px', color: '#687486', fontFamily: 'var(--font-mono)' }}>
+                      {locale === 'hi' ? 'प्रभावित क्षेत्र' : 'SPATIAL FOOTPRINT'}
+                    </span>
+                    <span style={{ fontSize: '10px', padding: '2px 7px', borderRadius: '4px', backgroundColor: 'rgba(56, 189, 248, 0.15)', color: '#38BDF8', fontWeight: 700 }}>
+                      ☁️ {locale === 'hi' ? 'आसमान की 5 परतें' : '5 Sky Layers'}
+                    </span>
                   </div>
                   <div style={{ fontSize: '24px', fontWeight: 900, color: '#FFFFFF', fontFamily: 'var(--font-mono)' }}>
                     {realtimeData?.impactAcreage ?? '—'}
                   </div>
                   <div style={{ fontSize: '11px', color: '#9BA3AF', marginTop: '4px' }}>
-                    {locale === 'hi' ? 'निर्देशांक:' : 'Coordinates:'} <strong style={{ color: '#FFFFFF', fontFamily: 'var(--font-mono)' }}>{activeBasinObj.coords}</strong>
+                    {locale === 'hi' ? 'इलाका:' : 'Area:'} <strong style={{ color: '#FFFFFF', fontFamily: 'var(--font-mono)' }}>{activeBasinObj.coords}</strong>
                   </div>
                 </div>
 
+                {/* Metric 3: Scientific Consensus */}
                 <div style={{ padding: '16px', borderRadius: '14px', backgroundColor: 'rgba(15, 20, 29, 0.85)', border: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: '11px', color: '#687486', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
-                    {locale === 'hi' ? 'मॉडल सहमति' : 'ENSEMBLE CONSENSUS'}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '11px', color: '#687486', fontFamily: 'var(--font-mono)' }}>
+                      {locale === 'hi' ? 'वैज्ञानिक मॉडल सहमति' : 'MODEL CONSENSUS'}
+                    </span>
+                    <span style={{ fontSize: '10px', padding: '2px 7px', borderRadius: '4px', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontWeight: 700 }}>
+                      🤝 {locale === 'hi' ? '10/10 एकमत' : 'All Agree'}
+                    </span>
                   </div>
                   <div style={{ fontSize: '24px', fontWeight: 900, color: '#10B981', fontFamily: 'var(--font-mono)' }}>
                     {realtimeData ? `${realtimeData.ensembleConfidence}%` : '—'}
                   </div>
                   <div style={{ fontSize: '11px', color: '#9BA3AF', marginTop: '4px' }}>
-                    {locale === 'hi' ? 'फैलाव:' : 'Spread:'} <strong style={{ color: '#FFFFFF' }}>{locale === 'hi' ? '10/10 सदस्य सहमत' : '10/10 Members Aligned'}</strong>
+                    {locale === 'hi' ? 'भरोसा:' : 'Confidence:'} <strong style={{ color: '#FFFFFF' }}>{locale === 'hi' ? '10/10 सदस्य सहमत' : '10/10 Members Aligned'}</strong>
                   </div>
                 </div>
 
+                {/* Metric 4: Market Disruption */}
                 <div style={{ padding: '16px', borderRadius: '14px', backgroundColor: 'rgba(15, 20, 29, 0.85)', border: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: '11px', color: '#687486', fontFamily: 'var(--font-mono)', marginBottom: '4px' }}>
-                    {locale === 'hi' ? 'मंडी / उपज प्रभाव' : 'MARKET / YIELD DISRUPTION'}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '11px', color: '#687486', fontFamily: 'var(--font-mono)' }}>
+                      {locale === 'hi' ? 'मंडी / उपज प्रभाव' : 'MANDI SHOCK'}
+                    </span>
+                    <span style={{ fontSize: '10px', padding: '2px 7px', borderRadius: '4px', backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B', fontWeight: 700 }}>
+                      💰 {locale === 'hi' ? 'भाव झटका' : 'Price Spike'}
+                    </span>
                   </div>
                   <div style={{ fontSize: '24px', fontWeight: 900, color: '#F59E0B', fontFamily: 'var(--font-mono)' }}>
                     {realtimeData?.economicVolatility ?? '—'}
                   </div>
                   <div style={{ fontSize: '11px', color: '#9BA3AF', marginTop: '4px' }}>
-                    {locale === 'hi' ? 'थोक मंडी झटका अनुमान' : 'Wholesale Mandi Shock Projection'}
+                    {locale === 'hi' ? 'थोक मंडी भाव:' : 'Mandi Shift:'} <strong style={{ color: '#FFFFFF' }}>{locale === 'hi' ? '+18.4% दाम बढ़ सकते हैं' : '+18.4% price increase'}</strong>
                   </div>
+                </div>
+              </div>
+
+              {/* Child & Citizen Friendly Summary Pill */}
+              <div
+                style={{
+                  padding: '14px 18px',
+                  borderRadius: '14px',
+                  backgroundColor: 'rgba(251, 191, 36, 0.08)',
+                  border: '1px solid rgba(251, 191, 36, 0.28)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px'
+                }}
+              >
+                <div style={{ fontSize: '24px', flexShrink: 0 }}>🧒</div>
+                <div style={{ fontSize: '13px', lineHeight: 1.5, color: '#FEF3C7' }}>
+                  <strong style={{ color: '#FBBF24' }}>
+                    {locale === 'hi' ? 'सरल भाषा में समझें (कोई भी समझ सकता है): ' : 'Simple Summary (Anyone Can Understand): '}
+                  </strong>
+                  {locale === 'hi'
+                    ? 'ओडिशा समुद्र से भारी तूफान आ रहा है। 3 दिन में तेज़ आंधी-बारिश होगी, खेतों में पानी भरेगा और मंडियों में अनाज-सब्जियों के दाम 18% तक बढ़ सकते हैं। 3D पृथ्वी और चक्रवात का रास्ता देखने के लिए ऊपर "🌍 3D पृथ्वी विंडो खोलें" बटन दबाएं।'
+                    : 'A strong storm is approaching the Odisha coast from the sea. In 3 days, heavy rain will flood fields and cause local food & mandi prices to rise by ~18%. Click the "🌍 Open 3D Earth Window" button above to spin the globe!'}
                 </div>
               </div>
 

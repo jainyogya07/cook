@@ -90,8 +90,8 @@ export function VolumetricStratificationCanvas({
       ctx.fillRect(0, 0, width, height);
 
       const cx = width / 2;
-      const cy = height / 2 + 20;
-      const boxSize = Math.min(width, height) * 0.48;
+      const cy = height / 2 + 10;
+      const boxSize = Math.min(width, height) * 0.44;
 
       // Project 3D point (x, y, z) into 2D isometric viewport
       const project = (x: number, y: number, z: number) => {
@@ -108,7 +108,191 @@ export function VolumetricStratificationCanvas({
         return { px, py, depth: ry };
       };
 
-      // 1. Draw 5 Stratified Isobaric Planes
+      // -------------------------------------------------------------
+      // 0. PLANETARY 3D EARTH GLOBE AT ATMOSPHERIC BASE
+      // -------------------------------------------------------------
+      const globeRadius = boxSize * 0.46;
+      const globeCenterZ = -boxSize * 0.45 - globeRadius * 0.58;
+      const globeCenterProj = project(0, 0, globeCenterZ);
+
+      // A. Earth Atmospheric Glow Aura
+      const earthAuraGrad = ctx.createRadialGradient(
+        globeCenterProj.px,
+        globeCenterProj.py,
+        globeRadius * 0.5,
+        globeCenterProj.px,
+        globeCenterProj.py,
+        globeRadius * 1.3
+      );
+      earthAuraGrad.addColorStop(0, 'rgba(14, 165, 233, 0.28)');
+      earthAuraGrad.addColorStop(0.7, 'rgba(2, 132, 199, 0.08)');
+      earthAuraGrad.addColorStop(1, 'rgba(7, 9, 14, 0)');
+
+      ctx.beginPath();
+      ctx.arc(globeCenterProj.px, globeCenterProj.py, globeRadius * 1.3, 0, Math.PI * 2);
+      ctx.fillStyle = earthAuraGrad;
+      ctx.fill();
+
+      // B. Earth Shaded Spherical Ocean Disk
+      const oceanGrad = ctx.createRadialGradient(
+        globeCenterProj.px - globeRadius * 0.35,
+        globeCenterProj.py - globeRadius * 0.35,
+        globeRadius * 0.1,
+        globeCenterProj.px,
+        globeCenterProj.py,
+        globeRadius
+      );
+      oceanGrad.addColorStop(0, '#0284C7');
+      oceanGrad.addColorStop(0.35, '#0369A1');
+      oceanGrad.addColorStop(0.8, '#0B1D3A');
+      oceanGrad.addColorStop(1, '#050D1A');
+
+      ctx.beginPath();
+      ctx.arc(globeCenterProj.px, globeCenterProj.py, globeRadius, 0, Math.PI * 2);
+      ctx.fillStyle = oceanGrad;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Spherical coordinate helper
+      const spherePoint = (latDeg: number, lonDeg: number) => {
+        const latRad = (latDeg * Math.PI) / 180;
+        const lonRad = (lonDeg * Math.PI) / 180;
+        const cosLat = Math.cos(latRad);
+        const sinLat = Math.sin(latRad);
+        const x = globeRadius * cosLat * Math.cos(lonRad);
+        const y = globeRadius * cosLat * Math.sin(lonRad);
+        const z = globeCenterZ + globeRadius * sinLat;
+        return project(x, y, z);
+      };
+
+      // C. Rotating Latitude Parallels on Earth
+      [-30, 0, 23.5, 45].forEach((lat) => {
+        ctx.beginPath();
+        let first = true;
+        for (let lon = -180; lon <= 180; lon += 12) {
+          const pt = spherePoint(lat, lon);
+          if (pt.depth > -globeRadius * 0.1) {
+            if (first) {
+              ctx.moveTo(pt.px, pt.py);
+              first = false;
+            } else {
+              ctx.lineTo(pt.px, pt.py);
+            }
+          } else {
+            first = true;
+          }
+        }
+        ctx.strokeStyle = lat === 0 ? 'rgba(56, 189, 248, 0.45)' : 'rgba(56, 189, 248, 0.15)';
+        ctx.lineWidth = lat === 0 ? 1.2 : 0.7;
+        ctx.stroke();
+      });
+
+      // D. Rotating Longitude Meridians
+      for (let lon = 0; lon < 360; lon += 45) {
+        ctx.beginPath();
+        let first = true;
+        for (let lat = -70; lat <= 70; lat += 10) {
+          const pt = spherePoint(lat, lon);
+          if (pt.depth > -globeRadius * 0.1) {
+            if (first) {
+              ctx.moveTo(pt.px, pt.py);
+              first = false;
+            } else {
+              ctx.lineTo(pt.px, pt.py);
+            }
+          } else {
+            first = true;
+          }
+        }
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+        ctx.lineWidth = 0.7;
+        ctx.stroke();
+      }
+
+      // E. Indian Subcontinent & Bay of Bengal Coastline Polygon
+      const indiaCoords: [number, number][] = [
+        [35, 74],
+        [32, 76],
+        [28, 88],
+        [26, 92],
+        [22, 89],
+        [19.8, 85.8], // Odisha Coast Landfall
+        [16, 81.5],
+        [13, 80.2],
+        [8.2, 77.5], // Kanyakumari
+        [12, 75],
+        [15.5, 73.8],
+        [19, 72.8],
+        [23.5, 68.8], // Gujarat
+        [28, 70],
+        [32, 74],
+        [35, 74]
+      ];
+
+      ctx.beginPath();
+      let indiaVisible = false;
+      indiaCoords.forEach(([lat, lon], idx) => {
+        const pt = spherePoint(lat, lon);
+        if (pt.depth > -globeRadius * 0.1) {
+          indiaVisible = true;
+          if (idx === 0) ctx.moveTo(pt.px, pt.py);
+          else ctx.lineTo(pt.px, pt.py);
+        }
+      });
+      if (indiaVisible) {
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.18)';
+        ctx.fill();
+        ctx.strokeStyle = '#10B981';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        // Label for India
+        const indiaLabelPt = spherePoint(22, 78);
+        if (indiaLabelPt.depth > 0) {
+          ctx.font = 'bold 11px monospace';
+          ctx.fillStyle = '#10B981';
+          ctx.fillText('🇮🇳 BHARAT / INDIA', indiaLabelPt.px - 45, indiaLabelPt.py - 6);
+        }
+
+        // Odisha Cyclone Landfall Target Beacon
+        const odishaPt = spherePoint(19.8, 85.8);
+        if (odishaPt.depth > 0) {
+          const pulse = (Math.sin(now * 0.006) + 1) * 0.5;
+          ctx.beginPath();
+          ctx.arc(odishaPt.px, odishaPt.py, 6 + pulse * 8, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(239, 68, 68, ' + (0.8 - pulse * 0.4) + ')';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(odishaPt.px, odishaPt.py, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#EF4444';
+          ctx.fill();
+
+          ctx.font = 'bold 10px monospace';
+          ctx.fillStyle = '#EF4444';
+          ctx.fillText('🔴 ODISHA (Landfall)', odishaPt.px + 10, odishaPt.py + 4);
+        }
+
+        // Bay of Bengal Label
+        const bobPt = spherePoint(15, 88);
+        if (bobPt.depth > 0) {
+          ctx.font = '10px monospace';
+          ctx.fillStyle = '#38BDF8';
+          ctx.fillText('🌀 BAY OF BENGAL', bobPt.px - 35, bobPt.py);
+        }
+      }
+
+      // Earth Bottom Label
+      ctx.font = 'bold 11px monospace';
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.7)';
+      ctx.fillText('🌍 PLANET EARTH (3D GLOBE)', globeCenterProj.px - 75, globeCenterProj.py + globeRadius + 18);
+
+      // -------------------------------------------------------------
+      // 1. STRATIFIED 5 ISOBARIC ATMOSPHERIC LAYERS
+      // -------------------------------------------------------------
       LEVELS.forEach((level, idx) => {
         const z = ((4 - idx) / 4) * (boxSize * 0.9) - (boxSize * 0.45);
         const isHighlight = level.hPa === selectedLevel;
@@ -161,26 +345,26 @@ export function VolumetricStratificationCanvas({
         ctx.fillText(`${level.hPa} hPa (${level.altitudeKm})`, tagPos.px + 10, tagPos.py + 4);
       });
 
-      // 2. Draw Central Vertical Atmospheric Column Axis
-      const bottomAxis = project(0, 0, -boxSize * 0.45);
-      const topAxis = project(0, 0, boxSize * 0.45);
+      // 2. Draw Central Vertical Atmospheric Column Axis from Earth into Sky
+      const bottomAxis = project(0, 0, globeCenterZ + globeRadius);
+      const topAxis = project(0, 0, boxSize * 0.48);
       ctx.beginPath();
       ctx.moveTo(bottomAxis.px, bottomAxis.py);
       ctx.lineTo(topAxis.px, topAxis.py);
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.lineWidth = 1.2;
       ctx.setLineDash([2, 4]);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // 3. Draw 3D Cyclonic Wind Stream Particles
+      // 3. Draw 3D Cyclonic Wind Stream Particles Rising from Earth Ocean
       particles.forEach((p) => {
         p.angle += p.speed;
         p.zNorm += p.verticalDrift;
         if (p.zNorm > 1) p.zNorm = 0;
         if (p.zNorm < 0) p.zNorm = 1;
 
-        const radiusFactor = 0.75 + Math.sin(p.zNorm * Math.PI) * 0.4;
+        const radiusFactor = 0.65 + Math.sin(p.zNorm * Math.PI) * 0.45;
         const x = Math.cos(p.angle) * (p.radius * radiusFactor);
         const y = Math.sin(p.angle) * (p.radius * radiusFactor);
         const z = (p.zNorm * boxSize * 0.9) - (boxSize * 0.45);
@@ -287,12 +471,34 @@ export function VolumetricStratificationCanvas({
           <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981', boxShadow: '0 0 10px #10B981' }} />
           <div>
             <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#38BDF8', fontWeight: 700 }}>
-              4D VOLUMETRIC DIGITAL TWIN · 60 FPS
+              🌍 3D PLANETARY EARTH & ATMOSPHERIC TWIN
             </div>
             <div style={{ fontSize: '13px', color: '#FFFFFF', fontWeight: 700 }}>
-              {moduleTitle} ({leadHour}h Horizon)
+              {moduleTitle} · Bharat / Odisha Coast ({leadHour}h Horizon)
             </div>
           </div>
+        </div>
+
+        {/* Kid & Citizen Friendly Explainer Pill */}
+        <div
+          style={{
+            backgroundColor: 'rgba(15, 20, 29, 0.85)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+            padding: '6px 14px',
+            borderRadius: '9999px',
+            fontSize: '11px',
+            color: '#F8FAFC',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            pointerEvents: 'auto'
+          }}
+        >
+          <span>🧒</span>
+          <span>
+            <strong>सीधी समझ:</strong> नीचे 3D पृथ्वी (भारत & ओडिशा) है, ऊपर आसमान की 5 परतों में आंधी-तूफान उठ रहा है।
+          </span>
         </div>
 
         {/* Drag Hint */}
@@ -307,11 +513,12 @@ export function VolumetricStratificationCanvas({
             fontFamily: 'var(--font-mono)',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '6px',
+            pointerEvents: 'auto'
           }}
         >
           <RotateCw style={{ width: '12px', height: '12px', color: '#38BDF8' }} />
-          <span>Click & Drag to Rotate 3D Axis</span>
+          <span>Click & Drag to Rotate 3D Earth Globe</span>
         </div>
       </div>
 
