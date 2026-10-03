@@ -56,7 +56,7 @@ interface DedicatedModuleSimulatorProps {
   horizon: string;
   locale: 'en' | 'hi';
   realtimeData: any;
-  port: number;
+  port?: number;
 }
 
 export default function DedicatedModuleSimulator({

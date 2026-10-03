@@ -86,28 +86,13 @@ export default function InteractiveModuleViewerModal() {
 
       {/* Embedded High-Performance Live 3D Module */}
       <div className="flex-1 w-full h-full relative bg-[#040914] overflow-hidden">
-        {moduleNumber === 1 ? (
-          <iframe
-            key={key}
-            src="/module01/index.html"
-            className="w-full h-full border-none"
-            title="Module 01 Planetary Volumetric Earth Globe"
-            allow="accelerometer; autoplay; camera; gyroscope; payment"
-          />
-        ) : (
-          <DedicatedModuleSimulator
-            key={key}
-            moduleNumber={moduleNumber}
-            title={title}
-            basin={defaultBasin}
-            horizon="+72h"
-            locale={locale || 'en'}
-            realtimeData={{
-              riskCategory: 'CRITICAL CONVERGENCE',
-              advisoryBullet: 'Active 3D biophysical monitoring along coastal river corridor.'
-            }}
-          />
-        )}
+        <iframe
+          key={key}
+          src={`/module${moduleNumber.toString().padStart(2, '0')}/index.html`}
+          className="w-full h-full border-none"
+          title={`Module ${moduleNumber} Live 3D View`}
+          allow="accelerometer; autoplay; camera; gyroscope; payment"
+        />
       </div>
     </div>
   );

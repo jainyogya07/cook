@@ -23,6 +23,7 @@
     "dev:module17": "npm --prefix module17-supply-shock run dev",
     "dev:module18": "npm --prefix module18-scenario-simulator run dev",
     "dev:module19": "npm --prefix module19-landing run dev",
-    "build": "node scripts/build-all-modules.js && npm --prefix product-shell run build"
+    "build:modules": "node scripts/build-all-modules.js",
+    "build": "npm --prefix product-shell run build"
   }
 }
