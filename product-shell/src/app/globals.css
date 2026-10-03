@@ -3012,8 +3012,89 @@ a {
 .nv-metrics span { display: block; font-size: 11px; color: #94a3b8; }
 .nv-about p { margin: 0 0 12px; line-height: 1.55; color: #e2e8f0; }
 @media (max-width: 860px) {
-  .nv-model-layout, .nv-io { grid-template-columns: 1fr; }
+  .nv-model-layout, .nv-io, .nv-doc, .nv-catalog { grid-template-columns: 1fr; }
   .nv-brand span { display: none; }
   .nv-shell { padding: 8px; }
   .nv-page-head h1 { font-size: 22px; }
+  .nv-toc { display: none; }
 }
+
+.nv-filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 18px; }
+.nv-filters button {
+  border: 1px solid rgba(255,255,255,.12);
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 999px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.nv-filters button.is-active { background: #76b900; color: #04120a; border-color: #76b900; }
+.nv-catalog { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.nv-feature-card {
+  text-align: left;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px;
+  padding: 18px;
+  color: #fff;
+  cursor: pointer;
+  min-height: 220px;
+}
+.nv-feature-card:hover { border-color: #76b900; }
+.nv-feature-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.nv-feature-top span { color: #76b900; font-size: 11px; letter-spacing: .12em; font-weight: 800; }
+.nv-feature-top em { font-style: normal; font-size: 11px; color: #94a3b8; }
+.nv-feature-card h2 { margin: 0 0 8px; font-size: 18px; }
+.nv-feature-card p { margin: 0; color: #cbd5e1; font-size: 13px; line-height: 1.5; }
+.nv-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.nv-tags i { font-style: normal; font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: #94a3b8; }
+.nv-back { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; color: #76b900; cursor: pointer; margin-bottom: 12px; font-weight: 700; }
+.nv-nim-hero { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.nv-nim-hero h1 { margin: 8px 0 4px; font-size: 32px; letter-spacing: -.04em; }
+.nv-sci { color: #94a3b8; font-size: 13px; margin: 0; }
+.nv-io-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.nv-io-pro label { margin-top: 10px; }
+.nv-io-pro select, .nv-io-pro details {
+  width: 100%;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: #111318;
+  color: #fff;
+  padding: 10px 12px;
+}
+.nv-io-pro details p { color: #cbd5e1; font-size: 13px; }
+.nv-run-row { display: flex; justify-content: flex-end; gap: 8px; align-items: center; margin-top: 8px; }
+.nv-globe {
+  position: relative;
+  height: 220px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  background: #000;
+}
+.nv-globe span {
+  position: absolute;
+  inset: 18px auto auto 50%;
+  width: 180px;
+  height: 180px;
+  margin-left: -90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3b82f6, #0b1b3a 55%, #020617 100%);
+  box-shadow: 0 0 40px rgba(59,130,246,.35);
+}
+.nv-globe b { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: #76b900; }
+.nv-globe-lg { height: 260px; }
+.nv-doc { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 28px; }
+.nv-doc section { margin-bottom: 28px; scroll-margin-top: 12px; }
+.nv-doc h2 { font-size: 20px; margin: 0 0 10px; }
+.nv-doc p, .nv-doc li { color: #d1d5db; line-height: 1.65; }
+.nv-doc table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.nv-doc th, .nv-doc td { border-bottom: 1px solid rgba(255,255,255,.08); padding: 8px 6px; text-align: left; }
+.nv-toc { position: sticky; top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.nv-toc strong { font-size: 12px; color: #76b900; margin-bottom: 4px; }
+.nv-toc a { color: #94a3b8; text-decoration: none; font-size: 13px; }
+.nv-toc a:hover { color: #fff; }
+.nv-result-page { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; }
+.nv-event { color: #76b900; font-size: 12px; letter-spacing: .06em; }
+.nv-chat { min-height: 100%; }

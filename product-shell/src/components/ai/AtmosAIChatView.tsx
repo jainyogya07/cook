@@ -114,7 +114,7 @@ export default function AtmosAIChatView() {
 
   return (
     <main
-      className="x-center-feed"
+      className="x-center-feed nv-chat"
       style={{ display: 'flex', flexDirection: 'column', overflowX: 'hidden', position: 'relative', minHeight: 0, flex: 1 }}
     >
       {/* Scrollable Chat Area */}
@@ -173,14 +173,14 @@ export default function AtmosAIChatView() {
                 letterSpacing: '-0.02em',
                 marginBottom: '8px'
               }}>
-              क्या जानना है?
+              {locale === 'hi' ? 'क्या जानना है?' : 'What do you need to know?'}
             </h2>
               <p style={{
                 fontSize: '14px',
                 color: 'var(--text-2)',
                 lineHeight: 1.5
               }}>
-                जगह, समय, फसल या खतरा लिखें। हिंदी में पूछें — जवाब हिंदी में मिलेगा।
+                {locale === 'hi' ? 'जगह, समय, फसल या खतरा लिखें। हिंदी में पूछें — जवाब हिंदी में मिलेगा।' : 'Write a place, a time, a crop or hazard. Ask in English — the answer stays in English.'}
               </p>
             </div>
 
@@ -442,8 +442,8 @@ export default function AtmosAIChatView() {
           style={{
             padding: '10px',
             borderRadius: '9999px',
-            backgroundColor: '#FFFFFF',
-            color: '#050506',
+            backgroundColor: '#76b900',
+            color: '#04120a',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
