@@ -1218,23 +1218,30 @@ export default function ModuleWorkspaceView() {
               </div>
             )}
 
-            {/* Connected Engines */}
-            {connectedModuleDetails.length > 0 && (
-              <div style={{ padding: '14px', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#687486', fontFamily: 'var(--font-mono)', marginBottom: '8px' }}>
-                  COUPLED PIPELINE ENGINES
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {connectedModuleDetails.map((cm: any) => (
+            {/* All 18 Engines Rapid Switcher */}
+            <div style={{ padding: '14px', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#687486', fontFamily: 'var(--font-mono)' }}>
+                  4D ENGINES MESH (M01-M18)
+                </span>
+                <span style={{ fontSize: '9px', fontWeight: 700, color: '#10B981', fontFamily: 'var(--font-mono)', padding: '2px 6px', borderRadius: '4px', backgroundColor: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                  18 ONLINE
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '340px', overflowY: 'auto', paddingRight: '2px' }} className="custom-scrollbar">
+                {ENGINE_FIELD_GUIDE.map((eng) => {
+                  const isCurrentEngine = eng.moduleNumber === moduleNumber;
+                  return (
                     <button
-                      key={cm.moduleNumber}
-                      onClick={() => openModuleWorkspace(cm.moduleNumber, cm.port, cm.title)}
+                      key={eng.moduleNumber}
+                      onClick={() => openModuleWorkspace(eng.moduleNumber, 3000 + eng.moduleNumber, locale === 'hi' ? eng.titleHi : eng.title)}
                       style={{
                         width: '100%',
-                        padding: '8px 10px',
+                        padding: '6px 8px',
                         borderRadius: '8px',
-                        backgroundColor: '#121620',
-                        border: '1px solid var(--border)',
+                        backgroundColor: isCurrentEngine ? 'rgba(56, 189, 248, 0.18)' : '#121620',
+                        border: isCurrentEngine ? '1px solid rgba(56, 189, 248, 0.45)' : '1px solid var(--border)',
+                        boxShadow: isCurrentEngine ? '0 0 12px rgba(56, 189, 248, 0.12)' : 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
@@ -1242,21 +1249,49 @@ export default function ModuleWorkspaceView() {
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
+                      title={`${eng.title} (${eng.symbol})`}
                     >
-                      <div>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#FFFFFF' }}>
-                          M{cm.moduleNumber < 10 ? `0${cm.moduleNumber}` : cm.moduleNumber} · {cm.title?.substring(0, 18)}
-                        </div>
-                        <div style={{ fontSize: '10px', color: '#10B981', fontFamily: 'var(--font-mono)' }}>
-                          Port :{cm.port} (ONLINE)
-                        </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        <span
+                          style={{
+                            padding: '1px 5px',
+                            borderRadius: '4px',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '9.5px',
+                            fontWeight: 800,
+                            backgroundColor: isCurrentEngine ? '#38BDF8' : 'rgba(255, 255, 255, 0.08)',
+                            color: isCurrentEngine ? '#07090E' : '#94A3B8',
+                            flexShrink: 0
+                          }}
+                        >
+                          M{eng.moduleNumber < 10 ? `0${eng.moduleNumber}` : eng.moduleNumber}
+                        </span>
+                        <span style={{ fontSize: '11px', color: isCurrentEngine ? '#38BDF8' : '#64748B', flexShrink: 0 }}>
+                          {eng.symbol}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '11.5px',
+                            fontWeight: isCurrentEngine ? 700 : 500,
+                            color: isCurrentEngine ? '#FFFFFF' : '#CBD5E1',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}
+                        >
+                          {locale === 'hi' ? eng.titleHi : eng.title}
+                        </span>
                       </div>
-                      <ArrowUpRight style={{ width: '13px', height: '13px', color: '#FFFFFF' }} />
+                      {isCurrentEngine ? (
+                        <span style={{ width: '6px', height: '6px', borderRadius: '9999px', backgroundColor: '#38BDF8', boxShadow: '0 0 8px #38BDF8', flexShrink: 0 }} />
+                      ) : (
+                        <ArrowUpRight style={{ width: '12px', height: '12px', color: '#64748B', flexShrink: 0 }} />
+                      )}
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
 
             {/* Ask Atmos AI CTA */}
             <div style={{ padding: '14px', marginTop: 'auto' }}>

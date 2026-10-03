@@ -28,6 +28,7 @@ import {
 import { useShellStore } from '@/services/useShellStore';
 import { LeftNavTab } from '@/types/shell';
 import { t } from '@/i18n/copy';
+import { ENGINE_FIELD_GUIDE } from '@/data/engineFieldGuide';
 
 export default function LeftSidebar() {
   const {
@@ -40,7 +41,9 @@ export default function LeftSidebar() {
     bookmarks,
     userProfile,
     locale,
-    setLocale
+    setLocale,
+    activeModuleWorkspace,
+    openModuleWorkspace
   } = useShellStore();
 
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -390,6 +393,143 @@ export default function LeftSidebar() {
           )}
         </li>
       </ul>
+
+      {/* 2. 4D AI Engines Permanent Rail (M01 - M18) */}
+      <div style={{ marginTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '10px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '4px 6px',
+            marginBottom: '6px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Sparkles style={{ width: '13px', height: '13px', color: '#38BDF8' }} />
+            <span
+              className="x-nav-label"
+              style={{
+                fontSize: '11px',
+                fontWeight: 800,
+                color: '#94A3B8',
+                letterSpacing: '0.04em',
+                fontFamily: 'var(--font-mono)'
+              }}
+            >
+              {locale === 'hi' ? '4D इंजन (M01-M18)' : '4D AI ENGINES'}
+            </span>
+          </div>
+          <span
+            className="x-nav-label"
+            style={{
+              fontSize: '9px',
+              fontFamily: 'var(--font-mono)',
+              fontWeight: 700,
+              padding: '1px 6px',
+              borderRadius: '9999px',
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              color: '#10B981',
+              border: '1px solid rgba(16, 185, 129, 0.3)'
+            }}
+          >
+            18 LIVE
+          </span>
+        </div>
+
+        {/* Scrollable list of all 18 modules */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+            maxHeight: '260px',
+            overflowY: 'auto',
+            paddingRight: '2px'
+          }}
+          className="custom-scrollbar"
+        >
+          {ENGINE_FIELD_GUIDE.map((eng) => {
+            const isSelected = activeModuleWorkspace?.moduleNumber === eng.moduleNumber;
+            return (
+              <motion.button
+                key={eng.moduleNumber}
+                whileHover={{ x: 2 }}
+                onClick={() => {
+                  openModuleWorkspace(
+                    eng.moduleNumber,
+                    3000 + eng.moduleNumber,
+                    locale === 'hi' ? eng.titleHi : eng.title
+                  );
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '5px 8px',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: isSelected ? 700 : 500,
+                  color: isSelected ? '#FFFFFF' : '#CBD5E1',
+                  backgroundColor: isSelected ? 'rgba(56, 189, 248, 0.18)' : 'transparent',
+                  border: isSelected ? '1px solid rgba(56, 189, 248, 0.45)' : '1px solid transparent',
+                  boxShadow: isSelected ? '0 0 16px rgba(56, 189, 248, 0.15)' : 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.15s ease'
+                }}
+                title={`Engine ${eng.moduleNumber < 10 ? `0${eng.moduleNumber}` : eng.moduleNumber}: ${eng.title}`}
+              >
+                <span
+                  style={{
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '9.5px',
+                    fontWeight: 800,
+                    backgroundColor: isSelected ? '#38BDF8' : 'rgba(255, 255, 255, 0.06)',
+                    color: isSelected ? '#07090E' : '#94A3B8',
+                    flexShrink: 0
+                  }}
+                >
+                  M{eng.moduleNumber < 10 ? `0${eng.moduleNumber}` : eng.moduleNumber}
+                </span>
+
+                <span style={{ fontSize: '11px', color: isSelected ? '#38BDF8' : '#64748B', flexShrink: 0 }}>
+                  {eng.symbol}
+                </span>
+
+                <span
+                  className="x-nav-label"
+                  style={{
+                    flex: 1,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontSize: '11.5px'
+                  }}
+                >
+                  {locale === 'hi' ? eng.titleHi : eng.title}
+                </span>
+
+                {isSelected && (
+                  <span
+                    style={{
+                      width: '5px',
+                      height: '5px',
+                      borderRadius: '9999px',
+                      backgroundColor: '#38BDF8',
+                      boxShadow: '0 0 6px #38BDF8',
+                      flexShrink: 0
+                    }}
+                  />
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* 2.5 Atmos Pro Membership Teaser Card (Fills empty vertical void) */}
       <div className="sidebar-pro-card" style={{ marginTop: 'auto', paddingTop: '16px', paddingBottom: '12px' }}>
