@@ -915,7 +915,6 @@ export default function ModuleWorkspaceView() {
               ENGINE {moduleNumber < 10 ? `0${moduleNumber}` : moduleNumber}
             </span>
             <span style={{ fontSize: '14px', fontWeight: 700, color: '#FFFFFF' }}>{title}</span>
-            <span style={{ fontSize: '12px', color: '#687486', fontFamily: 'var(--font-mono)' }}>({targetUrl})</span>
           </div>
           <button onClick={() => setIsFullscreen(false)} style={{ padding: '6px 14px', borderRadius: '9999px', fontSize: '12px', fontWeight: 600, color: '#FFFFFF', border: '1px solid var(--border)', backgroundColor: '#151B26', cursor: 'pointer' }}>
             <Minimize2 style={{ width: '14px', height: '14px' }} />
@@ -1021,7 +1020,7 @@ export default function ModuleWorkspaceView() {
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '9999px', backgroundColor: '#10B981' }} />
-            <span>{isLocalhost && isPortOnline ? `ONLINE :${port}` : 'ENGINE ACTIVE // 30 FPS'}</span>
+            <span>{locale === 'hi' ? '3D इंजन सक्रिय // रियल-टाइम' : '3D ENGINE ACTIVE // REAL-TIME'}</span>
           </div>
         </div>
 
@@ -1082,7 +1081,7 @@ export default function ModuleWorkspaceView() {
               ) : (
                 <>
                   <Activity style={{ width: '13px', height: '13px' }} />
-                  <span>{locale === 'hi' ? `⚡ M0${moduleNumber} सिमुलेटर (: ${port})` : `⚡ M0${moduleNumber} Simulator (: ${port})`}</span>
+                  <span>{locale === 'hi' ? `⚡ M0${moduleNumber} 3D सिमुलेशन` : `⚡ M0${moduleNumber} 3D Simulation`}</span>
                 </>
               )}
             </button>
@@ -1092,46 +1091,21 @@ export default function ModuleWorkspaceView() {
             onClick={() => {
               setIframeKey((k) => k + 1);
               setIsIframeLoading(true);
-              showToast('Reloaded Engine Sandbox', 'info');
+              showToast('Reloaded 3D Engine Twin', 'info');
             }}
             style={{ padding: '6px', borderRadius: '9999px', backgroundColor: '#151B26', color: '#FFFFFF', border: '1px solid var(--border)', cursor: 'pointer' }}
-            title="Reload Engine"
+            title="Reload 3D Engine"
           >
             <RotateCcw style={{ width: '13px', height: '13px' }} />
           </button>
 
           <button
             onClick={() => setIsFullscreen(true)}
-            style={{ padding: '6px', borderRadius: '9999px', backgroundColor: '#151B26', color: '#FFFFFF', border: '1px solid var(--border)', cursor: 'pointer' }}
+            style={{ padding: '6px 14px', borderRadius: '9999px', backgroundColor: '#151B26', color: '#FFFFFF', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600 }}
             title="Fullscreen Studio"
           >
             <Maximize2 style={{ width: '13px', height: '13px' }} />
-          </button>
-
-          <button
-            onClick={() => {
-              if (!isLocalhost) {
-                showToast(`Standalone port :${port} is for local workstation development`, 'info');
-              }
-              window.open(targetUrl, '_blank');
-            }}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '9999px',
-              backgroundColor: '#EFF3F4',
-              color: '#0B0E14',
-              border: 'none',
-              fontWeight: 700,
-              fontSize: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer'
-            }}
-            title={isLocalhost ? `Open :${port} in New Tab` : `Local dev port :${port}`}
-          >
-            <span>{isLocalhost ? `Open :${port}` : `Dev Port :${port}`}</span>
-            <ExternalLink style={{ width: '13px', height: '13px' }} />
+            <span>{locale === 'hi' ? 'पूर्ण स्क्रीन' : 'Fullscreen'}</span>
           </button>
         </div>
       </div>
@@ -1486,7 +1460,7 @@ export default function ModuleWorkspaceView() {
                             border: '1px solid rgba(56, 189, 248, 0.3)'
                           }}
                         >
-                          Port :{port}
+                          3D OPERATIONAL
                         </span>
                       </div>
                       <div style={{ fontSize: '13px', color: '#94A3B8', lineHeight: 1.4 }}>
