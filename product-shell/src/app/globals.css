@@ -107,8 +107,8 @@ a {
   background: linear-gradient(180deg, var(--glass-strong), var(--glass));
   border: 1px solid var(--stroke);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--shadow-glass);
 }
 
@@ -116,8 +116,8 @@ a {
   background: linear-gradient(180deg, var(--glass-strong), var(--glass));
   border: 1px solid var(--stroke);
   border-radius: var(--radius-md);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.6);
 }
 
@@ -211,11 +211,11 @@ a {
 
 /* Center feed column — scrollable glass panel */
 .x-center-feed {
-  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+  background: rgba(10, 14, 22, 0.92);
   border: 1px solid var(--stroke);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: var(--shadow-glass);
   overflow-y: auto;
   overflow-x: hidden;
@@ -2709,24 +2709,43 @@ a {
 
 /* Unique scientific signatures per engine — not generic bounce */
 .engine-sig { --sig: #38bdf8; }
-.engine-sig-1 { --sig: #7dd3fc; animation: sigTelemetry 5.2s ease-in-out infinite; }
-.engine-sig-2 { --sig: #67e8f9; animation: sigStratify 6.4s ease-in-out infinite; }
-.engine-sig-3 { --sig: #fbbf24; animation: sigAnomaly 4.8s ease-in-out infinite; }
-.engine-sig-4 { --sig: #fb7185; animation: sigFootprint 7.1s ease-in-out infinite; }
-.engine-sig-5 { --sig: #c4b5fd; animation: sigTrack 8s linear infinite; }
-.engine-sig-6 { --sig: #93c5fd; animation: sigPulseField 3.6s ease-in-out infinite; }
-.engine-sig-7 { --sig: #22d3ee; animation: sigDownscale 5.6s ease-in-out infinite; }
-.engine-sig-8 { --sig: #f472b6; animation: sigCompare 6.2s ease-in-out infinite; }
-.engine-sig-9 { --sig: #34d399; animation: sigExposure 7.4s ease-in-out infinite; }
-.engine-sig-10 { --sig: #a3e635; animation: sigPhenology 9s ease-in-out infinite; }
-.engine-sig-11 { --sig: #2dd4bf; animation: sigHydrology 6.8s ease-in-out infinite; }
-.engine-sig-12 { --sig: #86efac; animation: sigBranch 5.4s ease-in-out infinite; }
-.engine-sig-13 { --sig: #facc15; animation: sigYield 4.9s ease-in-out infinite; }
-.engine-sig-14 { --sig: #f97316; animation: sigPathogen 3.8s ease-in-out infinite; }
-.engine-sig-15 { --sig: #e879f9; animation: sigMandi 5.1s ease-in-out infinite; }
-.engine-sig-16 { --sig: #818cf8; animation: sigCascade 6.6s ease-in-out infinite; }
-.engine-sig-17 { --sig: #fb7185; animation: sigShock 4.2s ease-in-out infinite; }
-.engine-sig-18 { --sig: #38bdf8; animation: sigScenario 7.8s ease-in-out infinite; }
+.engine-sig-1 { --sig: #7dd3fc; }
+.engine-sig-2 { --sig: #67e8f9; }
+.engine-sig-3 { --sig: #fbbf24; }
+.engine-sig-4 { --sig: #fb7185; }
+.engine-sig-5 { --sig: #c4b5fd; }
+.engine-sig-6 { --sig: #93c5fd; }
+.engine-sig-7 { --sig: #22d3ee; }
+.engine-sig-8 { --sig: #f472b6; }
+.engine-sig-9 { --sig: #34d399; }
+.engine-sig-10 { --sig: #a3e635; }
+.engine-sig-11 { --sig: #2dd4bf; }
+.engine-sig-12 { --sig: #86efac; }
+.engine-sig-13 { --sig: #facc15; }
+.engine-sig-14 { --sig: #f97316; }
+.engine-sig-15 { --sig: #e879f9; }
+.engine-sig-16 { --sig: #818cf8; }
+.engine-sig-17 { --sig: #fb7185; }
+.engine-sig-18 { --sig: #38bdf8; }
+
+.engine-sig-1 .field-guide-symbol { animation: sigTelemetry 5.2s ease-in-out infinite; }
+.engine-sig-2 .field-guide-symbol { animation: sigStratify 6.4s ease-in-out infinite; }
+.engine-sig-3 .field-guide-symbol { animation: sigAnomaly 4.8s ease-in-out infinite; }
+.engine-sig-4 .field-guide-symbol { animation: sigFootprint 7.1s ease-in-out infinite; }
+.engine-sig-5 .field-guide-symbol { animation: sigTrack 8s linear infinite; }
+.engine-sig-6 .field-guide-symbol { animation: sigPulseField 3.6s ease-in-out infinite; }
+.engine-sig-7 .field-guide-symbol { animation: sigDownscale 5.6s ease-in-out infinite; }
+.engine-sig-8 .field-guide-symbol { animation: sigCompare 6.2s ease-in-out infinite; }
+.engine-sig-9 .field-guide-symbol { animation: sigExposure 7.4s ease-in-out infinite; }
+.engine-sig-10 .field-guide-symbol { animation: sigPhenology 9s ease-in-out infinite; }
+.engine-sig-11 .field-guide-symbol { animation: sigHydrology 6.8s ease-in-out infinite; }
+.engine-sig-12 .field-guide-symbol { animation: sigBranch 5.4s ease-in-out infinite; }
+.engine-sig-13 .field-guide-symbol { animation: sigYield 4.9s ease-in-out infinite; }
+.engine-sig-14 .field-guide-symbol { animation: sigPathogen 3.8s ease-in-out infinite; }
+.engine-sig-15 .field-guide-symbol { animation: sigMandi 5.1s ease-in-out infinite; }
+.engine-sig-16 .field-guide-symbol { animation: sigCascade 6.6s ease-in-out infinite; }
+.engine-sig-17 .field-guide-symbol { animation: sigShock 4.2s ease-in-out infinite; }
+.engine-sig-18 .field-guide-symbol { animation: sigScenario 7.8s ease-in-out infinite; }
 
 .field-guide-symbol,
 .catalog-card .signal-pulse {

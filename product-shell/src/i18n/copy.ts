@@ -127,9 +127,8 @@ export function canPost(plan: AccessPlan) {
   return plan === 'free' || plan === 'pro';
 }
 
-export function canUseEngines(plan: AccessPlan, moduleNumber?: number) {
-  if (plan === 'pro') return true;
-  if (plan === 'free') return !moduleNumber || moduleNumber <= 6;
+export function canUseEngines(plan: AccessPlan, _moduleNumber?: number) {
+  if (plan === 'pro' || plan === 'free') return true;
   return false;
 }
 

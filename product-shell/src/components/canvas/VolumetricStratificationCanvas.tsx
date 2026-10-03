@@ -31,10 +31,10 @@ export function VolumetricStratificationCanvas({
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<number>(850);
-  const [rotationAngle, setRotationAngle] = useState(0.4);
-  const [tiltAngle, setTiltAngle] = useState(0.55);
-  const [isDragging, setIsDragging] = useState(false);
-  const [lastMouse, setLastMouse] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const rotRef = useRef(0.4);
+  const tiltRef = useRef(0.55);
+  const isDraggingRef = useRef(false);
+  const lastMouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const selectedData = LEVELS.find((l) => l.hPa === selectedLevel) || LEVELS[3];
 
@@ -44,19 +44,40 @@ export function VolumetricStratificationCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
+    let isVisible = !document.hidden;
     let width = (canvas.width = canvas.parentElement?.clientWidth || 800);
     let height = (canvas.height = canvas.parentElement?.clientHeight || 600);
+
+    // Cached gradients to prevent heap churn
+    let cachedAuraGrad: CanvasGradient | null = null;
+    let cachedOceanGrad: CanvasGradient | null = null;
+    let lastGradPy = -9999;
+    let lastBoxSize = 0;
 
     const handleResize = () => {
       if (!canvas || !canvas.parentElement) return;
       width = canvas.width = canvas.parentElement.clientWidth;
       height = canvas.height = canvas.parentElement.clientHeight;
+      cachedAuraGrad = null;
+      cachedOceanGrad = null;
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
-    // Particle streamlines in 3D cylindrical coordinates (capped to 50 for cool laptop operation)
-    const particleCount = 50;
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+      if (isVisible && !animationFrameId) {
+        lastTime = performance.now();
+        animationFrameId = requestAnimationFrame(render);
+      } else if (!isVisible && animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // Particle streamlines in 3D cylindrical coordinates (22 streamlined particles for low CPU)
+    const particleCount = 22;
     const particles = Array.from({ length: particleCount }, () => ({
       radius: 40 + Math.random() * 220,
       angle: Math.random() * Math.PI * 2,
@@ -67,22 +88,23 @@ export function VolumetricStratificationCanvas({
       alpha: 0.25 + Math.random() * 0.5
     }));
 
-    let autoRot = rotationAngle;
     let lastTime = performance.now();
-    const frameInterval = 1000 / 30; // 30 FPS cap for silent laptop fans
+    const frameInterval = 1000 / 24; // 24 FPS cap for cool laptop operation
 
     const render = (now: number) => {
-      animationFrameId = requestAnimationFrame(render);
+      if (!isVisible) {
+        animationFrameId = null;
+        return;
+      }
 
-      // Auto-pause when tab is inactive to protect battery and thermals
-      if (document.hidden) return;
+      animationFrameId = requestAnimationFrame(render);
 
       const delta = now - lastTime;
       if (delta < frameInterval) return;
       lastTime = now - (delta % frameInterval);
 
-      if (!isDragging) {
-        autoRot += 0.0025;
+      if (!isDraggingRef.current) {
+        rotRef.current += 0.0018;
       }
 
       // Flat fill without allocating radial gradients on heap every frame
@@ -93,18 +115,19 @@ export function VolumetricStratificationCanvas({
       const cy = height / 2 + 10;
       const boxSize = Math.min(width, height) * 0.44;
 
-      // Project 3D point (x, y, z) into 2D isometric viewport
+      const autoRot = rotRef.current;
+      const tiltAngle = tiltRef.current;
+      const cosR = Math.cos(autoRot);
+      const sinR = Math.sin(autoRot);
+      const cosT = Math.cos(tiltAngle);
+      const sinT = Math.sin(tiltAngle);
+
+      // Project 3D point (x, y, z) into 2D isometric viewport (hoisted trig)
       const project = (x: number, y: number, z: number) => {
-        const cosR = Math.cos(autoRot);
-        const sinR = Math.sin(autoRot);
         const rx = x * cosR - y * sinR;
         const ry = x * sinR + y * cosR;
-
-        const cosT = Math.cos(tiltAngle);
-        const sinT = Math.sin(tiltAngle);
         const px = cx + rx;
         const py = cy + (ry * sinT) - (z * cosT);
-
         return { px, py, depth: ry };
       };
 
@@ -115,41 +138,49 @@ export function VolumetricStratificationCanvas({
       const globeCenterZ = -boxSize * 0.45 - globeRadius * 0.58;
       const globeCenterProj = project(0, 0, globeCenterZ);
 
-      // A. Earth Atmospheric Glow Aura
-      const earthAuraGrad = ctx.createRadialGradient(
-        globeCenterProj.px,
-        globeCenterProj.py,
-        globeRadius * 0.5,
-        globeCenterProj.px,
-        globeCenterProj.py,
-        globeRadius * 1.3
-      );
-      earthAuraGrad.addColorStop(0, 'rgba(14, 165, 233, 0.28)');
-      earthAuraGrad.addColorStop(0.7, 'rgba(2, 132, 199, 0.08)');
-      earthAuraGrad.addColorStop(1, 'rgba(7, 9, 14, 0)');
+      // Only re-create radial gradients when viewport or tilt changes
+      if (!cachedAuraGrad || !cachedOceanGrad || Math.abs(lastGradPy - globeCenterProj.py) > 1 || lastBoxSize !== boxSize) {
+        lastGradPy = globeCenterProj.py;
+        lastBoxSize = boxSize;
 
+        const aura = ctx.createRadialGradient(
+          globeCenterProj.px,
+          globeCenterProj.py,
+          globeRadius * 0.5,
+          globeCenterProj.px,
+          globeCenterProj.py,
+          globeRadius * 1.3
+        );
+        aura.addColorStop(0, 'rgba(14, 165, 233, 0.28)');
+        aura.addColorStop(0.7, 'rgba(2, 132, 199, 0.08)');
+        aura.addColorStop(1, 'rgba(7, 9, 14, 0)');
+        cachedAuraGrad = aura;
+
+        const ocean = ctx.createRadialGradient(
+          globeCenterProj.px - globeRadius * 0.35,
+          globeCenterProj.py - globeRadius * 0.35,
+          globeRadius * 0.1,
+          globeCenterProj.px,
+          globeCenterProj.py,
+          globeRadius
+        );
+        ocean.addColorStop(0, '#0284C7');
+        ocean.addColorStop(0.35, '#0369A1');
+        ocean.addColorStop(0.8, '#0B1D3A');
+        ocean.addColorStop(1, '#050D1A');
+        cachedOceanGrad = ocean;
+      }
+
+      // A. Earth Atmospheric Glow Aura
       ctx.beginPath();
       ctx.arc(globeCenterProj.px, globeCenterProj.py, globeRadius * 1.3, 0, Math.PI * 2);
-      ctx.fillStyle = earthAuraGrad;
+      ctx.fillStyle = cachedAuraGrad;
       ctx.fill();
 
       // B. Earth Shaded Spherical Ocean Disk
-      const oceanGrad = ctx.createRadialGradient(
-        globeCenterProj.px - globeRadius * 0.35,
-        globeCenterProj.py - globeRadius * 0.35,
-        globeRadius * 0.1,
-        globeCenterProj.px,
-        globeCenterProj.py,
-        globeRadius
-      );
-      oceanGrad.addColorStop(0, '#0284C7');
-      oceanGrad.addColorStop(0.35, '#0369A1');
-      oceanGrad.addColorStop(0.8, '#0B1D3A');
-      oceanGrad.addColorStop(1, '#050D1A');
-
       ctx.beginPath();
       ctx.arc(globeCenterProj.px, globeCenterProj.py, globeRadius, 0, Math.PI * 2);
-      ctx.fillStyle = oceanGrad;
+      ctx.fillStyle = cachedOceanGrad;
       ctx.fill();
       ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
       ctx.lineWidth = 1.5;
@@ -391,27 +422,28 @@ export function VolumetricStratificationCanvas({
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [rotationAngle, tiltAngle, isDragging, selectedLevel]);
+  }, [selectedLevel]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setLastMouse({ x: e.clientX, y: e.clientY });
+    isDraggingRef.current = true;
+    lastMouseRef.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const dx = e.clientX - lastMouse.x;
-    const dy = e.clientY - lastMouse.y;
-    setRotationAngle((prev) => prev + dx * 0.008);
-    setTiltAngle((prev) => Math.max(0.2, Math.min(1.2, prev + dy * 0.005)));
-    setLastMouse({ x: e.clientX, y: e.clientY });
+    if (!isDraggingRef.current) return;
+    const dx = e.clientX - lastMouseRef.current.x;
+    const dy = e.clientY - lastMouseRef.current.y;
+    rotRef.current += dx * 0.008;
+    tiltRef.current = Math.max(0.2, Math.min(1.2, tiltRef.current + dy * 0.005));
+    lastMouseRef.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
+    isDraggingRef.current = false;
   };
 
   return (
@@ -437,7 +469,7 @@ export function VolumetricStratificationCanvas({
           inset: 0,
           width: '100%',
           height: '100%',
-          cursor: isDragging ? 'grabbing' : 'grab'
+          cursor: 'grab'
         }}
       />
 

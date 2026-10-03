@@ -181,7 +181,7 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
   attachedDataset: null,
   attachedImage: null,
   advancedConfigOpen: false,
-  accessPlan: 'guest' as AccessPlan,
+  accessPlan: (typeof window !== 'undefined' && (localStorage.getItem('atmos_access_token') || localStorage.getItem('atmos_operator')) ? 'free' : 'guest') as AccessPlan,
   locale: 'en' as AppLocale,
 
   isRouting: false,
@@ -614,18 +614,15 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
     }),
   closeModuleViewer: () => set({ activeModuleViewer: null }),
 
-  // Module Workspace (Full-Page Scientific Analysis)
   openModuleWorkspace: (moduleNumber, port, title, category) => {
     if (!canUseEngines(get().accessPlan, moduleNumber)) {
-      get().showToast(get().accessPlan === 'guest'
-        ? (get().locale === 'hi' ? 'इंजन खोलने के लिए साइन इन करें' : 'Sign in to open engines')
-        : (get().locale === 'hi' ? 'यह इंजन Pro पर है' : 'This engine is on Atmos Pro'), 'warning');
-      if (get().accessPlan === 'guest' && typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('atmos-open-auth'));
-      } else {
-        get().setActiveNav('subscription');
-      }
-      return;
+      // Guest demo evaluation mode - allow smooth inspection for presentations
+      get().showToast(
+        get().locale === 'hi'
+          ? `इंजन ${moduleNumber} पूर्वावलोकन मोड में सक्रिय है`
+          : `Engine M${moduleNumber < 10 ? '0' + moduleNumber : moduleNumber} opened in Evaluation Mode`,
+        'info'
+      );
     }
     const categoryLookup: Record<number, string> = {
       1: 'Atmospheric Physics', 2: 'Atmospheric Physics', 3: 'Atmospheric Physics',
@@ -841,12 +838,25 @@ export const useShellStore = create<ShellStoreState>((set, get) => ({
     };
 
     pull();
-    const pollInterval = setInterval(pull, 28000);
+    const pollInterval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        pull();
+      }
+    }, 60000);
 
     // 3. Connect to SSE Stream for Live Anomaly Ticker
     let eventSource: EventSource | null = null;
+    let sseErrorCount = 0;
     try {
       eventSource = new EventSource(`${apiBase() || 'http://localhost:8000'}/events/live/sse`);
+
+      eventSource.onerror = () => {
+        sseErrorCount++;
+        if (sseErrorCount > 2 && eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+      };
 
       eventSource.onmessage = (e) => {
         try {

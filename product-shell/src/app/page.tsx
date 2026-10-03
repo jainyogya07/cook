@@ -157,6 +157,7 @@ export default function ProductShellHome() {
       sessionStorage.setItem('atmos_access_requested', 'true');
       setAuthenticated(true);
       setAuthReady(true);
+      useShellStore.setState({ accessPlan: 'pro' });
       return;
     }
 
@@ -181,17 +182,22 @@ export default function ProductShellHome() {
     try {
       const cached = localStorage.getItem('atmos_operator');
       if (cached) {
-        const operator = JSON.parse(cached) as { name: string; handle: string; avatarInitials: string };
+        const operator = JSON.parse(cached) as { name: string; handle: string; avatarInitials: string; plan?: 'guest' | 'free' | 'pro' };
+        const opPlan = operator.plan === 'pro' ? 'pro' : 'free';
         useShellStore.setState((state) => ({
+          accessPlan: opPlan,
           userProfile: {
             ...state.userProfile,
             ...operator,
-            roleBadge: 'Authorized ATMOS 4D Operator'
+            roleBadge: opPlan === 'pro' ? 'Atmos Pro Operator' : 'Authorized ATMOS 4D Operator',
+            plan: opPlan
           }
         }));
+      } else {
+        useShellStore.setState({ accessPlan: 'free' });
       }
     } catch {
-      // Keep default profile until /auth/me returns.
+      useShellStore.setState({ accessPlan: 'free' });
     }
 
     const controller = new AbortController();
