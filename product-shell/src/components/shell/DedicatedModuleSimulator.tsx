@@ -794,44 +794,126 @@ function M13YieldRiskScene({ metric }: { metric: string }) {
   );
 }
 
-// --- M14: 3D Environmental Pest & Pathogen Incubation Microclimate ---
+// --- M14: 3D Geospatial Environmental Pest & Disease Risk Surface ---
 function M14PestDiseaseScene({ pathogen, humidity }: { pathogen: string; humidity: number }) {
   const sporeRef = useRef<THREE.Group>(null);
+  const pulseRingRef = useRef<THREE.Mesh>(null);
+
+  const districts = useMemo(() => [
+    { name: 'Balasore', pos: [-1.4, -1.15,], h: 0.65, color: '#ef4444', risk: 84 },
+    { name: 'Bhadrak', pos: [-0.6, -0.5], h: 0.55, color: '#f59e0b', risk: 72 },
+    { name: 'Kendrapara', pos: [0.2, -0.1], h: 0.95, color: '#ef4444', risk: 94, alert: true },
+    { name: 'Jagatsinghpur', pos: [0.8, 0.5], h: 0.50, color: '#f59e0b', risk: 68 },
+    { name: 'Puri Delta', pos: [0.0, 1.3], h: 0.35, color: '#10b981', risk: 42 },
+  ], []);
 
   useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
     if (sporeRef.current) {
-      sporeRef.current.rotation.y = clock.getElapsedTime() * 0.3;
+      sporeRef.current.children.forEach((spore, idx) => {
+        const offset = (t * 0.4 + idx * 0.15) % 1.0;
+        spore.position.x = -1.2 + offset * 2.4;
+        spore.position.y = 0.1 + Math.sin(t * 2.0 + idx) * 0.15;
+      });
+    }
+    if (pulseRingRef.current) {
+      const s = 1.0 + Math.sin(t * 4.0) * 0.2;
+      pulseRingRef.current.scale.set(s, s, 1);
     }
   });
 
-  const riskColor = pathogen === 'BLB' ? '#ef4444' : pathogen === 'BPH' ? '#f59e0b' : '#eab308';
+  const pathogenColor = pathogen === 'BLB' ? '#ef4444' : pathogen === 'BPH' ? '#f59e0b' : '#eab308';
 
   return (
     <group>
-      {/* 3D Crop Canopy Microclimate Envelope */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[1.8, 24, 24]} />
-        <meshStandardMaterial color={riskColor} transparent opacity={0.2} wireframe />
+      {/* 3D Base Agricultural Landscape Mesh */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.85, 0]}>
+        <planeGeometry args={[6.2, 6.2]} />
+        <meshStandardMaterial color="#08101e" roughness={0.9} />
       </mesh>
 
-      {/* Incubation Core Zone */}
-      <mesh position={[0, 0, 0]}>
-        <octahedronGeometry args={[0.8, 2]} />
-        <meshStandardMaterial color={riskColor} transparent opacity={0.5} />
+      <gridHelper args={[6, 12, '#38bdf8', '#1e293b']} position={[0, -0.84, 0]} />
+
+      {/* Odisha Coastline Reference Curve */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[
+              new Float32Array([
+                -1.8, -0.82, -2.4,
+                -1.2, -0.82, -1.6,
+                -0.4, -0.82, -0.8,
+                0.4, -0.82, 0.0,
+                1.0, -0.82, 0.8,
+                0.6, -0.82, 1.8,
+                -0.2, -0.82, 2.4
+              ]),
+              3
+            ]}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial color="#38bdf8" linewidth={2} />
+      </line>
+
+      {/* Microclimate Canopy Humidity Dome (>85% RH Favorability Envelope) */}
+      <mesh position={[0.2, -0.2, -0.2]}>
+        <sphereGeometry args={[1.6, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial
+          color={pathogenColor}
+          transparent
+          opacity={0.18}
+          wireframe={false}
+          side={THREE.DoubleSide}
+        />
       </mesh>
 
-      {/* Floating Spore & Vector Migration Particles */}
-      <group ref={sporeRef}>
-        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
-          const angle = (i / 8) * Math.PI * 2;
-          const r = 1.3;
-          return (
-            <mesh key={i} position={[Math.cos(angle) * r, Math.sin(i) * 0.4, Math.sin(angle) * r]}>
-              <sphereGeometry args={[0.06, 8, 8]} />
-              <meshBasicMaterial color={riskColor} />
+      {/* Extruded District Pest & Disease Risk Columns */}
+      {districts.map((d, i) => {
+        const y = -0.85 + d.h / 2;
+        return (
+          <group key={i} position={[d.pos[0], 0, d.pos[1]]}>
+            {/* Hexagonal Base Pedestal */}
+            <mesh position={[0, y, 0]}>
+              <cylinderGeometry args={[0.22, 0.26, d.h, 16]} />
+              <meshStandardMaterial color={d.color} roughness={0.3} metalness={0.2} />
             </mesh>
-          );
-        })}
+
+            {/* Glowing Cap Ring */}
+            <mesh position={[0, -0.85 + d.h + 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.12, 0.24, 16]} />
+              <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
+            </mesh>
+
+            {/* Critical Outbreak Pulsing Warning Ring on Kendrapara */}
+            {d.alert && (
+              <mesh
+                ref={pulseRingRef}
+                position={[0, -0.85 + d.h + 0.05, 0]}
+                rotation={[-Math.PI / 2, 0, 0]}
+              >
+                <ringGeometry args={[0.3, 0.42, 24]} />
+                <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} opacity={0.8} transparent />
+              </mesh>
+            )}
+
+            {/* Floating Top Beacon */}
+            <mesh position={[0, -0.85 + d.h + 0.12, 0]}>
+              <sphereGeometry args={[0.06, 12, 12]} />
+              <meshBasicMaterial color={d.color} />
+            </mesh>
+          </group>
+        );
+      })}
+
+      {/* Airborne Fungal Spore & Pest Migration Particles */}
+      <group ref={sporeRef}>
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+          <mesh key={i} position={[0, 0, 0]}>
+            <sphereGeometry args={[0.045, 8, 8]} />
+            <meshBasicMaterial color="#f59e0b" />
+          </mesh>
+        ))}
       </group>
     </group>
   );

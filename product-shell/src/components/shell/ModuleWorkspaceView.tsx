@@ -1240,7 +1240,7 @@ export default function ModuleWorkspaceView() {
                           M{cm.moduleNumber < 10 ? `0${cm.moduleNumber}` : cm.moduleNumber} · {cm.title?.substring(0, 18)}
                         </div>
                         <div style={{ fontSize: '10px', color: '#10B981', fontFamily: 'var(--font-mono)' }}>
-                          Port :{cm.port} (ONLINE)
+                          3D ENGINE ACTIVE
                         </div>
                       </div>
                       <ArrowUpRight style={{ width: '13px', height: '13px', color: '#FFFFFF' }} />
