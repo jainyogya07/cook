@@ -218,44 +218,101 @@ export default function ModelsCatalogView() {
       {tab === 'card' && (
         <div className="nv-doc">
           <article>
-            {/* 1. REAL-LIFE INDIAN SCENARIO & STORY */}
-            <section id="story" className="nv-story-section">
-              <div className="nv-section-badge">{hi ? '🌾 वास्तविक भारतीय कृषि कहानी' : '🌾 Real-Life Indian Agro Scenario'}</div>
-              <h2>{hi ? 'वास्तविक जीवन की कहानी व ज़मीनी स्थिति' : 'Real-Life Scenario & Ground Story'}</h2>
-              <div className="nv-story-box">
+            {/* 1. FIELD SCENARIO & DISTRICT BULLETIN */}
+            <section id="story">
+              <h2>{hi ? '01. ज़िला बुलेटिन व ज़मीनी स्थिति' : '01. Field Scenario & District Bulletin'}</h2>
+              <div className="nv-clean-card">
                 <p className="nv-story-lead">{hi ? card.realLifeStoryHi : card.realLifeStory}</p>
               </div>
             </section>
 
-            {/* 2. HOW TO USE & STEP-BY-STEP OPERATIONAL GUIDE */}
-            <section id="usage">
-              <div className="nv-section-badge">{hi ? '🎯 चरणबद्ध उपयोग व इनपुट' : '🎯 How to Use & Operational Guide'}</div>
-              <h2>{hi ? 'इस इंजन को कैसे चलाएँ और क्या इनपुट दें' : 'Step-by-Step Execution & Inputs'}</h2>
-              <div className="nv-guide-steps">
-                <p>{hi ? card.howToUseHi : card.howToUse}</p>
-              </div>
-              
-              <div className="nv-example-card">
-                <h3>{hi ? '💡 वास्तविक इनपुट और सटीक आउटपुट का उदाहरण' : '💡 Real-Life Input & Calibrated Output Example'}</h3>
-                <p className="nv-example-body">{hi ? card.realLifeExampleHi : card.realLifeExample}</p>
+            {/* 2. EXECUTIVE INPUT & OUTPUT TELEMETRY WITH 3D PREVIEW */}
+            <section id="telemetry">
+              <h2>{hi ? '02. इनपुट व आउटपुट टेलीमेट्री बोर्ड' : '02. Executive Input & Output Telemetry'}</h2>
+              <div className="nv-clean-card">
+                <p className="nv-guide-lead">{hi ? card.howToUseHi : card.howToUse}</p>
+                
+                {/* 2-Column I/O Matrix */}
+                <div className="nv-telemetry-board">
+                  {/* Left Column: Operational Inputs */}
+                  <div className="nv-telemetry-col">
+                    <div className="nv-telemetry-col-head">
+                      <span>📥 {hi ? 'संचालन इनपुट (Operational Inputs)' : 'Operational Inputs'}</span>
+                      <span className="nv-tier-badge nv-tier-advisory">{hi ? 'फ़ील्ड डेटा' : 'Field Ingest'}</span>
+                    </div>
+                    <div className="nv-field-row">
+                      <span className="nv-field-label">📍 {hi ? 'लक्षित क्षेत्र / ज़िला' : 'Target Region / District'}</span>
+                      <span className="nv-field-value">{hi ? card.ioSpec.inputs.regionHi : card.ioSpec.inputs.region}</span>
+                    </div>
+                    <div className="nv-field-row">
+                      <span className="nv-field-label">⏱️ {hi ? 'पूर्वानुमान समय सीमा' : 'Forecast Horizon'}</span>
+                      <span className="nv-field-value mono">{hi ? card.ioSpec.inputs.horizonHi : card.ioSpec.inputs.horizon}</span>
+                    </div>
+                    <div className="nv-field-row">
+                      <span className="nv-field-label">📡 {hi ? 'मौसम डेटा व उपग्रह फ़ीड' : 'Sensor & NWP Feeds'}</span>
+                      <span className="nv-field-value">{hi ? card.ioSpec.inputs.feedsHi : card.ioSpec.inputs.feeds}</span>
+                    </div>
+                    <div className="nv-field-row">
+                      <span className="nv-field-label">🌾 {hi ? 'निगरानी फसल / परिसंपत्ति' : 'Monitored Crop / Asset'}</span>
+                      <span className="nv-field-value">{hi ? card.ioSpec.inputs.targetAssetHi : card.ioSpec.inputs.targetAsset}</span>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Calibrated Outputs */}
+                  <div className="nv-telemetry-col">
+                    <div className="nv-telemetry-col-head">
+                      <span>📤 {hi ? 'कैलिब्रेटेड आउटपुट (Outputs)' : 'Calibrated Outputs'}</span>
+                      <span className={`nv-tier-badge nv-tier-${card.ioSpec.outputs.riskTier.toLowerCase()}`}>
+                        {hi ? card.ioSpec.outputs.riskTierLabelHi : card.ioSpec.outputs.riskTierLabel}
+                      </span>
+                    </div>
+                    <div className="nv-field-row">
+                      <span className="nv-field-label">📊 {hi ? 'मुख्य अवलोकन / माप' : 'Core Observation Metric'}</span>
+                      <span className="nv-field-value mono">{hi ? card.ioSpec.outputs.coreMetricHi : card.ioSpec.outputs.coreMetric}</span>
+                    </div>
+                    <div className="nv-field-row">
+                      <span className="nv-field-label">📈 {hi ? 'संभाव्यता रेंज (P10 · P50 · P90)' : 'Ensemble Band (P10 · P50 · P90)'}</span>
+                      <span className="nv-field-value mono">{hi ? card.ioSpec.outputs.ensembleBandHi : card.ioSpec.outputs.ensembleBand}</span>
+                    </div>
+                    <div className="nv-field-row">
+                      <span className="nv-field-label">⚡ {hi ? 'आधिकारिक सलाह निर्देश' : 'Official Advisory Directive'}</span>
+                      <span className="nv-field-value">{hi ? card.ioSpec.outputs.actionDirectiveHi : card.ioSpec.outputs.actionDirective}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3D Visual Simulation Preview Poster */}
+                <div className="nv-preview-container">
+                  <div className="nv-preview-header">
+                    <span>🎮 {hi ? 'इंजन 3D टेलीमेट्री विज़ुअल प्रिव्यू' : 'Engine 3D Telemetry Visual Preview'}</span>
+                    <button 
+                      type="button" 
+                      onClick={() => setTab('scene')}
+                      className="nv-preview-launch-btn"
+                    >
+                      {hi ? 'पूर्ण 3D सिमुलेशन चलाएँ ↗' : 'Launch Full 3D Interactive ↗'}
+                    </button>
+                  </div>
+                  <div className="nv-preview-body">
+                    {poster}
+                  </div>
+                </div>
               </div>
             </section>
 
             {/* 3. 4D CASCADE DOMINO IMPACT */}
             <section id="cascade">
-              <div className="nv-section-badge">{hi ? '⚡ 4D डोमिनो प्रभाव' : '⚡ 4D Cascade Domino Chain'}</div>
-              <h2>{hi ? '4D प्रभाव: आसमान से खेत और मंडी भाव तक' : '4D Cascade: Atmosphere to Mandi Dynamics'}</h2>
-              <div className="nv-cascade-card">
-                <p>{hi ? card.cascadeImpactHi : card.cascadeImpact}</p>
+              <h2>{hi ? '03. 4D बहु-भौतिकी प्रभाव श्रृंखला' : '03. 4D Multi-Physics Domino Cascade'}</h2>
+              <div className="nv-clean-card">
+                <p className="nv-clean-text">{hi ? card.cascadeImpactHi : card.cascadeImpact}</p>
               </div>
             </section>
 
             {/* 4. ACTIONABLE ADVISORY & DECISIONS */}
-            <section id="decision">
-              <div className="nv-section-badge">{hi ? '✅ आज के सीधे फैसले' : '✅ Immediate Actionable Advisory'}</div>
-              <h2>{hi ? 'किसान, FPO व व्यापारी के लिए स्पष्ट निर्णय' : 'Actionable Decisions & Operational Advisory'}</h2>
-              <div className="nv-decision-card">
-                <p>{hi ? card.actionableDecisionHi : card.actionableDecision}</p>
+            <section id="advisory">
+              <h2>{hi ? '04. सीधे फैसले व परिचालन निर्देश' : '04. Actionable Advisory & Field Decisions'}</h2>
+              <div className="nv-clean-card">
+                <p className="nv-clean-text">{hi ? card.actionableDecisionHi : card.actionableDecision}</p>
               </div>
             </section>
 
