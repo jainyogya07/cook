@@ -8,7 +8,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Sparkles, ArrowUpRight, Loader2, CloudRain, Wheat, TrendingUp, Shield, Mic, Square, Info, Paperclip } from 'lucide-react';
+import { Send, Sparkles, ArrowUpRight, Loader2, CloudRain, Wheat, TrendingUp, Shield, Mic, Square, Info, Paperclip, Globe } from 'lucide-react';
 import { useShellStore } from '@/services/useShellStore';
 import { parseAndRouteQuery } from '@/services/intentRouter';
 import { useVoiceCapture } from '@/hooks/useVoiceCapture';
@@ -238,6 +238,65 @@ export default function AtmosAIChatView() {
                   ? 'जगह, समय, फसल या खतरा लिखें। हिंदी में पूछें — जवाब हिंदी में मिलेगा।'
                   : 'Write a place, a time, a crop or hazard. Ask in English — the answer stays in English.'}
               </p>
+            </div>
+
+            {/* 🌍 PROMINENT 3D PLANETARY EARTH GLOBE & PHYSICS ENGINES HERO */}
+            <div className="nv-globe-hero-banner">
+              <div className="nv-globe-banner-left">
+                <div className="nv-globe-live-tag">
+                  <span className="nv-live-pulse-dot" />
+                  <span>{locale === 'hi' ? '🌍 लाइव 4D पृथ्वी और 18 इंजन' : '🌍 LIVE 4D EARTH GLOBE & 18 ENGINES'}</span>
+                </div>
+                <h3>{locale === 'hi' ? 'ग्रह पृथ्वी (3D ग्लोब) व वायुमंडलीय सिमुलेटर' : 'Planetary Earth 3D Globe & Atmospheric Twin'}</h3>
+                <p>
+                  {locale === 'hi'
+                    ? 'घूमता हुआ 3D ग्लोब, भारत-ओडिशा तटीय हवाएँ, 5 वायुमंडलीय परतें और खेत से मंडी तक 4D प्रभाव लाइव स्क्रीन पर देखें।'
+                    : 'Spin the rotating 3D Earth globe, inspect Indian coastline isobaric winds, 5 atmospheric layers, and the full farm-to-mandi cascade.'}
+                </p>
+                <div className="nv-globe-actions">
+                  <button
+                    type="button"
+                    className="nv-btn-globe-launch"
+                    onClick={() => {
+                      useShellStore.getState().setSelectedModelId(1);
+                      useShellStore.setState({ activeView: 'models', activeNav: 'models' });
+                      window.history.pushState(null, '', '#models/1');
+                    }}
+                  >
+                    <Globe size={15} />
+                    <span>{locale === 'hi' ? '3D ग्लोब सिमुलेशन खोलें →' : 'Launch 3D Earth Globe (M01) →'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="nv-btn-models-explore"
+                    onClick={() => {
+                      useShellStore.setState({ activeView: 'models', activeNav: 'models', selectedModelId: null });
+                      window.history.pushState(null, '', '#models');
+                    }}
+                  >
+                    <span>{locale === 'hi' ? '18 भौतिक 3D मॉडल देखें' : 'Explore All 18 3D Engines'}</span>
+                  </button>
+                </div>
+              </div>
+              <div
+                className="nv-globe-preview-art"
+                role="button"
+                tabIndex={0}
+                aria-label="Launch 3D Earth Globe"
+                onClick={() => {
+                  useShellStore.getState().setSelectedModelId(1);
+                  useShellStore.setState({ activeView: 'models', activeNav: 'models' });
+                  window.history.pushState(null, '', '#models/1');
+                }}
+              >
+                <div className="nv-globe-sphere">
+                  <div className="nv-globe-ring" />
+                  <div className="nv-globe-ring is-2" />
+                  <div className="nv-globe-atmosphere" />
+                  <span className="nv-globe-center-icon">🌍</span>
+                </div>
+                <div className="nv-globe-preview-hint">{locale === 'hi' ? 'क्लिक करके 3D घुमाएँ' : 'Click to Open & Spin 3D'}</div>
+              </div>
             </div>
 
             <div className="nv-ask-grid">

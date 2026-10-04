@@ -36,7 +36,7 @@ export default function ModelsCatalogView() {
     []
   );
   const [family, setFamily] = useState<Family>('All');
-  const [tab, setTab] = useState<Tab>('experience');
+  const [tab, setTab] = useState<Tab>('scene');
   const [eventIdx, setEventIdx] = useState(0);
   const [variable, setVariable] = useState('Rain');
   const [running, setRunning] = useState(false);
@@ -95,7 +95,7 @@ export default function ModelsCatalogView() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.035, duration: 0.4 }}
               whileHover={{ y: -4 }}
-              onClick={() => { setSelectedModelId(item.moduleNumber); setTab('experience'); setOutput(null); window.history.pushState(null, '', `#models/${item.moduleNumber}`); }}
+              onClick={() => { setSelectedModelId(item.moduleNumber); setTab('scene'); setOutput(null); window.history.pushState(null, '', `#models/${item.moduleNumber}`); }}
             >
               <div className={`nv-engine-poster is-${item.family === 'Atmosphere' ? 'sky' : item.family === 'Village' ? 'village' : item.family === 'Field' ? 'crop' : 'mandi'} is-mini`} aria-hidden="true">
                 <div className="nv-engine-art"><i /><i /><i /></div>
@@ -139,9 +139,15 @@ export default function ModelsCatalogView() {
       </header>
 
       <div className="nv-subtabs">
-        {(['experience', 'scene', 'card', 'result'] as Tab[]).map((id) => (
+        {(['scene', 'experience', 'card', 'result'] as Tab[]).map((id) => (
           <button key={id} type="button" className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>
-            {id === 'experience' ? (hi ? 'आज़माएँ' : 'Try') : id === 'scene' ? (hi ? '3D इंजन' : '3D engine') : id === 'card' ? (hi ? 'कार्ड' : 'Card') : t(locale, 'result')}
+            {id === 'scene'
+              ? (hi ? '🎮 3D सिमुलेशन' : '🎮 Live 3D Simulation')
+              : id === 'experience'
+              ? (hi ? '🧪 आज़माएँ' : '🧪 Try Forecast')
+              : id === 'card'
+              ? (hi ? '📋 मॉडल कार्ड व कहानी' : '📋 Model Card & Story')
+              : t(locale, 'result')}
           </button>
         ))}
       </div>
@@ -212,31 +218,79 @@ export default function ModelsCatalogView() {
       {tab === 'card' && (
         <div className="nv-doc">
           <article>
+            {/* 1. REAL-LIFE INDIAN SCENARIO & STORY */}
+            <section id="story" className="nv-story-section">
+              <div className="nv-section-badge">{hi ? '🌾 वास्तविक भारतीय कृषि कहानी' : '🌾 Real-Life Indian Agro Scenario'}</div>
+              <h2>{hi ? 'वास्तविक जीवन की कहानी व ज़मीनी स्थिति' : 'Real-Life Scenario & Ground Story'}</h2>
+              <div className="nv-story-box">
+                <p className="nv-story-lead">{hi ? card.realLifeStoryHi : card.realLifeStory}</p>
+              </div>
+            </section>
+
+            {/* 2. HOW TO USE & STEP-BY-STEP OPERATIONAL GUIDE */}
+            <section id="usage">
+              <div className="nv-section-badge">{hi ? '🎯 चरणबद्ध उपयोग व इनपुट' : '🎯 How to Use & Operational Guide'}</div>
+              <h2>{hi ? 'इस इंजन को कैसे चलाएँ और क्या इनपुट दें' : 'Step-by-Step Execution & Inputs'}</h2>
+              <div className="nv-guide-steps">
+                <p>{hi ? card.howToUseHi : card.howToUse}</p>
+              </div>
+              
+              <div className="nv-example-card">
+                <h3>{hi ? '💡 वास्तविक इनपुट और सटीक आउटपुट का उदाहरण' : '💡 Real-Life Input & Calibrated Output Example'}</h3>
+                <p className="nv-example-body">{hi ? card.realLifeExampleHi : card.realLifeExample}</p>
+              </div>
+            </section>
+
+            {/* 3. 4D CASCADE DOMINO IMPACT */}
+            <section id="cascade">
+              <div className="nv-section-badge">{hi ? '⚡ 4D डोमिनो प्रभाव' : '⚡ 4D Cascade Domino Chain'}</div>
+              <h2>{hi ? '4D प्रभाव: आसमान से खेत और मंडी भाव तक' : '4D Cascade: Atmosphere to Mandi Dynamics'}</h2>
+              <div className="nv-cascade-card">
+                <p>{hi ? card.cascadeImpactHi : card.cascadeImpact}</p>
+              </div>
+            </section>
+
+            {/* 4. ACTIONABLE ADVISORY & DECISIONS */}
+            <section id="decision">
+              <div className="nv-section-badge">{hi ? '✅ आज के सीधे फैसले' : '✅ Immediate Actionable Advisory'}</div>
+              <h2>{hi ? 'किसान, FPO व व्यापारी के लिए स्पष्ट निर्णय' : 'Actionable Decisions & Operational Advisory'}</h2>
+              <div className="nv-decision-card">
+                <p>{hi ? card.actionableDecisionHi : card.actionableDecision}</p>
+              </div>
+            </section>
+
+            {/* 5. SCIENTIFIC SPECIFICATION */}
             <section id="description">
-              <h2>{hi ? 'विवरण' : 'Description'}</h2>
+              <h2>{hi ? 'वैज्ञानिक विवरण' : 'Scientific Description'}</h2>
               <p>{hi ? card.descriptionHi : card.description}</p>
               <p>{hi ? guide?.resultHi : guide?.result}</p>
             </section>
+
             <section id="license">
-              <h2>{hi ? 'लाइसेंस / उपयोग' : 'License / Terms of Use'}</h2>
+              <h2>{hi ? 'लाइसेंस / उपयोग की शर्तें' : 'License / Terms of Use'}</h2>
               <p>{hi ? SHARED_LICENSE_HI : SHARED_LICENSE_EN}</p>
             </section>
+
             <section id="intended">
               <h2>{hi ? 'किसके लिए है' : 'Intended Use'}</h2>
               <ul>{(hi ? card.intendedHi : card.intended).map((item) => <li key={item}>{item}</li>)}</ul>
             </section>
+
             <section id="limitations">
               <h2>{hi ? 'सीमाएँ' : 'Known Limitations'}</h2>
               <ul>{(hi ? card.limitationsHi : card.limitations).map((item) => <li key={item}>{item}</li>)}</ul>
             </section>
+
             <section id="geography">
               <h2>{hi ? 'कहाँ चलता है' : 'Deployment Geography'}</h2>
               <p>{hi ? 'भारत केंद्र: तटीय ओडिशा, पंजाब, नाशिक गलियारा। क्लाउड: Vercel + Render।' : 'India-first: coastal Odisha, Punjab, Nashik corridor. Cloud: Vercel product shell + Render API.'}</p>
             </section>
+
             <section id="release">
               <h2>{hi ? 'रिलीज़' : 'Release'}</h2>
               <p>ATMOS 4D product shell · live app https://atmos-4d.vercel.app · engine port {meta?.port || 3000 + card.moduleNumber}</p>
             </section>
+
             <section id="classes">
               <h2>{hi ? 'कौन-से इंजन जुड़े हैं' : 'Program Classes'}</h2>
               <table>
@@ -248,10 +302,12 @@ export default function ModelsCatalogView() {
                 </tbody>
               </table>
             </section>
+
             <section id="deployment">
               <h2>{hi ? 'कैसे चलता है' : 'Deployment Details'}</h2>
               <p>{hi ? 'डेव में अलग पोर्ट, प्रोडक्शन में एक ऑर्केस्ट्रेशन परत। किसान को पोर्ट याद रखने की ज़रूरत नहीं।' : 'Independent ports in development; one orchestration layer in production. Farmers never type a port number.'}</p>
             </section>
+
             <section id="stack">
               <h2>{hi ? 'सॉफ़्टवेयर स्टैक' : 'Software Stack'}</h2>
               <table>
@@ -259,20 +315,23 @@ export default function ModelsCatalogView() {
                 <tbody>{SHARED_STACK.map((row) => <tr key={row.component}><td>{row.component}</td><td>{row.version}</td></tr>)}</tbody>
               </table>
             </section>
+
             <section id="security">
               <h2>{hi ? 'सुरक्षा' : 'Security'}</h2>
               <p>{hi ? 'सेशन कुकी/टोकन सर्वर साइड। डेटाबेस पासवर्ड गिट पर नहीं होने चाहिए।' : 'Auth tokens stay with the API. Database passwords must not live in git. News HTML is stripped before render.'}</p>
             </section>
+
             <section id="ethics">
               <h2>{hi ? 'ईमानदारी' : 'Ethical Considerations'}</h2>
               <p>{hi ? 'एक्सपोज़र ≠ नुकसान। OBSERVED / SCENARIO / FORECAST अलग लिखो। नीति अपने आप नहीं बनती।' : 'Exposure is not loss. Label OBSERVED vs SCENARIO vs FORECAST. The system must not pretend to issue policy.'}</p>
             </section>
+
             <section id="help">
               <h2>{hi ? 'शुरू कैसे करें' : 'Getting started'}</h2>
               <ol>
-                <li>{hi ? 'Experience पर नमूना घटना चुनें।' : 'On Experience, pick a sample weather event.'}</li>
-                <li>{hi ? 'Forecast दबाएँ — जवाब दाईं ओर।' : 'Press Forecast — answer on the right.'}</li>
-                <li>{hi ? 'नतीजा टैब पर सादा जवाब पढ़ें।' : 'Read the plain answer on Result.'}</li>
+                <li>{hi ? '3D सिमुलेशन टैब पर इंटरैक्टिव 3D इंजन चलाएँ।' : 'On 3D Simulation tab, inspect the full interactive 3D physics engine.'}</li>
+                <li>{hi ? 'आज़माएँ टैब पर घटना चुनें और Forecast दबाएँ।' : 'On Try Forecast, select an event and press Forecast.'}</li>
+                <li>{hi ? 'नतीजा टैब पर तीन संख्याएँ (कम / सामान्य / ज़्यादा) और सादा जवाब पढ़ें।' : 'On Result tab, inspect the P10 / P50 / P90 ensemble bands and advisory.'}</li>
               </ol>
               <p>{hi ? 'क्या टाइप करें' : 'What to type'}: {hi ? guide?.needHi : guide?.need}</p>
             </section>
