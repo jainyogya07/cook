@@ -165,7 +165,7 @@ export default function ProfileView() {
             backdropFilter: 'blur(8px)'
           }}
         >
-          ORBITAL TELEMETRY // SECTOR 04
+          AGRO-CLIMATIC INTELLIGENCE // OPERATOR DESK
         </div>
       </div>
 

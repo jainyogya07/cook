@@ -134,8 +134,8 @@ function landingText(locale: 'en' | 'hi') {
       simEye: 'लाइव उदाहरण',
       simH1: 'एक सवाल चुनें, पूरी कहानी देखें.',
       simSub: 'चक्रवात, फसल या मंडी — नीचे से चुनें। दिखेगा कि आसमान से खेत तक क्या बदलेगा।',
-      inspectStream: '4D स्ट्रीम देखें',
-      launchEngine: 'इंजन खोलें',
+      inspectStream: 'ज़मीनी सलाह देखें',
+      launchEngine: 'फैसले का औज़ार खोलें ↗',
       cascadeEye: '18 औज़ार की श्रृंखला',
       cascadeH1: 'अठारह साफ़ औज़ार.',
       cascadeH2: 'एक पूरी कहानी.',
@@ -220,8 +220,8 @@ function landingText(locale: 'en' | 'hi') {
     simEye: 'Live example',
     simH1: 'Pick a question. See the full story.',
     simSub: 'Cyclone, crop or mandi — choose below. Watch what changes from sky to field.',
-    inspectStream: 'Inspect 4D stream',
-    launchEngine: 'Open engines',
+    inspectStream: 'View Field Advisory',
+    launchEngine: 'Open Decision Engine ↗',
     cascadeEye: 'The 18-engine chain',
     cascadeH1: 'Eighteen clear tools.',
     cascadeH2: 'One unbroken story.',
@@ -251,47 +251,47 @@ interface AnomalyTarget {
 const anomalyTargets: AnomalyTarget[] = [
   {
     id: 'odisha',
-    name: 'DEEP DEPRESSION BOB-04',
-    region: 'COASTAL ODISHA & BENGAL',
-    val: '78.4%',
-    metric: 'PRECIPITATION ANOMALY',
+    name: 'BAY DEPRESSION & COASTAL FLOOD',
+    region: 'COASTAL ODISHA (PURI - PARADIP)',
+    val: '140 mm',
+    metric: '48H ACCUMULATED RAIN',
     leadTime: '+48H LEAD',
     type: 'severe',
     coords: { x: 68, y: 38 },
-    details: 'Coupled WRF-5km indicates 140mm/24h peak accumulation. Landfall vector stabilized.'
+    details: 'Deep depression brings 140mm rainfall envelope; threatens 1.48L ha standing Kharif paddy.'
   },
   {
     id: 'punjab',
-    name: 'THERMAL FLOWERING STRESS',
-    region: 'PUNJAB & HARYANA BELT',
-    val: '+4.2°C',
-    metric: 'TEMPERATURE EXCURSION',
+    name: 'TERMINAL HEATWAVE ON WHEAT',
+    region: 'PUNJAB & HARYANA WHEAT BELT',
+    val: '+6.2°C',
+    metric: 'ABOVE 30-YR NORMAL',
     leadTime: '+72H LEAD',
     type: 'warning',
     coords: { x: 34, y: 28 },
-    details: 'Canopy thermal envelope exceeding 35.8°C threshold during critical wheat grain-filling.'
+    details: 'Canopy heat spike during grain-filling; evening sprinkler irrigation advised to drop temp by 3°C.'
   },
   {
     id: 'maharashtra',
-    name: 'MANDI SUPPLY SHOCK',
-    region: 'NASHIK & PUNE AGRI-CORRIDOR',
-    val: '8.9 / 10',
-    metric: 'PRICE VOLATILITY INDEX',
+    name: 'ONION MANDI SUPPLY SHOCK',
+    region: 'NASHIK & PUNE ONION CORRIDOR',
+    val: '-34%',
+    metric: 'WHOLESALE ARRIVAL CONTRACTION',
     leadTime: '+96H LEAD',
     type: 'alert',
     coords: { x: 42, y: 64 },
-    details: 'Localized hail & excess moisture driving 34% projected mandi arrival contraction.'
+    details: 'Excess rainfall inundates nurseries; wholesale arrivals drop, modal prices projected at ₹2,820/q.'
   },
   {
     id: 'karnataka',
-    name: 'SOIL MOISTURE DEFICIT',
-    region: 'DECCAN SEMI-ARID ZONE',
-    val: '-42%',
+    name: 'SOIL WATERLOGGING & HYPOXIA',
+    region: 'VIDARBHA & DECCAN BLACK CLAY',
+    val: '98%',
     metric: 'ROOT ZONE SATURATION',
-    leadTime: '+120H LEAD',
+    leadTime: '+72H LEAD',
     type: 'warning',
     coords: { x: 48, y: 78 },
-    details: '0-100cm soil water potential critical for rainfed pulses and rabi oilseeds.'
+    details: 'Drainage percolation slow; 68 hours standing water risk suffocating soybean root systems.'
   }
 ];
 
@@ -313,44 +313,44 @@ interface SimulationScenario {
 const scenarios: SimulationScenario[] = [
   {
     id: 'cyclone',
-    title: 'Severe Cyclone & Coastal Surge',
-    category: 'ATMOSPHERE & HYDROLOGY',
-    badge: 'STAGE 4 ALERT',
+    title: 'Severe Cyclone & Coastal Inundation',
+    category: 'SKY WATCH & COASTAL BASIN',
+    badge: 'CYCLONE ADVISORY',
     icon: <Wind size={18} className="text-cyan-400" />,
-    primaryMetric: '142 km/h',
-    primaryLabel: 'Sustained Gust Velocity',
-    secondaryMetric: '3.8m',
-    secondaryLabel: 'Coastal Wave Setup',
-    description: 'Autonomous 12km ECMWF downscaling down to 5km terrain-aware grid. Wind field trajectories coupled directly to estuarine flood hazard.',
-    engines: ['Engine 01 NWP', 'Engine 03 Anomaly', 'Engine 05 Trajectory', 'Engine 07 Downscale'],
+    primaryMetric: '65 km/h',
+    primaryLabel: 'Sustained Coastal Winds',
+    secondaryMetric: '140 mm',
+    secondaryLabel: 'Peak 48h Inundation',
+    description: 'Tracks cyclonic depression toward Odisha coast. Downscales 12km synoptic wind and rain to village-level flood risk across 42 gram panchayats.',
+    engines: ['M01 Sky Watch', 'M04 Hazard Footprint', 'M05 Cyclone Track', 'M07 Village Map'],
     statusColor: '#06B6D4'
   },
   {
     id: 'heatwave',
-    title: 'Wheat Thermal Desiccation Spike',
-    category: 'AGRONOMIC EXPOSURE',
-    badge: 'CROP YIELD RISK',
+    title: 'Terminal Heatwave on Standing Wheat',
+    category: 'VILLAGE & CROP HEALTH',
+    badge: 'HEATWAVE ALERT',
     icon: <Flame size={18} className="text-amber-400" />,
-    primaryMetric: '-14.8%',
-    primaryLabel: 'Projected Harvest Loss',
-    secondaryMetric: '6.4M ha',
-    secondaryLabel: 'Exposed Canopy Area',
-    description: 'High-temperature anomaly intersects phenological stage 4 (grain filling). Accelerated senescence predicted across 14 agricultural districts.',
-    engines: ['Engine 08 Extreme Comp', 'Engine 09 Exposure', 'Engine 10 Phenology', 'Engine 13 Yield Risk'],
+    primaryMetric: '+6.2°C',
+    primaryLabel: 'Above 30-Yr Normal',
+    secondaryMetric: '-26.2%',
+    secondaryLabel: 'Potential Yield Deficit',
+    description: 'Unprecedented March heat anomaly hits wheat at grain-filling. Recommends light evening micro-sprinkling to drop canopy heat by 3°C.',
+    engines: ['M03 Extreme Anomaly', 'M09 Crop Exposure', 'M10 Growth Stage', 'M13 Yield Risk'],
     statusColor: '#F59E0B'
   },
   {
     id: 'mandi',
-    title: 'Tomato & Onion Mandi Price Surge',
-    category: 'MARKET INTELLIGENCE',
-    badge: 'SUPPLY CHAIN SHOCK',
+    title: 'Onion Harvest Shock & Mandi Prices',
+    category: 'FARM-TO-MANDI DYNAMICS',
+    badge: 'MARKET PRICE ALERT',
     icon: <TrendingUp size={18} className="text-emerald-400" />,
-    primaryMetric: '+42.5%',
-    primaryLabel: 'Modal Price Shift',
-    secondaryMetric: '4,800 MT',
-    secondaryLabel: 'Daily Inflow Deficit',
-    description: 'Localized precipitation extremes disable farm-to-mandi feeder transit. Elasticity models project 18-day wholesale price elevation.',
-    engines: ['Engine 15 Market Intel', 'Engine 16 Agro-Supply', 'Engine 17 Shock Simulator', 'Engine 18 Scenario'],
+    primaryMetric: '-34%',
+    primaryLabel: 'Mandi Arrival Inflow',
+    secondaryMetric: '₹2,820 / q',
+    secondaryLabel: 'Projected Modal Price',
+    description: 'Rain waterlogging inundates nurseries and delays harvesting. Models wholesale arrival contractions at Lasalgaon APMC and consumer price impact.',
+    engines: ['M14 Pest & Disease', 'M15 Mandi Prices', 'M16 Transport Corridor', 'M17 District Deficit'],
     statusColor: '#10B981'
   }
 ];
@@ -452,7 +452,7 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
             <span className="eyebrow-ping" />
             <Radio size={13} className="eyebrow-icon animate-pulse" />
             <span>{t(locale, 'landingKicker')}</span>
-            <span className="eyebrow-tag">v3.4 LIVE</span>
+            <span className="eyebrow-tag">{locale === 'hi' ? 'किसान व नीति निर्माताओं के लिए' : 'FOR FARMERS & POLICYMAKERS'}</span>
           </div>
 
           {/* Master Headline with Gradient Shimmer */}
@@ -505,14 +505,14 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
           </div>
         </div>
 
-        {/* 3. HERO VISUAL: 4D HOLOGRAPHIC RADAR SPHERE & COCKPIT */}
+        {/* 3. HERO VISUAL: 4D WEATHER RADAR & BASIN WATCH */}
         <div className="landing-hero-visual-pod">
           <div className="visual-top-bar">
             <div className="visual-tag">
               <span className="tag-live-dot" />
-              <span>ORBITAL RADAR MESH // COCKPIT 01</span>
+              <span>{locale === 'hi' ? 'मौसम रडार // बेसिन निगरानी' : 'ATMOSPHERIC RADAR // BASIN WATCH'}</span>
             </div>
-            <div className="visual-status">COUPLED 18 ENGINES</div>
+            <div className="visual-status">{locale === 'hi' ? '18 जुड़े हुए इंजन' : '18 CONNECTED ENGINES'}</div>
           </div>
 
           {/* The Holographic Gyroscope Radar Sphere */}
@@ -565,7 +565,7 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
           {/* Live Telemetry HUD Readout Panel (Dynamic on Node Click) */}
           <div className="visual-telemetry-hud">
             <div className="hud-header">
-              <div className="hud-badge">{selectedAnomaly.type.toUpperCase()} HAZARD</div>
+              <div className="hud-badge">{selectedAnomaly.type === 'severe' ? 'CRITICAL AGROMET ALERT' : 'AGROMET ADVISORY'}</div>
               <span className="hud-lead-time">{selectedAnomaly.leadTime}</span>
             </div>
 
@@ -585,7 +585,7 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
 
             <div className="hud-footer">
               <div className="hud-channels">
-                <span className="channel-chip">WRF-5km</span>
+                <span className="channel-chip">5km Village Grid</span>
                 <span className="channel-chip">ECMWF IFS</span>
                 <span className="channel-chip">IMD RADAR</span>
               </div>
@@ -754,7 +754,7 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
           ))}
         </div>
 
-        {/* Live Simulation Cockpit Stage */}
+        {/* Live Simulation Decision Support Stage */}
         <div className="simulation-cockpit-stage">
           <div className="cockpit-left-telemetry">
             <div className="cockpit-badge-row">
@@ -764,7 +764,7 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
               >
                 ● {activeScenario.badge}
               </span>
-              <span className="cockpit-cadence">LATENCY: 42ms · GPU ACCELERATED</span>
+              <span className="cockpit-cadence">{locale === 'hi' ? '30-वर्षीय मौसम व मंडी आंकड़ों पर आधारित' : 'CALIBRATED ON 30-YR CLIMATE & MANDI DATA'}</span>
             </div>
 
             <h3 className="cockpit-scenario-name">{activeScenario.title}</h3>
@@ -785,9 +785,9 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
               </div>
             </div>
 
-            {/* Coupled Engine Stack */}
+            {/* Connected Decision Chain */}
             <div className="cockpit-engines-tray">
-              <span className="tray-label">COUPLED ACTIVE PIPELINE:</span>
+              <span className="tray-label">{locale === 'hi' ? 'संबद्ध निर्णय श्रृंखला:' : 'CONNECTED DECISION CHAIN:'}</span>
               <div className="tray-chips">
                 {activeScenario.engines.map((eng, idx) => (
                   <span key={idx} className="engine-chip">
@@ -804,11 +804,11 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
             </button>
           </div>
 
-          {/* Interactive Waveform & Radar Visualizer */}
+          {/* Interactive Waveform & Risk Visualizer */}
           <div className="cockpit-right-visual">
             <div className="visual-hud-header">
-              <span>REAL-TIME ENSEMBLE SIMULATION FIELD</span>
-              <span className="radar-fps">60 FPS // SYNCHRONIZED</span>
+              <span>{locale === 'hi' ? 'गाँव-स्तरीय जोखिम व फसल नुकसान अनुमान' : 'FIELD-LEVEL PROBABILITY & HARVEST RISK'}</span>
+              <span className="radar-fps">{locale === 'hi' ? 'ज़िला स्तर · P10/P50/P90' : 'DISTRICT RESOLUTION · P10/P50/P90'}</span>
             </div>
 
             {/* Simulated Live Heatmap / Trajectory Canvas Overlay */}
@@ -835,20 +835,20 @@ export default function PublicLandingPage({ onEnterAuth, onBrowseGuest }: Public
                 <span className="marker-ping" />
                 <div className="marker-center" />
                 <div className="marker-tooltip">
-                  <span>MAX INTENSITY</span>
-                  <strong>+3.8σ ANOMALY</strong>
+                  <span>{locale === 'hi' ? 'ऐतिहासिक असामान्यता' : 'HISTORICAL ANOMALY'}</span>
+                  <strong>{locale === 'hi' ? 'चरम मौसमी विचलन' : 'CRITICAL WEATHER DEVIATION'}</strong>
                 </div>
               </div>
             </div>
 
             <div className="visual-hud-footer">
               <div className="hud-stat-pill">
-                <span>PROBABILITY OF EXCEEDANCE:</span>
+                <span>{locale === 'hi' ? 'भारी बारिश/सूखे की संभावना:' : 'CHANCE OF SEVERE EVENT:'}</span>
                 <b>84.2%</b>
               </div>
               <div className="hud-stat-pill">
-                <span>CONVERGENCE:</span>
-                <b className="text-emerald-400">STABLE</b>
+                <span>{locale === 'hi' ? 'डेटा विश्वसनीयता:' : 'DATA RELIABILITY:'}</span>
+                <b className="text-emerald-400">{locale === 'hi' ? 'IMD व NWP सत्यापित' : 'VERIFIED BY IMD & NWP'}</b>
               </div>
             </div>
           </div>
